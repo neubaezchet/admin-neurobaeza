@@ -62,8 +62,8 @@ export default function Login({ onLogin }) {
             <div className="inline-flex items-center justify-center w-14 h-14 bg-fluent-500 rounded-2xl mb-5 shadow-fluent-4">
               <Shield className="w-7 h-7 text-white" />
             </div>
-            <h1 className="text-xl font-bold text-gray-900">NeuroBarranquilla</h1>
-            <p className="text-sm text-gray-400 mt-1">Panel Administrativo</p>
+            <h1 className="text-xl font-bold text-gray-900">Admin Incapacidades</h1>
+            <p className="text-sm text-gray-400 mt-1">Panel de Control</p>
           </div>
 
           {/* Form */}
@@ -137,7 +137,7 @@ export default function Login({ onLogin }) {
 
         {/* Footer */}
         <p className="text-center text-[11px] text-gray-300 mt-6">
-          Sistema de Gestión de Incapacidades — NeuroBarranquilla © 2026
+          Sistema de Gestión de Incapacidades © 2026
         </p>
       </div>
     </div>

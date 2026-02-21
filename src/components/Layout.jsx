@@ -27,8 +27,8 @@ export default function Layout({ user, children }) {
               <Shield className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-sm font-bold text-gray-900 leading-tight">NeuroBarranquilla</h1>
-              <p className="text-[11px] text-gray-400 font-medium">Panel Administrativo</p>
+              <h1 className="text-sm font-bold text-gray-900 leading-tight">Admin Incapacidades</h1>
+              <p className="text-[11px] text-gray-400 font-medium">Panel de Control</p>
             </div>
           </div>
         </div>

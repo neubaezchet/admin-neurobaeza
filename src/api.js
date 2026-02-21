@@ -1,5 +1,5 @@
 /**
- * API client – Admin NeuroBarranquilla
+ * API client – Admin Incapacidades
  * Todas las llamadas apuntan al backend Railway.
  */
 
