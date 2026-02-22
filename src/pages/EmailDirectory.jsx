@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   Mail, Plus, Pencil, Trash2, Search, Filter, Check, X,
-  Building2, Globe, ChevronDown, RefreshCw, AlertCircle, UserCircle
+  Building2, Globe, ChevronDown, RefreshCw, AlertCircle, UserCircle, PlusCircle
 } from 'lucide-react'
 import {
   getCorreos, createCorreo, updateCorreo, deleteCorreo,
@@ -28,6 +28,7 @@ export default function EmailDirectory() {
   const [search, setSearch] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [editing, setEditing] = useState(null)
+  const [defaultArea, setDefaultArea] = useState('alerta_180')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
@@ -76,11 +77,13 @@ export default function EmailDirectory() {
 
   const openEdit = (correo) => {
     setEditing(correo)
+    setDefaultArea(correo.area || 'alerta_180')
     setShowModal(true)
   }
 
-  const openNew = () => {
+  const openNew = (area) => {
     setEditing(null)
+    setDefaultArea(area || (filterArea !== 'all' ? filterArea : 'alerta_180'))
     setShowModal(true)
   }
 
@@ -95,7 +98,7 @@ export default function EmailDirectory() {
           </h2>
           <p className="text-sm text-gray-400 mt-0.5">Gestión de correos de notificación por área y empresa</p>
         </div>
-        <button onClick={openNew} className="fluent-btn-primary flex items-center gap-2">
+        <button onClick={() => openNew()} className="fluent-btn-primary flex items-center gap-2">
           <Plus className="w-4 h-4" /> Nuevo correo
         </button>
       </div>
@@ -175,6 +178,9 @@ export default function EmailDirectory() {
                 <div className={`w-2 h-2 rounded-full ${g.color}`} />
                 <h3 className="text-sm font-semibold text-gray-800">{g.label}</h3>
                 <span className="fluent-badge bg-gray-100 text-gray-500 ml-1">{g.correos.length}</span>
+                <button onClick={() => openNew(g.value)} className="ml-auto flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-gray-500 hover:text-fluent-500 hover:bg-fluent-50 transition-colors" title={`Agregar correo a ${g.label}`}>
+                  <PlusCircle className="w-3.5 h-3.5" /> Agregar
+                </button>
               </div>
               <table className="fluent-table">
                 <thead>
@@ -239,6 +245,7 @@ export default function EmailDirectory() {
         <CorreoModal
           correo={editing}
           empresas={empresas}
+          defaultArea={defaultArea}
           onClose={() => { setShowModal(false); setEditing(null) }}
           onSaved={(msg) => { setSuccess(msg); load(); setTimeout(() => setSuccess(''), 3000) }}
           onError={setError}
@@ -249,16 +256,17 @@ export default function EmailDirectory() {
 }
 
 
-function CorreoModal({ correo, empresas, onClose, onSaved, onError }) {
+function CorreoModal({ correo, empresas, onClose, onSaved, onError, defaultArea }) {
   const isEdit = !!correo
   const [form, setForm] = useState({
-    area: correo?.area || 'talento_humano',
+    area: correo?.area || defaultArea || 'alerta_180',
     nombre_contacto: correo?.nombre_contacto || '',
     email: correo?.email || '',
     company_id: correo?.company_id || '',
     activo: correo?.activo ?? true,
   })
   const [saving, setSaving] = useState(false)
+  const [addedCount, setAddedCount] = useState(0)
 
   const handleSave = async (e) => {
     e.preventDefault()
@@ -273,6 +281,7 @@ function CorreoModal({ correo, empresas, onClose, onSaved, onError }) {
           activo: form.activo,
         })
         onSaved('Correo actualizado')
+        onClose()
       } else {
         await createCorreo({
           area: form.area,
@@ -280,9 +289,11 @@ function CorreoModal({ correo, empresas, onClose, onSaved, onError }) {
           email: form.email,
           company_id: form.company_id || null,
         })
-        onSaved('Correo creado exitosamente')
+        setAddedCount(prev => prev + 1)
+        onSaved(`Correo '${form.email}' creado exitosamente`)
+        // Clear form for next entry (keep area and company)
+        setForm(prev => ({ ...prev, nombre_contacto: '', email: '' }))
       }
-      onClose()
     } catch (err) {
       onError(err.message)
     } finally {
@@ -294,7 +305,12 @@ function CorreoModal({ correo, empresas, onClose, onSaved, onError }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm animate-fade-in" onClick={onClose}>
       <div className="bg-white rounded-2xl shadow-fluent-16 w-full max-w-md mx-4 overflow-hidden animate-fade-in" onClick={e => e.stopPropagation()}>
         <div className="px-6 py-4 border-b border-surface-border flex items-center justify-between">
-          <h3 className="font-bold text-gray-900">{isEdit ? 'Editar Correo' : 'Nuevo Correo'}</h3>
+          <div>
+            <h3 className="font-bold text-gray-900">{isEdit ? 'Editar Correo' : 'Nuevo Correo'}</h3>
+            {!isEdit && addedCount > 0 && (
+              <p className="text-xs text-green-600 mt-0.5">✅ {addedCount} correo{addedCount > 1 ? 's' : ''} agregado{addedCount > 1 ? 's' : ''} — puedes seguir agregando</p>
+            )}
+          </div>
           <button onClick={onClose} className="p-1 rounded hover:bg-surface-hover"><X className="w-4 h-4 text-gray-400" /></button>
         </div>
         <form onSubmit={handleSave} className="p-6 space-y-4">
@@ -310,17 +326,16 @@ function CorreoModal({ correo, empresas, onClose, onSaved, onError }) {
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Email</label>
-            <input type="email" required value={form.email} onChange={e => setForm({...form, email: e.target.value})} className="fluent-input" placeholder="correo@empresa.com" />
+            <input type="email" required value={form.email} onChange={e => setForm({...form, email: e.target.value})} className="fluent-input" placeholder="correo@empresa.com" autoFocus={!isEdit && addedCount > 0} />
           </div>
-          {!isEdit && (
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Empresa</label>
-              <select value={form.company_id} onChange={e => setForm({...form, company_id: e.target.value ? parseInt(e.target.value) : ''})} className="fluent-select">
-                <option value="">Global (todas las empresas)</option>
-                {empresas.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
-              </select>
-            </div>
-          )}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Empresa</label>
+            <select value={form.company_id} onChange={e => setForm({...form, company_id: e.target.value ? parseInt(e.target.value) : ''})} className="fluent-select" disabled={isEdit}>
+              <option value="">Global (todas las empresas)</option>
+              {empresas.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
+            </select>
+            {isEdit && <p className="text-[10px] text-gray-400 mt-0.5">La empresa no se puede cambiar. Elimina y crea uno nuevo si necesitas cambiarla.</p>}
+          </div>
           {isEdit && (
             <div className="flex items-center gap-3">
               <label className="relative inline-flex items-center cursor-pointer">
@@ -331,10 +346,10 @@ function CorreoModal({ correo, empresas, onClose, onSaved, onError }) {
             </div>
           )}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="fluent-btn-outline flex-1">Cancelar</button>
+            <button type="button" onClick={onClose} className="fluent-btn-outline flex-1">{!isEdit && addedCount > 0 ? 'Cerrar' : 'Cancelar'}</button>
             <button type="submit" disabled={saving} className="fluent-btn-primary flex-1 flex items-center justify-center gap-2">
-              {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-              {isEdit ? 'Guardar' : 'Crear'}
+              {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : isEdit ? <Check className="w-4 h-4" /> : <PlusCircle className="w-4 h-4" />}
+              {isEdit ? 'Guardar' : addedCount > 0 ? 'Agregar otro' : 'Crear'}
             </button>
           </div>
         </form>
