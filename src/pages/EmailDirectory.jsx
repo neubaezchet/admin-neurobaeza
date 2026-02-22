@@ -9,11 +9,9 @@ import {
 } from '../api'
 
 const AREAS = [
-  { value: 'talento_humano',   label: 'Talento Humano',   color: 'bg-blue-500',   light: 'bg-blue-50 text-blue-700' },
-  { value: 'seguridad_salud',  label: 'Seguridad y Salud',color: 'bg-green-500',  light: 'bg-green-50 text-green-700' },
-  { value: 'nomina',           label: 'Nómina',           color: 'bg-amber-500',  light: 'bg-amber-50 text-amber-700' },
-  { value: 'incapacidades',    label: 'Incapacidades',    color: 'bg-purple-500', light: 'bg-purple-50 text-purple-700' },
+  { value: 'alerta_180',       label: 'Alertas 180 Días', color: 'bg-blue-500',   light: 'bg-blue-50 text-blue-700' },
   { value: 'presunto_fraude',  label: 'Presunto Fraude',  color: 'bg-red-500',    light: 'bg-red-50 text-red-700' },
+  { value: 'empresas',         label: 'Empresas',         color: 'bg-amber-500',  light: 'bg-amber-50 text-amber-700' },
 ]
 
 function AreaBadge({ area }) {
