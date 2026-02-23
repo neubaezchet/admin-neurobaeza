@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Shield, Eye, EyeOff, AlertCircle, Loader2, Zap } from 'lucide-react'
 import { login, setupSuperadmin } from '../api'
@@ -11,6 +11,30 @@ export default function Login({ onLogin }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [setupMode, setSetupMode] = useState(false)
+
+  const vantaRef = useRef(null)
+  const vantaEffect = useRef(null)
+
+  useEffect(() => {
+    if (!vantaEffect.current && window.VANTA) {
+      vantaEffect.current = window.VANTA.FOG({
+        el: vantaRef.current,
+        THREE: window.THREE,
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        minHeight: 200.00,
+        minWidth: 200.00,
+        highlightColor: 0x3d82a7,
+        midtoneColor: 0xffffff,
+        lowlightColor: 0xffffff,
+        baseColor: 0xe3aeae,
+        blurFactor: 0.90,
+        speed: 2.50,
+      })
+    }
+    return () => { if (vantaEffect.current) vantaEffect.current.destroy() }
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -47,14 +71,9 @@ export default function Login({ onLogin }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-white flex items-center justify-center p-4">
-      {/* Decorative background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-fluent-500/5 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-fluent-500/3 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative w-full max-w-md">
+    <div ref={vantaRef} className="min-h-screen flex items-center justify-center p-4" style={{ position: 'relative' }}>
+      {/* Content above Vanta */}
+      <div className="relative w-full max-w-md" style={{ zIndex: 1 }}>
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-fluent-16 border border-surface-border/30 overflow-hidden">
           {/* Header */}
