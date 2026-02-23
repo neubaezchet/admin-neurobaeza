@@ -16,11 +16,12 @@ const ROLES = [
 ]
 
 const PERMISOS_DISPONIBLES = [
-  { key: 'validador',  label: 'Validador',      desc: 'Acceso al validador de incapacidades' },
-  { key: 'reportes',   label: 'Reportes',       desc: 'Dashboard de reportes y estadísticas' },
-  { key: 'powerbi',    label: 'Power BI',       desc: 'Dashboard Power BI embebido' },
-  { key: 'directorio', label: 'Dir. Correos',   desc: 'Gestión de directorio de correos' },
-  { key: 'consola',    label: 'Consola Sistema', desc: 'Monitoreo y logs del sistema' },
+  { key: 'validador',     label: 'Validador',        desc: 'Acceso al validador de incapacidades' },
+  { key: 'reportes',      label: 'Reportes',         desc: 'Dashboard de reportes y estadísticas' },
+  { key: 'exportaciones', label: 'Exportaciones',    desc: 'Exportaciones masivas PDF' },
+  { key: 'powerbi',       label: 'Power BI',         desc: 'Dashboard Power BI embebido' },
+  { key: 'directorio',    label: 'Dir. Correos',     desc: 'Gestión de directorio de correos' },
+  { key: 'consola',       label: 'Consola Sistema',  desc: 'Monitoreo y logs del sistema' },
 ]
 
 function RoleBadge({ rol }) {
