@@ -5,7 +5,7 @@ import {
 } from 'lucide-react'
 import {
   getCorreos, createCorreo, updateCorreo, deleteCorreo,
-  getEmpresas
+  getEmpresas, updateEmpresa
 } from '../api'
 
 const AREAS = [
@@ -251,6 +251,70 @@ export default function EmailDirectory() {
           onError={setError}
         />
       )}
+
+      {/* Sección Empresas */}
+      <div className="fluent-card overflow-hidden animate-slide-in">
+        <div className="px-4 py-3 border-b border-surface-border flex items-center gap-2">
+          <Building2 className="w-4 h-4 text-amber-500" />
+          <h3 className="text-sm font-semibold text-gray-800">Empresas Registradas</h3>
+          <span className="fluent-badge bg-gray-100 text-gray-500 ml-1">{empresas.length}</span>
+        </div>
+        {empresas.length > 0 ? (
+          <table className="fluent-table">
+            <thead>
+              <tr>
+                <th>Empresa</th>
+                <th>NIT</th>
+                <th>Email Contacto</th>
+                <th>Correos Configurados</th>
+                <th className="w-20 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {empresas.map(e => {
+                const correosEmpresa = correos.filter(c => c.company_id === e.id && c.activo)
+                return (
+                  <tr key={e.id}>
+                    <td className="font-medium text-gray-800">{e.nombre}</td>
+                    <td className="text-gray-500">{e.nit || <span className="text-gray-300">—</span>}</td>
+                    <td className="text-gray-500">{e.contacto_email || <span className="text-gray-300">—</span>}</td>
+                    <td>
+                      <div className="flex items-center gap-2">
+                        <span className={`fluent-badge ${correosEmpresa.length > 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
+                          {correosEmpresa.length} correo{correosEmpresa.length !== 1 ? 's' : ''}
+                        </span>
+                        {correosEmpresa.length === 0 && (
+                          <button
+                            onClick={() => { setDefaultArea('empresas'); setEditing(null); setShowModal(true) }}
+                            className="text-xs text-blue-500 hover:underline"
+                          >
+                            + Agregar
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                    <td className="text-right">
+                      <button
+                        onClick={() => openNew('empresas')}
+                        className="p-1.5 rounded hover:bg-fluent-50 text-gray-400 hover:text-fluent-500 transition-colors"
+                        title="Agregar correo a esta empresa"
+                      >
+                        <PlusCircle className="w-3.5 h-3.5" />
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        ) : (
+          <div className="p-8 text-center text-gray-400">
+            <Building2 className="w-10 h-10 mx-auto mb-2 text-gray-200" />
+            <p className="text-sm">No hay empresas registradas</p>
+            <p className="text-xs mt-1">Las empresas se crean automáticamente al sincronizar el Excel</p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

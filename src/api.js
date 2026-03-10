@@ -130,6 +130,9 @@ export function deleteUser(id) {
 export function getEmpresas() {
   return apiFetch('/admin/empresas');
 }
+export function updateEmpresa(id, data) {
+  return apiFetch(`/admin/empresas/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+}
 
 // ─── Consola / Stats ────────────────────────────────────
 export function getStats() {
