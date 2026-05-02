@@ -25,12 +25,12 @@ export default function Login({ onLogin }) {
         gyroControls: false,
         minHeight: 200.00,
         minWidth: 200.00,
-        highlightColor: 0x3d82a7,
-        midtoneColor: 0xffffff,
-        lowlightColor: 0xffffff,
-        baseColor: 0xe3aeae,
-        blurFactor: 0.90,
-        speed: 2.50,
+        highlightColor: 0x6359A3,
+        midtoneColor: 0xE8E4DF,
+        lowlightColor: 0xD5CFC8,
+        baseColor: 0xF8F6F4,
+        blurFactor: 0.82,
+        speed: 1.20,
       })
     }
     return () => { if (vantaEffect.current) vantaEffect.current.destroy() }
@@ -74,33 +74,64 @@ export default function Login({ onLogin }) {
     <div ref={vantaRef} className="min-h-screen flex items-center justify-center p-4" style={{ position: 'relative' }}>
       {/* Content above Vanta */}
       <div className="relative w-full max-w-md" style={{ zIndex: 1 }}>
-        {/* Card */}
-        <div className="bg-white rounded-2xl shadow-fluent-16 border border-surface-border/30 overflow-hidden">
+        {/* Card — Glassmorphism */}
+        <div
+          className="rounded-ios-xl overflow-hidden animate-scale-in"
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.78)',
+            backdropFilter: 'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            boxShadow: '0 16px 48px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08)',
+          }}
+        >
           {/* Header */}
           <div className="px-8 pt-10 pb-6 text-center">
-            <div className="inline-flex items-center justify-center w-14 h-14 bg-fluent-500 rounded-2xl mb-5 shadow-fluent-4">
+            <div
+              className="inline-flex items-center justify-center w-14 h-14 rounded-ios-lg mb-5"
+              style={{
+                background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-primary-hover))',
+                boxShadow: '0 4px 16px rgba(99, 89, 163, 0.35)',
+              }}
+            >
               <Shield className="w-7 h-7 text-white" />
             </div>
-            <h1 className="text-xl font-bold text-gray-900">Admin Incapacidades</h1>
-            <p className="text-sm text-gray-400 mt-1">Panel de Control</p>
+            <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
+              Admin Incapacidades
+            </h1>
+            <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+              Panel de Control Empresarial
+            </p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="px-8 pb-8 space-y-4">
             {error && (
-              <div className="flex items-center gap-2 px-3 py-2.5 bg-red-50 border border-red-100 rounded-fluent text-sm text-red-600 animate-fade-in">
+              <div
+                className="flex items-center gap-2 px-3.5 py-3 rounded-ios text-sm animate-fade-in"
+                style={{
+                  backgroundColor: 'var(--error-soft)',
+                  color: 'var(--error)',
+                  border: '1px solid rgba(186, 26, 26, 0.15)',
+                }}
+              >
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                <span>{error}</span>
+                <span className="font-medium">{error}</span>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Usuario</label>
+              <label
+                className="block text-[11px] font-bold mb-1.5 uppercase tracking-wider"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                Usuario
+              </label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="fluent-input"
+                className="neo-input"
                 placeholder="admin"
                 autoFocus
                 autoComplete="username"
@@ -108,20 +139,26 @@ export default function Login({ onLogin }) {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Contraseña</label>
+              <label
+                className="block text-[11px] font-bold mb-1.5 uppercase tracking-wider"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                Contraseña
+              </label>
               <div className="relative">
                 <input
                   type={showPwd ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="fluent-input pr-10"
+                  className="neo-input pr-10"
                   placeholder="••••••"
                   autoComplete="current-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPwd(!showPwd)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-gray-400 hover:text-gray-600"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-ios transition-colors"
+                  style={{ color: 'var(--text-muted)' }}
                 >
                   {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -131,7 +168,7 @@ export default function Login({ onLogin }) {
             <button
               type="submit"
               disabled={loading || !username.trim() || !password.trim()}
-              className="fluent-btn-primary w-full py-2.5 flex items-center justify-center gap-2"
+              className="neo-btn-primary w-full py-3 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Ingresando...</>
@@ -145,7 +182,10 @@ export default function Login({ onLogin }) {
               <button
                 type="button"
                 onClick={() => { setSetupMode(!setupMode); setError('') }}
-                className="text-xs text-gray-400 hover:text-fluent-500 transition-colors inline-flex items-center gap-1"
+                className="text-xs transition-colors inline-flex items-center gap-1"
+                style={{ color: 'var(--text-muted)' }}
+                onMouseEnter={(e) => e.target.style.color = 'var(--accent-primary)'}
+                onMouseLeave={(e) => e.target.style.color = 'var(--text-muted)'}
               >
                 <Zap className="w-3 h-3" />
                 {setupMode ? 'Ya tengo cuenta → Iniciar sesión' : '¿Primera vez? → Crear superadmin'}
@@ -155,7 +195,7 @@ export default function Login({ onLogin }) {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-[11px] text-gray-300 mt-6">
+        <p className="text-center text-[11px] mt-6" style={{ color: 'var(--text-muted)' }}>
           Sistema de Gestión de Incapacidades © 2026
         </p>
       </div>

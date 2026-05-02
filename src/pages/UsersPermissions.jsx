@@ -26,7 +26,7 @@ const PERMISOS_DISPONIBLES = [
 
 function RoleBadge({ rol }) {
   const cfg = ROLES.find(r => r.value === rol) || ROLES[5]
-  return <span className={`fluent-badge ${cfg.color}`}>{cfg.label}</span>
+  return <span className={`neo-badge ${cfg.color}`}>{cfg.label}</span>
 }
 
 export default function UsersPermissions() {
@@ -85,41 +85,41 @@ export default function UsersPermissions() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-            <Users className="w-5 h-5 text-fluent-500" />
+            <Users className="w-5 h-5 text-brand-500" />
             Usuarios y Permisos
           </h2>
           <p className="text-sm text-gray-400 mt-0.5">Control de acceso al portal de incapacidades</p>
         </div>
-        <button onClick={() => { setEditing(null); setShowModal(true) }} className="fluent-btn-primary flex items-center gap-2">
+        <button onClick={() => { setEditing(null); setShowModal(true) }} className="neo-btn-primary flex items-center gap-2">
           <Plus className="w-4 h-4" /> Nuevo usuario
         </button>
       </div>
 
       {/* Alerts */}
       {error && (
-        <div className="flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-100 rounded-fluent text-sm text-red-600 animate-fade-in">
+        <div className="flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-100 rounded-ios text-sm text-red-600 animate-fade-in">
           <AlertCircle className="w-4 h-4" /> {error}
           <button onClick={() => setError('')} className="ml-auto"><X className="w-4 h-4" /></button>
         </div>
       )}
       {success && (
-        <div className="flex items-center gap-2 px-4 py-3 bg-green-50 border border-green-100 rounded-fluent text-sm text-green-700 animate-fade-in">
+        <div className="flex items-center gap-2 px-4 py-3 bg-green-50 border border-green-100 rounded-ios text-sm text-green-700 animate-fade-in">
           <Check className="w-4 h-4" /> {success}
         </div>
       )}
 
       {/* Widgets row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="fluent-card p-4">
+        <div className="neo-card p-4">
           <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Total usuarios</p>
           <p className="text-2xl font-bold text-gray-900">{users.length}</p>
         </div>
-        <div className="fluent-card p-4">
+        <div className="neo-card p-4">
           <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Activos</p>
           <p className="text-2xl font-bold text-green-600">{totalActive}</p>
         </div>
         {byRole.filter(r => r.count > 0).slice(0, 2).map(r => (
-          <div key={r.value} className="fluent-card p-4">
+          <div key={r.value} className="neo-card p-4">
             <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">{r.label}</p>
             <p className="text-2xl font-bold text-gray-900">{r.count}</p>
           </div>
@@ -127,13 +127,13 @@ export default function UsersPermissions() {
       </div>
 
       {/* Search */}
-      <div className="fluent-card p-4">
+      <div className="neo-card p-4">
         <div className="flex items-center gap-3">
           <div className="relative flex-1">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input value={search} onChange={e => setSearch(e.target.value)} className="fluent-input pl-9" placeholder="Buscar por usuario, nombre o email..." />
+            <input value={search} onChange={e => setSearch(e.target.value)} className="neo-input pl-9" placeholder="Buscar por usuario, nombre o email..." />
           </div>
-          <button onClick={load} className="fluent-btn-ghost flex items-center gap-1.5">
+          <button onClick={load} className="neo-btn-ghost flex items-center gap-1.5">
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Recargar
           </button>
         </div>
@@ -145,8 +145,8 @@ export default function UsersPermissions() {
           <RefreshCw className="w-5 h-5 animate-spin mr-2" /> Cargando usuarios...
         </div>
       ) : (
-        <div className="fluent-card overflow-hidden">
-          <table className="fluent-table">
+        <div className="neo-card overflow-hidden">
+          <table className="neo-table">
             <thead>
               <tr>
                 <th>Usuario</th>
@@ -164,7 +164,7 @@ export default function UsersPermissions() {
                 <tr key={u.id}>
                   <td>
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-fluent-500/10 flex items-center justify-center text-fluent-500 font-bold text-[10px]">
+                      <div className="w-7 h-7 rounded-full bg-brand-500/10 flex items-center justify-center text-brand-500 font-bold text-[10px]">
                         {(u.nombre || u.username || '?')[0].toUpperCase()}
                       </div>
                       <div>
@@ -185,7 +185,7 @@ export default function UsersPermissions() {
                   <td>
                     <div className="flex flex-wrap gap-1">
                       {u.permisos && Object.entries(u.permisos).filter(([,v]) => v).map(([k]) => (
-                        <span key={k} className="fluent-badge bg-fluent-50 text-fluent-600 text-[10px]">{k}</span>
+                        <span key={k} className="neo-badge bg-brand-50 text-brand-600 text-[10px]">{k}</span>
                       ))}
                       {(!u.permisos || Object.values(u.permisos).filter(v=>v).length === 0) && (
                         <span className="text-gray-300 text-xs">—</span>
@@ -193,7 +193,7 @@ export default function UsersPermissions() {
                     </div>
                   </td>
                   <td>
-                    <span className={`fluent-badge ${u.activo ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                    <span className={`neo-badge ${u.activo ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                       {u.activo ? 'Activo' : 'Inactivo'}
                     </span>
                   </td>
@@ -202,7 +202,7 @@ export default function UsersPermissions() {
                   </td>
                   <td className="text-right">
                     <div className="inline-flex gap-1">
-                      <button onClick={() => { setEditing(u); setShowModal(true) }} className="p-1.5 rounded hover:bg-fluent-50 text-gray-400 hover:text-fluent-500 transition-colors">
+                      <button onClick={() => { setEditing(u); setShowModal(true) }} className="p-1.5 rounded hover:bg-brand-50 text-gray-400 hover:text-brand-500 transition-colors">
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
                       <button onClick={() => handleDelete(u.id, u.username)} className="p-1.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors">
@@ -224,13 +224,13 @@ export default function UsersPermissions() {
       )}
 
       {/* Roles reference */}
-      <div className="fluent-card p-5">
+      <div className="neo-card p-5">
         <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
           <Key className="w-3.5 h-3.5" /> Referencia de Roles
         </h4>
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
           {ROLES.map(r => (
-            <div key={r.value} className="flex items-start gap-2 p-2 rounded-fluent hover:bg-surface-hover transition-colors">
+            <div key={r.value} className="flex items-start gap-2 p-2 rounded-ios hover:bg-gray-50 transition-colors">
               <RoleBadge rol={r.value} />
               <span className="text-xs text-gray-400 mt-0.5">{r.desc}</span>
             </div>
@@ -311,20 +311,20 @@ function UserModal({ user, empresas, onClose, onSaved, onError }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm animate-fade-in" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-fluent-16 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto animate-fade-in" onClick={e => e.stopPropagation()}>
-        <div className="sticky top-0 bg-white px-6 py-4 border-b border-surface-border flex items-center justify-between z-10">
+      <div className="bg-white rounded-2xl shadow-ios-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto animate-fade-in" onClick={e => e.stopPropagation()}>
+        <div className="sticky top-0 bg-white px-6 py-4 border-b border-gray-200 flex items-center justify-between z-10">
           <h3 className="font-bold text-gray-900 flex items-center gap-2">
-            <Shield className="w-4 h-4 text-fluent-500" />
+            <Shield className="w-4 h-4 text-brand-500" />
             {isEdit ? 'Editar Usuario' : 'Nuevo Usuario'}
           </h3>
-          <button onClick={onClose} className="p-1 rounded hover:bg-surface-hover"><X className="w-4 h-4 text-gray-400" /></button>
+          <button onClick={onClose} className="p-1 rounded hover:bg-gray-50"><X className="w-4 h-4 text-gray-400" /></button>
         </div>
         <form onSubmit={handleSave} className="p-6 space-y-4">
           {/* Basic */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Username</label>
-              <input value={form.username} onChange={e => setForm({...form, username: e.target.value})} className="fluent-input" placeholder="usuario" disabled={isEdit} required />
+              <input value={form.username} onChange={e => setForm({...form, username: e.target.value})} className="neo-input" placeholder="usuario" disabled={isEdit} required />
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">
@@ -335,7 +335,7 @@ function UserModal({ user, empresas, onClose, onSaved, onError }) {
                   type={showPwd ? 'text' : 'password'}
                   value={form.password}
                   onChange={e => setForm({...form, password: e.target.value})}
-                  className="fluent-input pr-9"
+                  className="neo-input pr-9"
                   placeholder={isEdit ? 'Dejar vacío para no cambiar' : '••••••'}
                   required={!isEdit}
                   minLength={isEdit ? 0 : 6}
@@ -350,11 +350,11 @@ function UserModal({ user, empresas, onClose, onSaved, onError }) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Nombre completo</label>
-              <input value={form.nombre} onChange={e => setForm({...form, nombre: e.target.value})} className="fluent-input" placeholder="Juan Pérez" />
+              <input value={form.nombre} onChange={e => setForm({...form, nombre: e.target.value})} className="neo-input" placeholder="Juan Pérez" />
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Email</label>
-              <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} className="fluent-input" placeholder="correo@empresa.com" />
+              <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} className="neo-input" placeholder="correo@empresa.com" />
             </div>
           </div>
 
@@ -362,13 +362,13 @@ function UserModal({ user, empresas, onClose, onSaved, onError }) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Rol</label>
-              <select value={form.rol} onChange={e => setForm({...form, rol: e.target.value})} className="fluent-select">
+              <select value={form.rol} onChange={e => setForm({...form, rol: e.target.value})} className="neo-select">
                 {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Empresa</label>
-              <select value={form.company_id} onChange={e => setForm({...form, company_id: e.target.value})} className="fluent-select">
+              <select value={form.company_id} onChange={e => setForm({...form, company_id: e.target.value})} className="neo-select">
                 <option value="">Todas</option>
                 {empresas.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
               </select>
@@ -384,14 +384,14 @@ function UserModal({ user, empresas, onClose, onSaved, onError }) {
                   key={p.key}
                   type="button"
                   onClick={() => togglePermiso(p.key)}
-                  className={`flex items-center gap-2 p-2.5 rounded-fluent border text-left text-xs transition-all ${
+                  className={`flex items-center gap-2 p-2.5 rounded-ios border text-left text-xs transition-all ${
                     form.permisos[p.key]
-                      ? 'border-fluent-500 bg-fluent-50 text-fluent-700'
-                      : 'border-surface-border text-gray-500 hover:border-gray-300'
+                      ? 'border-brand-500 bg-brand-50 text-brand-700'
+                      : 'border-gray-200 text-gray-500 hover:border-gray-300'
                   }`}
                 >
                   {form.permisos[p.key] ? (
-                    <ToggleRight className="w-4 h-4 text-fluent-500 flex-shrink-0" />
+                    <ToggleRight className="w-4 h-4 text-brand-500 flex-shrink-0" />
                   ) : (
                     <ToggleLeft className="w-4 h-4 text-gray-300 flex-shrink-0" />
                   )}
@@ -409,7 +409,7 @@ function UserModal({ user, empresas, onClose, onSaved, onError }) {
             <div className="flex items-center gap-3 pt-1">
               <label className="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" checked={form.activo} onChange={e => setForm({...form, activo: e.target.checked})} className="sr-only peer" />
-                <div className="w-9 h-5 bg-gray-200 peer-focus:ring-2 peer-focus:ring-fluent-500/30 rounded-full peer peer-checked:bg-fluent-500 after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
+                <div className="w-9 h-5 bg-gray-200 peer-focus:ring-2 peer-focus:ring-brand-500/30 rounded-full peer peer-checked:bg-brand-500 after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
               </label>
               <span className={`text-sm ${form.activo ? 'text-green-600' : 'text-gray-400'}`}>{form.activo ? 'Usuario activo' : 'Usuario inactivo'}</span>
             </div>
@@ -417,8 +417,8 @@ function UserModal({ user, empresas, onClose, onSaved, onError }) {
 
           {/* Actions */}
           <div className="flex gap-3 pt-3">
-            <button type="button" onClick={onClose} className="fluent-btn-outline flex-1">Cancelar</button>
-            <button type="submit" disabled={saving} className="fluent-btn-primary flex-1 flex items-center justify-center gap-2">
+            <button type="button" onClick={onClose} className="neo-btn-outline flex-1">Cancelar</button>
+            <button type="submit" disabled={saving} className="neo-btn-primary flex-1 flex items-center justify-center gap-2">
               {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
               {isEdit ? 'Guardar' : 'Crear Usuario'}
             </button>

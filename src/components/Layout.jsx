@@ -17,18 +17,34 @@ export default function Layout({ user, children }) {
   }
 
   return (
-    <div className="flex h-screen bg-surface-secondary overflow-hidden">
+    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: 'var(--bg-secondary)' }}>
       {/* ══════ Sidebar ══════ */}
-      <aside className="w-[260px] bg-white border-r border-surface-border flex flex-col">
+      <aside
+        className="w-[260px] flex flex-col"
+        style={{
+          backgroundColor: 'var(--bg-card-solid)',
+          borderRight: '1px solid var(--border-primary)',
+        }}
+      >
         {/* Logo */}
-        <div className="px-5 py-5 border-b border-surface-border">
+        <div className="px-5 py-5" style={{ borderBottom: '1px solid var(--border-primary)' }}>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-fluent-500 rounded-fluent flex items-center justify-center">
+            <div
+              className="w-9 h-9 rounded-ios flex items-center justify-center"
+              style={{
+                background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-primary-hover))',
+                boxShadow: '0 2px 8px rgba(99, 89, 163, 0.3)',
+              }}
+            >
               <Shield className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-sm font-bold text-gray-900 leading-tight">Admin Incapacidades</h1>
-              <p className="text-[11px] text-gray-400 font-medium">Panel de Control</p>
+              <h1 className="text-sm font-bold leading-tight" style={{ color: 'var(--text-primary)' }}>
+                Admin Incapacidades
+              </h1>
+              <p className="text-[11px] font-medium" style={{ color: 'var(--text-muted)' }}>
+                Panel de Control
+              </p>
             </div>
           </div>
         </div>
@@ -40,12 +56,13 @@ export default function Layout({ user, children }) {
               key={to}
               to={to}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-fluent text-[13px] font-medium transition-all duration-150 group
-                ${isActive
-                  ? 'bg-fluent-50 text-fluent-500 shadow-sm'
-                  : 'text-gray-600 hover:bg-surface-hover hover:text-gray-900'
-                }`
+                `flex items-center gap-3 px-3 py-2.5 rounded-ios text-[13px] font-medium transition-all duration-200 group`
               }
+              style={({ isActive }) => ({
+                backgroundColor: isActive ? 'var(--accent-primary-soft)' : 'transparent',
+                color: isActive ? 'var(--accent-primary)' : 'var(--text-tertiary)',
+                boxShadow: isActive ? 'var(--shadow-sm)' : 'none',
+              })}
             >
               <Icon className="w-[18px] h-[18px]" />
               <span className="flex-1">{label}</span>
@@ -55,18 +72,34 @@ export default function Layout({ user, children }) {
         </nav>
 
         {/* User card */}
-        <div className="mx-3 mb-3 p-3 rounded-fluent bg-surface-tertiary">
+        <div
+          className="mx-3 mb-3 p-3 rounded-ios"
+          style={{ backgroundColor: 'var(--bg-input)' }}
+        >
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-fluent-500/10 flex items-center justify-center text-fluent-500 font-bold text-xs">
+            <div
+              className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs"
+              style={{
+                backgroundColor: 'var(--accent-primary-soft)',
+                color: 'var(--accent-primary)',
+              }}
+            >
               {(user?.nombre || user?.username || '?')[0].toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-gray-900 truncate">{user?.nombre || user?.username}</p>
-              <p className="text-[10px] text-gray-400 capitalize">{user?.rol || 'admin'}</p>
+              <p className="text-xs font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+                {user?.nombre || user?.username}
+              </p>
+              <p className="text-[10px] capitalize" style={{ color: 'var(--text-muted)' }}>
+                {user?.rol || 'admin'}
+              </p>
             </div>
             <button
               onClick={handleLogout}
-              className="p-1.5 rounded-fluent hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
+              className="p-1.5 rounded-ios transition-colors"
+              style={{ color: 'var(--text-muted)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--error)'; e.currentTarget.style.backgroundColor = 'var(--error-soft)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.backgroundColor = 'transparent' }}
               title="Cerrar sesión"
             >
               <LogOut className="w-4 h-4" />

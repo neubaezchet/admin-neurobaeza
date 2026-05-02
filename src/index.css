@@ -2,82 +2,174 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════
+   GOOGLE FONTS — Plus Jakarta Sans
+   ═══════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+
+/* ═══════════════════════════════════════════
+   CSS CUSTOM PROPERTIES — Enterprise Theme
+   Matches RepoGemini's "Obsidian Dusk" palette
+   ═══════════════════════════════════════════ */
+:root {
+  --bg-primary: #F8F6F4;
+  --bg-secondary: #F2EFEC;
+  --bg-card: rgba(255, 255, 255, 0.92);
+  --bg-card-solid: #FFFFFF;
+  --bg-input: #F3F1EF;
+  --bg-input-focus: #FFFFFF;
+  --bg-hover: rgba(99, 89, 163, 0.05);
+
+  --text-primary: #1C1B1F;
+  --text-secondary: #49454F;
+  --text-tertiary: #79747E;
+  --text-muted: #AEAAB4;
+
+  --border-primary: rgba(0, 0, 0, 0.07);
+  --border-focus: #6359A3;
+  --border-input: rgba(0, 0, 0, 0.10);
+
+  --accent-primary: #6359A3;
+  --accent-primary-hover: #544A8F;
+  --accent-primary-soft: rgba(99, 89, 163, 0.08);
+  --accent-primary-text: #FFFFFF;
+
+  --accent-secondary: #2D8887;
+  --accent-secondary-soft: rgba(45, 136, 135, 0.08);
+
+  --success: #2E7D59;
+  --success-soft: rgba(46, 125, 89, 0.08);
+  --error: #BA1A1A;
+  --error-soft: rgba(186, 26, 26, 0.08);
+  --warning: #8B6914;
+  --warning-soft: rgba(139, 105, 20, 0.08);
+
+  --glass-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.10);
+
+  /* Vanta nebula */
+  --nebula-highlight: 0x6359A3;
+  --nebula-midtone: 0xE8E4DF;
+  --nebula-lowlight: 0xD5CFC8;
+  --nebula-base: 0xF8F6F4;
+}
+
 @layer base {
-  * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-  body {
-    font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
-    color: #242424;
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-  ::selection { background: #0078D4; color: white; }
+  body {
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--text-primary);
+    background-color: var(--bg-secondary);
+  }
+  ::selection {
+    background: var(--accent-primary);
+    color: white;
+  }
   input, select, textarea {
     font-family: inherit;
   }
 }
 
 @layer components {
-  .fluent-card {
-    @apply bg-white rounded-fluent-lg shadow-fluent-2 border border-surface-border/50
-           transition-shadow duration-200 hover:shadow-fluent-4;
+  /* ═══ Cards ═══ */
+  .neo-card {
+    @apply bg-white rounded-ios shadow-ios border transition-shadow duration-200 hover:shadow-ios-lg;
+    border-color: var(--border-primary);
   }
-  .fluent-btn {
-    @apply px-4 py-2 rounded-fluent font-medium text-sm transition-all duration-150
-           active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+
+  /* ═══ Buttons ═══ */
+  .neo-btn {
+    @apply px-4 py-2.5 rounded-ios font-semibold text-sm transition-all duration-200
+           active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed;
   }
-  .fluent-btn-primary {
-    @apply fluent-btn bg-fluent-500 text-white hover:bg-fluent-600 shadow-fluent-2;
+  .neo-btn-primary {
+    @apply neo-btn text-white shadow-ios;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-primary-hover));
   }
-  .fluent-btn-outline {
-    @apply fluent-btn border border-surface-border text-gray-700 hover:bg-surface-hover;
+  .neo-btn-primary:hover:not(:disabled) {
+    filter: brightness(1.08);
+    box-shadow: 0 4px 16px rgba(99, 89, 163, 0.3);
   }
-  .fluent-btn-danger {
-    @apply fluent-btn bg-red-600 text-white hover:bg-red-700;
+  .neo-btn-outline {
+    @apply neo-btn border;
+    background: var(--bg-card-solid);
+    border-color: var(--border-primary);
+    color: var(--text-secondary);
   }
-  .fluent-btn-ghost {
-    @apply fluent-btn text-gray-600 hover:bg-surface-hover;
+  .neo-btn-outline:hover:not(:disabled) {
+    background: var(--bg-hover);
   }
-  .fluent-input {
-    @apply w-full px-3 py-2 rounded-fluent border border-surface-border bg-white
-           text-sm placeholder:text-gray-400
-           focus:outline-none focus:border-fluent-500 focus:ring-1 focus:ring-fluent-500/30
-           transition-colors duration-150;
+  .neo-btn-danger {
+    @apply neo-btn text-white;
+    background: linear-gradient(135deg, #BA1A1A, #a01515);
   }
-  .fluent-select {
-    @apply fluent-input appearance-none cursor-pointer pr-8
-           bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23666%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')]
+  .neo-btn-ghost {
+    @apply neo-btn;
+    color: var(--text-tertiary);
+  }
+  .neo-btn-ghost:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
+
+  /* ═══ Inputs — iOS-style floating ═══ */
+  .neo-input {
+    @apply w-full px-3.5 py-2.5 rounded-ios text-sm placeholder:text-gray-400
+           focus:outline-none transition-all duration-200;
+    background: var(--bg-input);
+    border: 1.5px solid var(--border-input);
+    color: var(--text-primary);
+  }
+  .neo-input:focus {
+    background: var(--bg-input-focus);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px var(--accent-primary-soft);
+  }
+  .neo-select {
+    @apply neo-input appearance-none cursor-pointer pr-9
+           bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%236359A3%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')]
            bg-no-repeat bg-[right_0.75rem_center];
   }
-  .fluent-badge {
-    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium;
+
+  /* ═══ Badges ═══ */
+  .neo-badge {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold;
   }
-  .fluent-table {
+
+  /* ═══ Tables ═══ */
+  .neo-table {
     @apply w-full text-sm;
   }
-  .fluent-table th {
-    @apply text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider
-           bg-surface-tertiary border-b border-surface-border;
+  .neo-table th {
+    @apply text-left px-4 py-3 text-[11px] font-bold uppercase tracking-wider;
+    color: var(--text-muted);
+    background: var(--bg-input);
+    border-bottom: 1px solid var(--border-primary);
   }
-  .fluent-table td {
-    @apply px-4 py-3 border-b border-surface-border/50;
+  .neo-table td {
+    @apply px-4 py-3.5;
+    border-bottom: 1px solid var(--border-primary);
   }
-  .fluent-table tbody tr {
-    @apply hover:bg-fluent-50/30 transition-colors;
+  .neo-table tbody tr {
+    @apply transition-colors duration-150;
+  }
+  .neo-table tbody tr:hover {
+    background: var(--bg-hover);
   }
 }
 
-/* Scrollbar Fluent */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+/* ═══ Scrollbar — Minimal ═══ */
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #c4c4c4; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #a0a0a0; }
+::-webkit-scrollbar-thumb { background: #C4C0CC; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #9E99A8; }
 
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes slideIn {
-  from { opacity: 0; transform: translateX(-8px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-.animate-fade-in { animation: fadeIn 0.3s ease-out; }
-.animate-slide-in { animation: slideIn 0.25s ease-out; }
+/* ═══ Animations ═══ */
+.animate-fade-in { animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+.animate-slide-in { animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+.animate-scale-in { animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1); }

@@ -16,7 +16,7 @@ const AREAS = [
 
 function AreaBadge({ area }) {
   const cfg = AREAS.find(a => a.value === area) || { label: area, light: 'bg-gray-100 text-gray-600' }
-  return <span className={`fluent-badge ${cfg.light}`}>{cfg.label}</span>
+  return <span className={`neo-badge ${cfg.light}`}>{cfg.label}</span>
 }
 
 export default function EmailDirectory() {
@@ -93,50 +93,50 @@ export default function EmailDirectory() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-            <Mail className="w-5 h-5 text-fluent-500" />
+            <Mail className="w-5 h-5 text-brand-500" />
             Directorio de Correos
           </h2>
           <p className="text-sm text-gray-400 mt-0.5">Gestión de correos de notificación por área y empresa</p>
         </div>
-        <button onClick={() => openNew()} className="fluent-btn-primary flex items-center gap-2">
+        <button onClick={() => openNew()} className="neo-btn-primary flex items-center gap-2">
           <Plus className="w-4 h-4" /> Nuevo correo
         </button>
       </div>
 
       {/* Alerts */}
       {error && (
-        <div className="flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-100 rounded-fluent text-sm text-red-600 animate-fade-in">
+        <div className="flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-100 rounded-ios text-sm text-red-600 animate-fade-in">
           <AlertCircle className="w-4 h-4" /> {error}
           <button onClick={() => setError('')} className="ml-auto"><X className="w-4 h-4" /></button>
         </div>
       )}
       {success && (
-        <div className="flex items-center gap-2 px-4 py-3 bg-green-50 border border-green-100 rounded-fluent text-sm text-green-700 animate-fade-in">
+        <div className="flex items-center gap-2 px-4 py-3 bg-green-50 border border-green-100 rounded-ios text-sm text-green-700 animate-fade-in">
           <Check className="w-4 h-4" /> {success}
         </div>
       )}
 
       {/* Filters */}
-      <div className="fluent-card p-4">
+      <div className="neo-card p-4">
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="fluent-input pl-9"
+              className="neo-input pl-9"
               placeholder="Buscar por nombre, email o empresa..."
             />
           </div>
-          <select value={filterArea} onChange={e => setFilterArea(e.target.value)} className="fluent-select w-48">
+          <select value={filterArea} onChange={e => setFilterArea(e.target.value)} className="neo-select w-48">
             <option value="all">Todas las áreas</option>
             {AREAS.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
           </select>
-          <select value={filterEmpresa} onChange={e => setFilterEmpresa(e.target.value)} className="fluent-select w-56">
+          <select value={filterEmpresa} onChange={e => setFilterEmpresa(e.target.value)} className="neo-select w-56">
             <option value="all">Todas las empresas</option>
             {empresas.map(e => <option key={e.id} value={e.nombre}>{e.nombre}</option>)}
           </select>
-          <button onClick={load} className="fluent-btn-ghost flex items-center gap-1.5" title="Recargar">
+          <button onClick={load} className="neo-btn-ghost flex items-center gap-1.5" title="Recargar">
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Recargar
           </button>
         </div>
@@ -150,8 +150,8 @@ export default function EmailDirectory() {
             <button
               key={a.value}
               onClick={() => setFilterArea(filterArea === a.value ? 'all' : a.value)}
-              className={`fluent-card p-4 text-left transition-all cursor-pointer ${
-                filterArea === a.value ? 'ring-2 ring-fluent-500/40 shadow-fluent-4' : ''
+              className={`neo-card p-4 text-left transition-all cursor-pointer ${
+                filterArea === a.value ? 'ring-2 ring-brand-500/40 shadow-ios-lg' : ''
               }`}
             >
               <div className="flex items-center gap-2 mb-2">
@@ -173,16 +173,16 @@ export default function EmailDirectory() {
       ) : (
         grouped.map(g => (
           g.correos.length > 0 && (
-            <div key={g.value} className="fluent-card overflow-hidden animate-slide-in">
-              <div className="px-4 py-3 border-b border-surface-border flex items-center gap-2">
+            <div key={g.value} className="neo-card overflow-hidden animate-slide-in">
+              <div className="px-4 py-3 border-b border-gray-200 flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${g.color}`} />
                 <h3 className="text-sm font-semibold text-gray-800">{g.label}</h3>
-                <span className="fluent-badge bg-gray-100 text-gray-500 ml-1">{g.correos.length}</span>
-                <button onClick={() => openNew(g.value)} className="ml-auto flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-gray-500 hover:text-fluent-500 hover:bg-fluent-50 transition-colors" title={`Agregar correo a ${g.label}`}>
+                <span className="neo-badge bg-gray-100 text-gray-500 ml-1">{g.correos.length}</span>
+                <button onClick={() => openNew(g.value)} className="ml-auto flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-gray-500 hover:text-brand-500 hover:bg-brand-50 transition-colors" title={`Agregar correo a ${g.label}`}>
                   <PlusCircle className="w-3.5 h-3.5" /> Agregar
                 </button>
               </div>
-              <table className="fluent-table">
+              <table className="neo-table">
                 <thead>
                   <tr>
                     <th>Contacto</th>
@@ -209,13 +209,13 @@ export default function EmailDirectory() {
                         </span>
                       </td>
                       <td>
-                        <span className={`fluent-badge ${c.activo ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                        <span className={`neo-badge ${c.activo ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                           {c.activo ? 'Activo' : 'Inactivo'}
                         </span>
                       </td>
                       <td className="text-right">
                         <div className="inline-flex gap-1">
-                          <button onClick={() => openEdit(c)} className="p-1.5 rounded hover:bg-fluent-50 text-gray-400 hover:text-fluent-500 transition-colors">
+                          <button onClick={() => openEdit(c)} className="p-1.5 rounded hover:bg-brand-50 text-gray-400 hover:text-brand-500 transition-colors">
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
                           <button onClick={() => handleDelete(c.id, c.email)} className="p-1.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors">
@@ -233,7 +233,7 @@ export default function EmailDirectory() {
       )}
 
       {!loading && filtered.length === 0 && (
-        <div className="fluent-card p-12 text-center text-gray-400">
+        <div className="neo-card p-12 text-center text-gray-400">
           <Mail className="w-12 h-12 mx-auto mb-3 text-gray-200" />
           <p className="font-medium">No se encontraron correos</p>
           <p className="text-sm mt-1">Ajusta los filtros o agrega un nuevo correo</p>
@@ -253,14 +253,14 @@ export default function EmailDirectory() {
       )}
 
       {/* Sección Empresas */}
-      <div className="fluent-card overflow-hidden animate-slide-in">
-        <div className="px-4 py-3 border-b border-surface-border flex items-center gap-2">
+      <div className="neo-card overflow-hidden animate-slide-in">
+        <div className="px-4 py-3 border-b border-gray-200 flex items-center gap-2">
           <Building2 className="w-4 h-4 text-amber-500" />
           <h3 className="text-sm font-semibold text-gray-800">Empresas Registradas</h3>
-          <span className="fluent-badge bg-gray-100 text-gray-500 ml-1">{empresas.length}</span>
+          <span className="neo-badge bg-gray-100 text-gray-500 ml-1">{empresas.length}</span>
         </div>
         {empresas.length > 0 ? (
-          <table className="fluent-table">
+          <table className="neo-table">
             <thead>
               <tr>
                 <th>Empresa</th>
@@ -280,7 +280,7 @@ export default function EmailDirectory() {
                     <td className="text-gray-500">{e.contacto_email || <span className="text-gray-300">—</span>}</td>
                     <td>
                       <div className="flex items-center gap-2">
-                        <span className={`fluent-badge ${correosEmpresa.length > 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
+                        <span className={`neo-badge ${correosEmpresa.length > 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
                           {correosEmpresa.length} correo{correosEmpresa.length !== 1 ? 's' : ''}
                         </span>
                         {correosEmpresa.length === 0 && (
@@ -296,7 +296,7 @@ export default function EmailDirectory() {
                     <td className="text-right">
                       <button
                         onClick={() => openNew('empresas')}
-                        className="p-1.5 rounded hover:bg-fluent-50 text-gray-400 hover:text-fluent-500 transition-colors"
+                        className="p-1.5 rounded hover:bg-brand-50 text-gray-400 hover:text-brand-500 transition-colors"
                         title="Agregar correo a esta empresa"
                       >
                         <PlusCircle className="w-3.5 h-3.5" />
@@ -367,34 +367,34 @@ function CorreoModal({ correo, empresas, onClose, onSaved, onError, defaultArea 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm animate-fade-in" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-fluent-16 w-full max-w-md mx-4 overflow-hidden animate-fade-in" onClick={e => e.stopPropagation()}>
-        <div className="px-6 py-4 border-b border-surface-border flex items-center justify-between">
+      <div className="bg-white rounded-2xl shadow-ios-xl w-full max-w-md mx-4 overflow-hidden animate-fade-in" onClick={e => e.stopPropagation()}>
+        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <div>
             <h3 className="font-bold text-gray-900">{isEdit ? 'Editar Correo' : 'Nuevo Correo'}</h3>
             {!isEdit && addedCount > 0 && (
               <p className="text-xs text-green-600 mt-0.5">✅ {addedCount} correo{addedCount > 1 ? 's' : ''} agregado{addedCount > 1 ? 's' : ''} — puedes seguir agregando</p>
             )}
           </div>
-          <button onClick={onClose} className="p-1 rounded hover:bg-surface-hover"><X className="w-4 h-4 text-gray-400" /></button>
+          <button onClick={onClose} className="p-1 rounded hover:bg-gray-50"><X className="w-4 h-4 text-gray-400" /></button>
         </div>
         <form onSubmit={handleSave} className="p-6 space-y-4">
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Área</label>
-            <select value={form.area} onChange={e => setForm({...form, area: e.target.value})} className="fluent-select">
+            <select value={form.area} onChange={e => setForm({...form, area: e.target.value})} className="neo-select">
               {AREAS.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
             </select>
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Nombre del contacto</label>
-            <input value={form.nombre_contacto} onChange={e => setForm({...form, nombre_contacto: e.target.value})} className="fluent-input" placeholder="Juan Pérez" />
+            <input value={form.nombre_contacto} onChange={e => setForm({...form, nombre_contacto: e.target.value})} className="neo-input" placeholder="Juan Pérez" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Email</label>
-            <input type="email" required value={form.email} onChange={e => setForm({...form, email: e.target.value})} className="fluent-input" placeholder="correo@empresa.com" autoFocus={!isEdit && addedCount > 0} />
+            <input type="email" required value={form.email} onChange={e => setForm({...form, email: e.target.value})} className="neo-input" placeholder="correo@empresa.com" autoFocus={!isEdit && addedCount > 0} />
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Empresa</label>
-            <select value={form.company_id} onChange={e => setForm({...form, company_id: e.target.value ? parseInt(e.target.value) : ''})} className="fluent-select" disabled={isEdit}>
+            <select value={form.company_id} onChange={e => setForm({...form, company_id: e.target.value ? parseInt(e.target.value) : ''})} className="neo-select" disabled={isEdit}>
               <option value="">Global (todas las empresas)</option>
               {empresas.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
             </select>
@@ -404,14 +404,14 @@ function CorreoModal({ correo, empresas, onClose, onSaved, onError, defaultArea 
             <div className="flex items-center gap-3">
               <label className="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" checked={form.activo} onChange={e => setForm({...form, activo: e.target.checked})} className="sr-only peer" />
-                <div className="w-9 h-5 bg-gray-200 peer-focus:ring-2 peer-focus:ring-fluent-500/30 rounded-full peer peer-checked:bg-fluent-500 after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
+                <div className="w-9 h-5 bg-gray-200 peer-focus:ring-2 peer-focus:ring-brand-500/30 rounded-full peer peer-checked:bg-brand-500 after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
               </label>
               <span className="text-sm text-gray-600">{form.activo ? 'Activo' : 'Inactivo'}</span>
             </div>
           )}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="fluent-btn-outline flex-1">{!isEdit && addedCount > 0 ? 'Cerrar' : 'Cancelar'}</button>
-            <button type="submit" disabled={saving} className="fluent-btn-primary flex-1 flex items-center justify-center gap-2">
+            <button type="button" onClick={onClose} className="neo-btn-outline flex-1">{!isEdit && addedCount > 0 ? 'Cerrar' : 'Cancelar'}</button>
+            <button type="submit" disabled={saving} className="neo-btn-primary flex-1 flex items-center justify-center gap-2">
               {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : isEdit ? <Check className="w-4 h-4" /> : <PlusCircle className="w-4 h-4" />}
               {isEdit ? 'Guardar' : addedCount > 0 ? 'Agregar otro' : 'Crear'}
             </button>

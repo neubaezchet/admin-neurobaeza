@@ -76,7 +76,7 @@ export default function SystemConsole() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-            <Monitor className="w-5 h-5 text-fluent-500" />
+            <Monitor className="w-5 h-5 text-brand-500" />
             Consola del Sistema
           </h2>
           <p className="text-sm text-gray-400 mt-0.5">Monitoreo en tiempo real, estadísticas y actividad</p>
@@ -84,12 +84,12 @@ export default function SystemConsole() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setAutoRefresh(!autoRefresh)}
-            className={`fluent-btn-ghost flex items-center gap-1.5 text-xs ${autoRefresh ? 'text-green-600' : 'text-gray-400'}`}
+            className={`neo-btn-ghost flex items-center gap-1.5 text-xs ${autoRefresh ? 'text-green-600' : 'text-gray-400'}`}
           >
             <Zap className={`w-3.5 h-3.5 ${autoRefresh ? 'text-green-500' : ''}`} />
             Auto-refresh {autoRefresh ? 'ON' : 'OFF'}
           </button>
-          <button onClick={load} className="fluent-btn-ghost flex items-center gap-1.5">
+          <button onClick={load} className="neo-btn-ghost flex items-center gap-1.5">
             <RefreshCw className="w-4 h-4" /> Actualizar
           </button>
         </div>
@@ -120,7 +120,7 @@ export default function SystemConsole() {
       {/* Main Stats */}
       {stats && (
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-          <StatCard icon={FileText} label="Total Casos" value={stats.total_casos} color="text-fluent-500" />
+          <StatCard icon={FileText} label="Total Casos" value={stats.total_casos} color="text-brand-500" />
           <StatCard icon={Zap} label="Casos Hoy" value={stats.casos_hoy} color="text-emerald-500" />
           <StatCard icon={Users} label="Empleados" value={stats.total_empleados} color="text-cyan-500" />
           <StatCard icon={Building2} label="Empresas" value={stats.total_empresas} color="text-amber-500" />
@@ -132,9 +132,9 @@ export default function SystemConsole() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Distribution by estado */}
         {stats?.por_estado && (
-          <div className="fluent-card p-5">
+          <div className="neo-card p-5">
             <h3 className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <Activity className="w-4 h-4 text-fluent-500" /> Distribución por Estado
+              <Activity className="w-4 h-4 text-brand-500" /> Distribución por Estado
             </h3>
             <div className="space-y-2.5">
               {Object.entries(stats.por_estado)
@@ -161,16 +161,16 @@ export default function SystemConsole() {
         )}
 
         {/* Activity Log */}
-        <div className="fluent-card p-5 flex flex-col">
+        <div className="neo-card p-5 flex flex-col">
           <h3 className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <Clock className="w-4 h-4 text-fluent-500" /> Actividad Reciente
+            <Clock className="w-4 h-4 text-brand-500" /> Actividad Reciente
           </h3>
           <div className="flex-1 overflow-y-auto max-h-[400px] -mx-1 px-1 space-y-1">
             {visibleEvents.length === 0 ? (
               <p className="text-sm text-gray-400 text-center py-8">Sin actividad reciente</p>
             ) : (
               visibleEvents.map((ev, i) => (
-                <div key={ev.id || i} className="flex items-start gap-2.5 p-2 rounded-fluent hover:bg-surface-hover transition-colors group">
+                <div key={ev.id || i} className="flex items-start gap-2.5 p-2 rounded-ios hover:bg-gray-50 transition-colors group">
                   <EventIcon tipo={ev.tipo} />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-gray-700 leading-relaxed">
@@ -188,7 +188,7 @@ export default function SystemConsole() {
           {activity.length > 20 && (
             <button
               onClick={() => setShowAllEvents(!showAllEvents)}
-              className="mt-3 fluent-btn-ghost text-xs flex items-center justify-center gap-1 w-full"
+              className="mt-3 neo-btn-ghost text-xs flex items-center justify-center gap-1 w-full"
             >
               {showAllEvents ? <><ChevronUp className="w-3.5 h-3.5" /> Mostrar menos</> : <><ChevronDown className="w-3.5 h-3.5" /> Ver {activity.length - 20} más</>}
             </button>
@@ -209,9 +209,9 @@ export default function SystemConsole() {
 function HealthWidget({ icon: Icon, label, status, detail }) {
   const isOk = status === 'online'
   return (
-    <div className={`fluent-card p-4 border-l-[3px] ${isOk ? 'border-l-green-500' : 'border-l-red-500'}`}>
+    <div className={`neo-card p-4 border-l-[3px] ${isOk ? 'border-l-green-500' : 'border-l-red-500'}`}>
       <div className="flex items-center gap-3">
-        <div className={`p-2 rounded-fluent ${isOk ? 'bg-green-50' : 'bg-red-50'}`}>
+        <div className={`p-2 rounded-ios ${isOk ? 'bg-green-50' : 'bg-red-50'}`}>
           <Icon className={`w-5 h-5 ${isOk ? 'text-green-600' : 'text-red-500'}`} />
         </div>
         <div>
@@ -233,7 +233,7 @@ function HealthWidget({ icon: Icon, label, status, detail }) {
 
 function StatCard({ icon: Icon, label, value, color }) {
   return (
-    <div className="fluent-card p-4">
+    <div className="neo-card p-4">
       <div className="flex items-center gap-2 mb-2">
         <Icon className={`w-4 h-4 ${color}`} />
         <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">{label}</span>
