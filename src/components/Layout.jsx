@@ -1,11 +1,12 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { Mail, Users, Monitor, LogOut, ShieldCheck, ChevronRight, Cpu } from 'lucide-react'
+import { Mail, Users, Monitor, LogOut, ShieldCheck, ChevronRight, Cpu, Network } from 'lucide-react'
 import { logout } from '../api'
 
 const NAV = [
-  { to: '/correos',  icon: Mail,    label: 'Directorio de Correos', desc: 'Gestión de contactos' },
-  { to: '/usuarios', icon: Users,   label: 'Usuarios y Permisos',   desc: 'Control de acceso' },
-  { to: '/consola',  icon: Monitor, label: 'Consola del Sistema',   desc: 'Logs y monitoreo' },
+  { to: '/conexiones', icon: Network, label: 'Directorio de Conexiones', desc: 'EPS / ARL por empresa' },
+  { to: '/correos',    icon: Mail,    label: 'Directorio de Correos',    desc: 'Gestión de contactos' },
+  { to: '/usuarios',   icon: Users,   label: 'Usuarios y Permisos',      desc: 'Control de acceso' },
+  { to: '/consola',    icon: Monitor, label: 'Consola del Sistema',      desc: 'Logs y monitoreo' },
 ]
 
 export default function Layout({ user, children }) {

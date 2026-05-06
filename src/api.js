@@ -134,6 +134,20 @@ export function updateEmpresa(id, data) {
   return apiFetch(`/admin/empresas/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 }
 
+// ─── Conexiones EPS/ARL ─────────────────────────────────
+export function getConexiones(empresaId) {
+  return apiFetch(`/admin/conexiones?empresa_id=${empresaId}`);
+}
+export function createConexion(data) {
+  return apiFetch('/admin/conexiones', { method: 'POST', body: JSON.stringify(data) });
+}
+export function updateConexion(id, data) {
+  return apiFetch(`/admin/conexiones/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+}
+export function deleteConexion(id) {
+  return apiFetch(`/admin/conexiones/${id}`, { method: 'DELETE' });
+}
+
 // ─── Consola / Stats ────────────────────────────────────
 export function getStats() {
   return apiFetch('/admin/stats');
