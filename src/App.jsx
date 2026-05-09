@@ -7,6 +7,7 @@ import EmailDirectory from './pages/EmailDirectory'
 import UsersPermissions from './pages/UsersPermissions'
 import SystemConsole from './pages/SystemConsole'
 import ConnectionDirectory from './pages/ConnectionDirectory'
+import BotConfiguration from './pages/BotConfiguration'
 
 function ProtectedRoute({ children }) {
   const token = getToken()
@@ -28,6 +29,7 @@ export default function App() {
               <Routes>
                 <Route path="/" element={<Navigate to="/conexiones" replace />} />
                 <Route path="/conexiones" element={<ConnectionDirectory />} />
+                <Route path="/bots" element={<BotConfiguration />} />
                 <Route path="/correos"    element={<EmailDirectory />} />
                 <Route path="/usuarios"   element={<UsersPermissions />} />
                 <Route path="/consola"    element={<SystemConsole />} />

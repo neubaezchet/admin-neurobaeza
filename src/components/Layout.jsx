@@ -1,9 +1,10 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { Mail, Users, Monitor, LogOut, ShieldCheck, ChevronRight, Cpu, Network } from 'lucide-react'
+import { Mail, Users, Monitor, LogOut, ShieldCheck, ChevronRight, Cpu, Network, Bot } from 'lucide-react'
 import { logout } from '../api'
 
 const NAV = [
   { to: '/conexiones', icon: Network, label: 'Directorio de Conexiones', desc: 'EPS / ARL por empresa' },
+  { to: '/bots',       icon: Bot,     label: 'Configuración de Bots',     desc: 'Bots de radicación' },
   { to: '/correos',    icon: Mail,    label: 'Directorio de Correos',    desc: 'Gestión de contactos' },
   { to: '/usuarios',   icon: Users,   label: 'Usuarios y Permisos',      desc: 'Control de acceso' },
   { to: '/consola',    icon: Monitor, label: 'Consola del Sistema',      desc: 'Logs y monitoreo' },

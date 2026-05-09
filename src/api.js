@@ -158,3 +158,37 @@ export function getHealth() {
 export function getActivity(limit = 50) {
   return apiFetch(`/admin/activity?limit=${limit}`);
 }
+
+// ─── Bots Radicación ────────────────────────────────────
+export function getBotsDisponibles() {
+  return apiFetch('/admin/bots/disponibles');
+}
+
+export function getBotsEmpresa(nombreEmpresa) {
+  return apiFetch(`/admin/empresas/${encodeURIComponent(nombreEmpresa)}/bots`);
+}
+
+export function createBotEmpresa(nombreEmpresa, data) {
+  return apiFetch(`/admin/empresas/${encodeURIComponent(nombreEmpresa)}/bots`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateBotEmpresa(nombreEmpresa, botNombre, data) {
+  return apiFetch(
+    `/admin/empresas/${encodeURIComponent(nombreEmpresa)}/bots/${encodeURIComponent(botNombre)}`,
+    { method: 'PUT', body: JSON.stringify(data) }
+  );
+}
+
+export function deleteBotEmpresa(nombreEmpresa, botNombre) {
+  return apiFetch(
+    `/admin/empresas/${encodeURIComponent(nombreEmpresa)}/bots/${encodeURIComponent(botNombre)}`,
+    { method: 'DELETE' }
+  );
+}
+
+export function syncRadicacionBots() {
+  return apiFetch('/admin/bots/sync-radicacion', { method: 'POST' });
+}
