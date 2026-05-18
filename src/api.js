@@ -192,3 +192,72 @@ export function deleteBotEmpresa(nombreEmpresa, botNombre) {
 export function syncRadicacionBots() {
   return apiFetch('/admin/bots/sync-radicacion', { method: 'POST' });
 }
+
+// ─── Multi-tenant ────────────────────────────────────────
+export function getTenants(params = {}) {
+  const q = new URLSearchParams(params).toString()
+  return apiFetch(`/tenants/${q ? `?${q}` : ''}`)
+}
+export function getTenant(companyId) {
+  return apiFetch(`/tenants/${companyId}`)
+}
+export function createTenant(data) {
+  return apiFetch('/tenants/', { method: 'POST', body: JSON.stringify(data) })
+}
+export function updateTenant(companyId, data) {
+  return apiFetch(`/tenants/${companyId}`, { method: 'PUT', body: JSON.stringify(data) })
+}
+export function deactivateTenant(companyId) {
+  return apiFetch(`/tenants/${companyId}`, { method: 'DELETE' })
+}
+
+// Tema visual del tenant
+export function getTenantTheme(companyIdOrMe) {
+  if (companyIdOrMe === 'me') return apiFetch('/tenants/me/theme')
+  return apiFetch(`/tenants/${companyIdOrMe}/theme`)
+}
+
+// Onboarding wizard
+export function getOnboardingProgress(companyId) {
+  return apiFetch(`/tenants/${companyId}/onboarding`)
+}
+export function saveTenantOnboardingStep(companyId, { step, data }) {
+  return apiFetch(`/tenants/${companyId}/onboarding/step`, {
+    method: 'POST',
+    body: JSON.stringify({ step, data }),
+  })
+}
+export function completeTenantOnboarding(companyId) {
+  return apiFetch(`/tenants/${companyId}/onboarding/complete`, { method: 'POST' })
+}
+
+// Google Drive
+export function verifyTenantDrive(companyId, data) {
+  return apiFetch(`/tenants/${companyId}/drive/verify`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+export function getTenantFiles(companyId, subfolder) {
+  const q = subfolder ? `?subfolder=${subfolder}` : ''
+  return apiFetch(`/tenants/${companyId}/files${q}`)
+}
+
+// Usuarios del tenant
+export function getTenantUsers(companyId) {
+  return apiFetch(`/tenants/${companyId}/users`)
+}
+export function addTenantUser(companyId, data) {
+  return apiFetch(`/tenants/${companyId}/users`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+export function removeTenantUser(companyId, adminUserId) {
+  return apiFetch(`/tenants/${companyId}/users/${adminUserId}`, { method: 'DELETE' })
+}
+
+// Audit log
+export function getTenantAuditLog(companyId, { limit = 50, offset = 0 } = {}) {
+  return apiFetch(`/tenants/${companyId}/audit?limit=${limit}&offset=${offset}`)
+}

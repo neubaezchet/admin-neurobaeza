@@ -8,6 +8,8 @@ import UsersPermissions from './pages/UsersPermissions'
 import SystemConsole from './pages/SystemConsole'
 import ConnectionDirectory from './pages/ConnectionDirectory'
 import BotConfiguration from './pages/BotConfiguration'
+import TenantOnboarding from './pages/TenantOnboarding'
+import TenantWelcome from './pages/TenantWelcome'
 
 function ProtectedRoute({ children }) {
   const token = getToken()
@@ -21,6 +23,27 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login onLogin={setUser} />} />
+
+      {/* Onboarding wizard — full screen, sin Layout */}
+      <Route
+        path="/tenants/:companyId/onboarding"
+        element={
+          <ProtectedRoute>
+            <TenantOnboarding />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Pantalla de bienvenida — full screen, sin Layout */}
+      <Route
+        path="/tenants/:companyId/welcome"
+        element={
+          <ProtectedRoute>
+            <TenantWelcome />
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/*"
         element={
