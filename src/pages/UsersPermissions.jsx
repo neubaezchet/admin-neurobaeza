@@ -24,6 +24,16 @@ const PERMISOS_DISPONIBLES = [
   { key: 'consola',       label: 'Consola Sistema',  desc: 'Monitoreo y logs del sistema' },
 ]
 
+// Permisos específicos del portal de incapacidades (tenant_permisos)
+const TENANT_PERMISOS = [
+  { key: 'tabla_viva',    label: 'Tabla Viva',                desc: 'Vista en tiempo real de incapacidades activas' },
+  { key: 'reportes',      label: 'Reportes y Estadísticas',   desc: 'Dashboards y gráficas de gestión' },
+  { key: 'powerbi',       label: 'Power BI',                  desc: 'Dashboard Power BI embebido' },
+  { key: 'exportaciones', label: 'Exportaciones masivas',     desc: 'Descargar datos en Excel / PDF' },
+  { key: 'plano',         label: 'Plano de Incapacidades',    desc: 'Vista plano / calendar de incapacidades' },
+  { key: 'pendientes',    label: 'Pendientes de Envío',       desc: 'Casos pendientes de radicación ante EPS' },
+]
+
 function RoleBadge({ rol }) {
   const cfg = ROLES.find(r => r.value === rol) || ROLES[5]
   return (
@@ -265,14 +275,17 @@ export default function UsersPermissions() {
 
 function UserModal({ user, empresas, onClose, onSaved, onError }) {
   const isEdit = !!user
+  const isTenantAdmin = !!user?.es_tenant_admin
+
   const [form, setForm] = useState({
-    username: user?.username || '',
-    nombre: user?.nombre || '',
-    email: user?.email || '',
-    rol: user?.rol || 'viewer',
-    company_id: user?.company_id || '',
-    permisos: user?.permisos || {},
-    activo: user?.activo ?? true,
+    username:        user?.username        || '',
+    nombre:          user?.nombre          || '',
+    email:           user?.email           || '',
+    rol:             user?.rol             || 'viewer',
+    company_id:      user?.company_id      || '',
+    permisos:        user?.permisos        || {},
+    tenant_permisos: user?.tenant_permisos || {},
+    activo:          user?.activo          ?? true,
     password: '',
   })
   const [showPwd, setShowPwd] = useState(false)
@@ -282,6 +295,10 @@ function UserModal({ user, empresas, onClose, onSaved, onError }) {
     setForm(f => ({ ...f, permisos: { ...f.permisos, [key]: !f.permisos[key] } }))
   }
 
+  const toggleTenantPermiso = (key) => {
+    setForm(f => ({ ...f, tenant_permisos: { ...f.tenant_permisos, [key]: !f.tenant_permisos[key] } }))
+  }
+
   const handleSave = async (e) => {
     e.preventDefault()
     if (!form.username || (!isEdit && !form.password)) return
@@ -289,25 +306,27 @@ function UserModal({ user, empresas, onClose, onSaved, onError }) {
     try {
       if (isEdit) {
         const payload = {
-          nombre: form.nombre,
-          email: form.email,
-          rol: form.rol,
-          company_id: form.company_id ? parseInt(form.company_id) : 0,
-          permisos: form.permisos,
-          activo: form.activo,
+          nombre:          form.nombre,
+          email:           form.email,
+          rol:             form.rol,
+          company_id:      form.company_id ? parseInt(form.company_id) : 0,
+          permisos:        form.permisos,
+          tenant_permisos: form.tenant_permisos,
+          activo:          form.activo,
         }
         if (form.password) payload.password = form.password
         await updateUser(user.id, payload)
         onSaved(`Usuario "${form.username}" actualizado`)
       } else {
         await createUser({
-          username: form.username,
-          password: form.password,
-          nombre: form.nombre,
-          email: form.email,
-          rol: form.rol,
-          company_id: form.company_id ? parseInt(form.company_id) : null,
-          permisos: form.permisos,
+          username:        form.username,
+          password:        form.password,
+          nombre:          form.nombre,
+          email:           form.email,
+          rol:             form.rol,
+          company_id:      form.company_id ? parseInt(form.company_id) : null,
+          permisos:        form.permisos,
+          tenant_permisos: form.tenant_permisos,
         })
         onSaved(`Usuario "${form.username}" creado`)
       }
@@ -384,22 +403,32 @@ function UserModal({ user, empresas, onClose, onSaved, onError }) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="neo-label">Rol</label>
-              <select value={form.rol} onChange={e => setForm({...form, rol: e.target.value})} className="neo-select">
+              <select value={form.rol} onChange={e => setForm({...form, rol: e.target.value})} className="neo-select" disabled={isTenantAdmin}>
                 {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
               </select>
             </div>
             <div>
               <label className="neo-label">Empresa</label>
-              <select value={form.company_id} onChange={e => setForm({...form, company_id: e.target.value})} className="neo-select">
-                <option value="">Todas</option>
-                {empresas.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
-              </select>
+              {isTenantAdmin ? (
+                /* Para tenant admins, empresa fija — no editable */
+                <div className="neo-input flex items-center gap-2 opacity-60 cursor-not-allowed" style={{ color: 'var(--text-tertiary)' }}>
+                  <Building2 className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="text-xs truncate">
+                    {empresas.find(e => e.id === parseInt(form.company_id))?.nombre || `Empresa #${form.company_id}`}
+                  </span>
+                </div>
+              ) : (
+                <select value={form.company_id} onChange={e => setForm({...form, company_id: e.target.value})} className="neo-select">
+                  <option value="">Todas</option>
+                  {empresas.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
+                </select>
+              )}
             </div>
           </div>
 
           {/* Permissions */}
           <div>
-            <label className="neo-label mb-2">Permisos del Portal</label>
+            <label className="neo-label mb-2">Permisos del Portal Admin</label>
             <div className="grid grid-cols-2 gap-2">
               {PERMISOS_DISPONIBLES.map(p => (
                 <button
@@ -424,6 +453,48 @@ function UserModal({ user, empresas, onClose, onSaved, onError }) {
                   )}
                   <div>
                     <p className="font-semibold" style={{ color: form.permisos[p.key] ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{p.label}</p>
+                    <p className="text-[10px] opacity-60">{p.desc}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Tenant portal permissions — visible siempre para mostrar qué puede ver en el portal */}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <label className="neo-label mb-0">Permisos del Portal de Incapacidades</label>
+              <span className="neo-badge text-[10px]" style={{ background: 'rgba(99,102,241,0.12)', color: '#818CF8' }}>
+                Portal Empresa
+              </span>
+            </div>
+            <p className="text-[11px] mb-2.5" style={{ color: 'var(--text-muted)' }}>
+              Módulos visibles en el portal de gestión de incapacidades de la empresa.
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {TENANT_PERMISOS.map(p => (
+                <button
+                  key={p.key}
+                  type="button"
+                  onClick={() => toggleTenantPermiso(p.key)}
+                  className="flex items-center gap-2 p-2.5 rounded-xl text-left text-xs transition-all"
+                  style={form.tenant_permisos[p.key] ? {
+                    border: '1px solid rgba(99,102,241,0.4)',
+                    background: 'rgba(99,102,241,0.08)',
+                    color: '#818CF8'
+                  } : {
+                    border: '1px solid var(--border-input)',
+                    background: 'transparent',
+                    color: 'var(--text-muted)'
+                  }}
+                >
+                  {form.tenant_permisos[p.key] ? (
+                    <ToggleRight className="w-4 h-4 flex-shrink-0" style={{ color: '#818CF8' }} />
+                  ) : (
+                    <ToggleLeft className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--text-muted)' }} />
+                  )}
+                  <div>
+                    <p className="font-semibold" style={{ color: form.tenant_permisos[p.key] ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{p.label}</p>
                     <p className="text-[10px] opacity-60">{p.desc}</p>
                   </div>
                 </button>

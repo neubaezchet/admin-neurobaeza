@@ -5,24 +5,20 @@
  *   1. Logo + ring de luz expandiéndose  (0–1.2s)
  *   2. Nombre de la empresa fade-in      (1.2–2.2s)
  *   3. Cards de resumen slide-in         (2.2–3.4s)
- *   4. Botón "Comenzar" aparece          (3.4s+)
+ *   4. Credenciales + botón aparecen     (3.4s+)
  *
  * Los colores se toman del tenant: paleta_colores.primary/secondary
+ * Las credenciales se reciben desde TenantOnboarding vía navigate state.
  */
 
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   Building2, Palette, Mail, HardDrive, Clock, MapPin,
-  CheckCircle2, ArrowRight, Sparkles
+  CheckCircle2, ArrowRight, Sparkles, Lock, Copy, Check,
 } from 'lucide-react'
 
 // ─── Helpers ──────────────────────────────────────────────
-
-function hex2oklch(hex) {
-  // Mínimo fallback — devuelve el hex como está para uso en CSS
-  return hex || '#3B82F6'
-}
 
 const PHASE_DELAYS = { ring: 0, logo: 200, name: 1200, cards: 2200, button: 3600 }
 
@@ -86,6 +82,159 @@ function SummaryCard({ icon: Icon, label, value, color, delay, visible }) {
   )
 }
 
+// ─── Credentials card ─────────────────────────────────────
+
+function CredentialsCard({ credentials, confirmed, onConfirm, visible }) {
+  const [copiedField, setCopiedField] = useState(null) // 'username' | 'password'
+
+  function copyToClipboard(text, field) {
+    navigator.clipboard.writeText(text).catch(() => {
+      // Fallback para navegadores sin clipboard API
+      const el = document.createElement('textarea')
+      el.value = text
+      document.body.appendChild(el)
+      el.select()
+      document.execCommand('copy')
+      document.body.removeChild(el)
+    })
+    setCopiedField(field)
+    setTimeout(() => setCopiedField(null), 2000)
+  }
+
+  const fieldStyle = {
+    display: 'flex', alignItems: 'center', gap: 10,
+    padding: '11px 14px', borderRadius: 10,
+    background: 'rgba(0,0,0,0.25)',
+    border: '1px solid rgba(251,191,36,0.2)',
+  }
+
+  const labelStyle = {
+    margin: 0, fontSize: 10, fontWeight: 700,
+    color: 'rgba(251,191,36,0.6)',
+    textTransform: 'uppercase', letterSpacing: '0.07em',
+  }
+
+  const valueStyle = {
+    margin: '3px 0 0', fontSize: 14,
+    color: 'rgba(255,255,255,0.9)', fontWeight: 600,
+    fontFamily: 'ui-monospace, SFMono-Regular, monospace',
+    letterSpacing: '0.03em',
+  }
+
+  const copyBtnStyle = (field) => ({
+    marginLeft: 'auto', flexShrink: 0,
+    display: 'flex', alignItems: 'center', gap: 5,
+    padding: '6px 12px', borderRadius: 8, cursor: 'pointer',
+    background: copiedField === field ? 'rgba(16,185,129,0.15)' : 'rgba(251,191,36,0.1)',
+    border: `1px solid ${copiedField === field ? 'rgba(16,185,129,0.35)' : 'rgba(251,191,36,0.25)'}`,
+    color: copiedField === field ? '#10B981' : 'rgba(251,191,36,0.8)',
+    fontSize: 11, fontWeight: 600,
+    transition: 'all 0.2s ease',
+  })
+
+  return (
+    <div style={{
+      width: '100%', maxWidth: 480,
+      borderRadius: 18,
+      background: 'linear-gradient(135deg, rgba(120,53,15,0.35) 0%, rgba(92,30,10,0.25) 100%)',
+      border: '1px solid rgba(251,191,36,0.3)',
+      boxShadow: '0 8px 40px rgba(251,191,36,0.08), inset 0 1px 0 rgba(251,191,36,0.12)',
+      padding: '20px 22px',
+      opacity: visible ? 1 : 0,
+      transform: visible ? 'translateY(0)' : 'translateY(24px)',
+      transition: 'opacity 0.6s 3700ms ease, transform 0.6s 3700ms ease',
+      marginBottom: 20,
+    }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 18 }}>
+        <div style={{
+          width: 38, height: 38, borderRadius: 10, flexShrink: 0,
+          background: 'rgba(251,191,36,0.12)',
+          border: '1px solid rgba(251,191,36,0.3)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <Lock size={17} color="#FBB924" />
+        </div>
+        <div>
+          <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>
+            Guarda estas credenciales
+          </p>
+          <p style={{ margin: '3px 0 0', fontSize: 12, color: 'rgba(251,191,36,0.7)', lineHeight: 1.4 }}>
+            Esta contraseña <strong style={{ color: '#FBB924' }}>no se volverá a mostrar.</strong> Cópiala ahora.
+          </p>
+        </div>
+      </div>
+
+      {/* Fields */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
+
+        {/* Username */}
+        <div style={fieldStyle}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={labelStyle}>Usuario</p>
+            <p style={valueStyle}>{credentials.username || '—'}</p>
+          </div>
+          <button
+            style={copyBtnStyle('username')}
+            onClick={() => copyToClipboard(credentials.username, 'username')}
+            title="Copiar usuario"
+          >
+            {copiedField === 'username'
+              ? <><Check size={11} /> Copiado ✓</>
+              : <><Copy size={11} /> Copiar</>
+            }
+          </button>
+        </div>
+
+        {/* Password */}
+        <div style={fieldStyle}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={labelStyle}>Contraseña temporal</p>
+            <p style={{ ...valueStyle, letterSpacing: '0.12em' }}>{credentials.password || '—'}</p>
+          </div>
+          <button
+            style={copyBtnStyle('password')}
+            onClick={() => copyToClipboard(credentials.password, 'password')}
+            title="Copiar contraseña"
+          >
+            {copiedField === 'password'
+              ? <><Check size={11} /> Copiado ✓</>
+              : <><Copy size={11} /> Copiar</>
+            }
+          </button>
+        </div>
+      </div>
+
+      {/* Confirmation checkbox */}
+      <label style={{
+        display: 'flex', alignItems: 'flex-start', gap: 10,
+        cursor: 'pointer', userSelect: 'none',
+      }}>
+        <div style={{ position: 'relative', flexShrink: 0, marginTop: 1 }}>
+          <input
+            type="checkbox"
+            checked={confirmed}
+            onChange={e => onConfirm(e.target.checked)}
+            style={{ opacity: 0, position: 'absolute', inset: 0, cursor: 'pointer', margin: 0 }}
+          />
+          <div style={{
+            width: 18, height: 18, borderRadius: 5,
+            background: confirmed ? '#10B981' : 'rgba(0,0,0,0.3)',
+            border: `1.5px solid ${confirmed ? '#10B981' : 'rgba(251,191,36,0.35)'}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.18s ease',
+          }}>
+            {confirmed && <Check size={11} color="white" strokeWidth={3} />}
+          </div>
+        </div>
+        <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.45 }}>
+          Confirmé que guardé las credenciales en un lugar seguro
+        </span>
+      </label>
+    </div>
+  )
+}
+
 // ─── Main component ───────────────────────────────────────
 
 export default function TenantWelcome() {
@@ -93,15 +242,19 @@ export default function TenantWelcome() {
   const { state } = useLocation()
   const navigate = useNavigate()
 
-  const tenant = state?.tenant || {}
-  const paleta = tenant.paleta_colores || {}
+  const tenant      = state?.tenant      || {}
+  const credentials = state?.credentials || {}
+  const hasCredentials = !!(credentials.username && credentials.password)
+
+  const paleta    = tenant.paleta_colores || {}
   const primary   = paleta.primary   || '#C2603C'
   const secondary = paleta.secondary || '#E8956D'
   const accent    = paleta.accent    || '#7B4F35'
 
   const [phase, setPhase] = useState({
-    ring: false, logo: false, name: false, cards: false, button: false
+    ring: false, logo: false, name: false, cards: false, button: false,
   })
+  const [credConfirmed, setCredConfirmed] = useState(false)
 
   useEffect(() => {
     const timers = Object.entries(PHASE_DELAYS).map(([key, delay]) =>
@@ -110,10 +263,12 @@ export default function TenantWelcome() {
     return () => timers.forEach(clearTimeout)
   }, [])
 
+  const canProceed = !hasCredentials || credConfirmed
+
   const summaryItems = [
     { icon: Building2, label: 'NIT',          value: tenant.nit,                   color: primary },
     { icon: Mail,      label: 'Administrador', value: tenant.contacto_email,         color: secondary },
-    { icon: Clock,     label: 'Reportes',      value: tenant.frecuencia_reportes,    color: accent },
+    { icon: Clock,     label: 'Reportes',      value: tenant.ciclo_reporte,          color: accent },
     { icon: MapPin,    label: 'Zona horaria',  value: tenant.zona_horaria,           color: primary },
     { icon: HardDrive, label: 'Google Drive',  value: tenant.google_workspace_drive_id ? 'Conectado' : 'Pendiente', color: secondary },
     { icon: Palette,   label: 'Identidad',     value: 'Configurada',                color: accent },
@@ -221,7 +376,7 @@ export default function TenantWelcome() {
       <div style={{
         width: '100%', maxWidth: 480,
         display: 'flex', flexDirection: 'column', gap: 10,
-        marginBottom: 36,
+        marginBottom: 28,
       }}>
         {summaryItems.map((item, i) => (
           <SummaryCard
@@ -233,6 +388,16 @@ export default function TenantWelcome() {
         ))}
       </div>
 
+      {/* ── Phase 4: Credentials card (solo si vienen credenciales) ── */}
+      {hasCredentials && (
+        <CredentialsCard
+          credentials={credentials}
+          confirmed={credConfirmed}
+          onConfirm={setCredConfirmed}
+          visible={phase.button}
+        />
+      )}
+
       {/* ── Phase 4: CTA ── */}
       <div style={{
         opacity: phase.button ? 1 : 0,
@@ -241,27 +406,41 @@ export default function TenantWelcome() {
         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
       }}>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => canProceed && navigate('/')}
+          disabled={!canProceed}
           style={{
-            padding: '16px 48px', borderRadius: 16, cursor: 'pointer',
-            background: `linear-gradient(135deg, ${primary}, ${secondary})`,
-            border: 'none', color: 'white',
+            padding: '16px 48px', borderRadius: 16,
+            cursor: canProceed ? 'pointer' : 'not-allowed',
+            background: canProceed
+              ? `linear-gradient(135deg, ${primary}, ${secondary})`
+              : 'rgba(255,255,255,0.08)',
+            border: canProceed ? 'none' : '1px solid rgba(255,255,255,0.12)',
+            color: canProceed ? 'white' : 'rgba(255,255,255,0.3)',
             fontWeight: 700, fontSize: 16, letterSpacing: '-0.01em',
             display: 'flex', alignItems: 'center', gap: 10,
-            boxShadow: `0 8px 40px ${primary}50, 0 2px 8px rgba(0,0,0,0.3)`,
-            transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+            boxShadow: canProceed ? `0 8px 40px ${primary}50, 0 2px 8px rgba(0,0,0,0.3)` : 'none',
+            transition: 'all 0.2s ease',
           }}
           onMouseEnter={e => {
+            if (!canProceed) return
             e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)'
             e.currentTarget.style.boxShadow = `0 16px 50px ${primary}60, 0 4px 12px rgba(0,0,0,0.4)`
           }}
           onMouseLeave={e => {
             e.currentTarget.style.transform = 'translateY(0) scale(1)'
-            e.currentTarget.style.boxShadow = `0 8px 40px ${primary}50, 0 2px 8px rgba(0,0,0,0.3)`
+            e.currentTarget.style.boxShadow = canProceed
+              ? `0 8px 40px ${primary}50, 0 2px 8px rgba(0,0,0,0.3)`
+              : 'none'
           }}
         >
-          Comenzar <ArrowRight size={18} />
+          {hasCredentials ? 'Ir al portal' : 'Comenzar'} <ArrowRight size={18} />
         </button>
+
+        {hasCredentials && !credConfirmed && (
+          <p style={{ margin: 0, fontSize: 12, color: 'rgba(251,191,36,0.6)', textAlign: 'center' }}>
+            Confirma que guardaste las credenciales para continuar
+          </p>
+        )}
 
         <button
           onClick={() => navigate(`/tenants/${companyId}/users`)}

@@ -1,17 +1,26 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { Mail, Users, Monitor, LogOut, ShieldCheck, ChevronRight, Cpu, Network, Bot } from 'lucide-react'
+import { Mail, Users, Monitor, LogOut, ShieldCheck, ChevronRight, Cpu, Network, Bot, Settings, Building2 } from 'lucide-react'
 import { logout } from '../api'
 
-const NAV = [
-  { to: '/conexiones', icon: Network, label: 'Directorio de Conexiones', desc: 'EPS / ARL por empresa' },
-  { to: '/bots',       icon: Bot,     label: 'Configuración de Bots',     desc: 'Bots de radicación' },
-  { to: '/correos',    icon: Mail,    label: 'Directorio de Correos',    desc: 'Gestión de contactos' },
-  { to: '/usuarios',   icon: Users,   label: 'Usuarios y Permisos',      desc: 'Control de acceso' },
-  { to: '/consola',    icon: Monitor, label: 'Consola del Sistema',      desc: 'Logs y monitoreo' },
+const NAV_FULL = [
+  { to: '/conexiones', icon: Network,  label: 'Directorio de Conexiones', desc: 'EPS / ARL por empresa' },
+  { to: '/bots',       icon: Bot,      label: 'Configuración de Bots',     desc: 'Bots de radicación' },
+  { to: '/correos',    icon: Mail,     label: 'Directorio de Correos',    desc: 'Gestión de contactos' },
+  { to: '/usuarios',   icon: Users,    label: 'Usuarios y Permisos',      desc: 'Control de acceso' },
+  { to: '/consola',    icon: Monitor,  label: 'Consola del Sistema',      desc: 'Logs y monitoreo' },
 ]
 
 export default function Layout({ user, children }) {
   const navigate = useNavigate()
+
+  // Si es tenant admin solo ve sus módulos; company_id para rutas dinámicas
+  const isTenantAdmin = !!user?.es_tenant_admin
+  const NAV = isTenantAdmin
+    ? [
+        { to: '/usuarios',                             icon: Users,    label: 'Usuarios de mi empresa', desc: 'Gestión de acceso' },
+        { to: `/tenants/${user?.company_id}/config`,   icon: Settings, label: 'Mi configuración',       desc: 'Portal y empresa' },
+      ]
+    : NAV_FULL
 
   const handleLogout = () => {
     logout()
@@ -64,16 +73,26 @@ export default function Layout({ user, children }) {
                 NeuroBareza
               </h1>
               <p className="text-[10px] font-medium mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                Admin Portal
+                {isTenantAdmin ? 'Portal Empresa' : 'Admin Portal'}
               </p>
             </div>
           </div>
+          {/* Badge tenant admin */}
+          {isTenantAdmin && (
+            <div className="flex items-center gap-1.5 mt-3 px-2 py-1 rounded-lg"
+              style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)' }}>
+              <Building2 className="w-3 h-3 flex-shrink-0" style={{ color: '#818CF8' }} />
+              <span className="text-[10px] font-semibold truncate" style={{ color: '#818CF8' }}>
+                {user?.nombre || user?.username}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* ── Navigation ── */}
         <nav className="relative flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           <p className="text-[9px] font-bold uppercase tracking-widest px-2 mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em' }}>
-            Módulos
+            {isTenantAdmin ? 'Mi empresa' : 'Módulos'}
           </p>
           {NAV.map(({ to, icon: Icon, label, desc }) => (
             <NavLink

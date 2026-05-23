@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   Mail, Plus, Pencil, Trash2, Search, Filter, Check, X,
-  Building2, Globe, ChevronDown, RefreshCw, AlertCircle, UserCircle, PlusCircle
+  Building2, Globe, ChevronDown, RefreshCw, AlertCircle, UserCircle, PlusCircle,
+  Link2, Copy, ShieldAlert, CalendarClock,
 } from 'lucide-react'
 import {
   getCorreos, createCorreo, updateCorreo, deleteCorreo,
-  getEmpresas, updateEmpresa
+  getEmpresas, updateEmpresa, generateTenantInvite,
 } from '../api'
 
 const AREAS = [
@@ -31,6 +32,8 @@ export default function EmailDirectory() {
   const [defaultArea, setDefaultArea] = useState('alerta_180')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [inviteModal, setInviteModal] = useState(null) // { link, expires_at, empresa }
+  const [generatingInvite, setGeneratingInvite] = useState(null) // empresa id
 
   const load = useCallback(async () => {
     try {
@@ -85,6 +88,22 @@ export default function EmailDirectory() {
     setEditing(null)
     setDefaultArea(area || (filterArea !== 'all' ? filterArea : 'alerta_180'))
     setShowModal(true)
+  }
+
+  const handleGenerateInvite = async (empresa) => {
+    setGeneratingInvite(empresa.id)
+    try {
+      const data = await generateTenantInvite(empresa.id)
+      setInviteModal({
+        link:       data.link_onboarding || data.invite_url || data.link || data.url,
+        expires_at: data.expires_at,
+        empresa:    empresa.nombre,
+      })
+    } catch (err) {
+      setError(`No se pudo generar el link: ${err.message}`)
+    } finally {
+      setGeneratingInvite(null)
+    }
   }
 
   return (
@@ -267,12 +286,13 @@ export default function EmailDirectory() {
                 <th>NIT</th>
                 <th>Email Contacto</th>
                 <th>Correos Configurados</th>
-                <th className="w-20 text-right">Acciones</th>
+                <th className="w-48 text-right">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {empresas.map(e => {
                 const correosEmpresa = correos.filter(c => c.company_id === e.id && c.activo)
+                const isGenerating = generatingInvite === e.id
                 return (
                   <tr key={e.id}>
                     <td className="font-medium text-gray-800">{e.nombre}</td>
@@ -294,13 +314,37 @@ export default function EmailDirectory() {
                       </div>
                     </td>
                     <td className="text-right">
-                      <button
-                        onClick={() => openNew('empresas')}
-                        className="p-1.5 rounded hover:bg-brand-50 text-gray-400 hover:text-brand-500 transition-colors"
-                        title="Agregar correo a esta empresa"
-                      >
-                        <PlusCircle className="w-3.5 h-3.5" />
-                      </button>
+                      <div className="inline-flex items-center gap-1">
+                        {/* Generar Link de Onboarding */}
+                        <button
+                          onClick={() => handleGenerateInvite(e)}
+                          disabled={isGenerating}
+                          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all"
+                          style={{
+                            background: isGenerating ? 'rgba(99,102,241,0.06)' : 'rgba(99,102,241,0.1)',
+                            color: '#818CF8',
+                            border: '1px solid rgba(99,102,241,0.25)',
+                            opacity: isGenerating ? 0.7 : 1,
+                          }}
+                          onMouseEnter={e => { if (!isGenerating) { e.currentTarget.style.background = 'rgba(99,102,241,0.18)' } }}
+                          onMouseLeave={e => { e.currentTarget.style.background = isGenerating ? 'rgba(99,102,241,0.06)' : 'rgba(99,102,241,0.1)' }}
+                          title="Generar link de onboarding"
+                        >
+                          {isGenerating
+                            ? <RefreshCw className="w-3 h-3 animate-spin" />
+                            : <Link2 className="w-3 h-3" />
+                          }
+                          {isGenerating ? 'Generando…' : 'Link Onboarding'}
+                        </button>
+                        {/* Agregar correo */}
+                        <button
+                          onClick={() => openNew('empresas')}
+                          className="p-1.5 rounded hover:bg-brand-50 text-gray-400 hover:text-brand-500 transition-colors"
+                          title="Agregar correo a esta empresa"
+                        >
+                          <PlusCircle className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 )
@@ -314,6 +358,162 @@ export default function EmailDirectory() {
             <p className="text-xs mt-1">Las empresas se crean automáticamente al sincronizar el Excel</p>
           </div>
         )}
+      </div>
+
+      {/* Modal invite link */}
+      {inviteModal && (
+        <InviteModal
+          link={inviteModal.link}
+          expiresAt={inviteModal.expires_at}
+          empresa={inviteModal.empresa}
+          onClose={() => setInviteModal(null)}
+        />
+      )}
+    </div>
+  )
+}
+
+
+// ─── Invite Link Modal ────────────────────────────────────
+
+function InviteModal({ link, expiresAt, empresa, onClose }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = () => {
+    if (!link) return
+    navigator.clipboard.writeText(link).catch(() => {
+      const el = document.createElement('textarea')
+      el.value = link
+      document.body.appendChild(el)
+      el.select()
+      document.execCommand('copy')
+      document.body.removeChild(el)
+    })
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const expiresFormatted = expiresAt
+    ? new Date(expiresAt).toLocaleString('es-CO', {
+        day: '2-digit', month: 'long', year: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+      })
+    : null
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in"
+      onClick={onClose}
+    >
+      <div
+        className="relative rounded-2xl w-full max-w-md mx-4 overflow-hidden"
+        style={{
+          background: 'var(--bg-card-solid, #0f1117)',
+          border: '1px solid var(--border-primary, rgba(255,255,255,0.08))',
+          boxShadow: '0 32px 80px rgba(0,0,0,0.7)',
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Top accent line */}
+        <div style={{ height: 2, background: 'linear-gradient(90deg, transparent, #818CF8 40%, #6366F1 70%, transparent)' }} />
+
+        {/* Header */}
+        <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border-primary, rgba(255,255,255,0.08))' }}>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+              style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)' }}>
+              <Link2 className="w-4 h-4" style={{ color: '#818CF8' }} />
+            </div>
+            <div>
+              <p className="text-sm font-bold" style={{ color: 'var(--text-primary, #fff)' }}>
+                Link de Onboarding
+              </p>
+              <p className="text-[11px]" style={{ color: 'var(--text-muted, rgba(255,255,255,0.4))' }}>
+                {empresa}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg transition-colors"
+            style={{ color: 'var(--text-muted, rgba(255,255,255,0.4))' }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-4">
+          {/* Single-use warning */}
+          <div className="flex items-start gap-3 px-3.5 py-3 rounded-xl"
+            style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)' }}>
+            <ShieldAlert className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#FBB924' }} />
+            <div>
+              <p className="text-xs font-semibold" style={{ color: '#FBB924' }}>Solo puede usarse una vez</p>
+              <p className="text-[11px] mt-0.5" style={{ color: 'rgba(251,191,36,0.65)' }}>
+                El link expira al ser usado o pasado el tiempo límite. Genera uno nuevo si el anterior fue utilizado.
+              </p>
+            </div>
+          </div>
+
+          {/* Link field + copy */}
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5"
+              style={{ color: 'var(--text-muted, rgba(255,255,255,0.4))', letterSpacing: '0.1em' }}>
+              URL de invitación
+            </label>
+            <div className="flex gap-2">
+              <div className="flex-1 px-3 py-2.5 rounded-xl text-xs font-mono truncate"
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  color: 'var(--text-secondary, rgba(255,255,255,0.7))',
+                }}>
+                {link || 'Sin link generado'}
+              </div>
+              <button
+                onClick={handleCopy}
+                disabled={!link}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all flex-shrink-0"
+                style={copied ? {
+                  background: 'rgba(16,185,129,0.15)',
+                  border: '1px solid rgba(16,185,129,0.35)',
+                  color: '#10B981',
+                } : {
+                  background: 'rgba(99,102,241,0.12)',
+                  border: '1px solid rgba(99,102,241,0.3)',
+                  color: '#818CF8',
+                }}
+              >
+                {copied ? <><Check className="w-3.5 h-3.5" /> Copiado ✓</> : <><Copy className="w-3.5 h-3.5" /> Copiar</>}
+              </button>
+            </div>
+          </div>
+
+          {/* Expiration */}
+          {expiresFormatted && (
+            <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-muted, rgba(255,255,255,0.4))' }}>
+              <CalendarClock className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>Válido hasta: <span style={{ color: 'var(--text-tertiary, rgba(255,255,255,0.6))' }}>{expiresFormatted}</span></span>
+            </div>
+          )}
+
+          {/* Close */}
+          <button
+            onClick={onClose}
+            className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all"
+            style={{
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: 'var(--text-secondary, rgba(255,255,255,0.7))',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
+          >
+            Cerrar
+          </button>
+        </div>
       </div>
     </div>
   )

@@ -217,6 +217,11 @@ export function getTenantTheme(companyIdOrMe) {
   return apiFetch(`/tenants/${companyIdOrMe}/theme`)
 }
 
+// Invitación de onboarding (genera link de un solo uso)
+export function generateTenantInvite(companyId) {
+  return apiFetch(`/tenants/${companyId}/invite`, { method: 'POST' })
+}
+
 // Onboarding wizard
 export function getOnboardingProgress(companyId) {
   return apiFetch(`/tenants/${companyId}/onboarding`)
