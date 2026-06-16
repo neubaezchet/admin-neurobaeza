@@ -30,8 +30,8 @@ export default function Login({ onLogin }) {
           minWidth: 200,
           scale: 1.0,
           scaleMobile: 1.0,
-          color: 0x3B82F6,
-          backgroundColor: 0x080D12,
+          color: 0x0EA5E9,
+          backgroundColor: 0x050507,
           points: 12.0,
           maxDistance: 22.0,
           spacing: 18.0,
@@ -87,7 +87,7 @@ export default function Login({ onLogin }) {
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59,130,246,0.08) 0%, transparent 70%)',
+          background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(14,165,233,0.08) 0%, transparent 70%)',
         }}
       />
 
@@ -100,7 +100,7 @@ export default function Login({ onLogin }) {
         <div
           className="absolute inset-0 rounded-3xl pointer-events-none"
           style={{
-            background: 'radial-gradient(ellipse at center, rgba(59,130,246,0.12) 0%, transparent 70%)',
+            background: 'radial-gradient(ellipse at center, rgba(14,165,233,0.12) 0%, transparent 70%)',
             transform: 'scale(1.2)',
             filter: 'blur(20px)',
           }}
@@ -112,15 +112,15 @@ export default function Login({ onLogin }) {
             background: 'rgba(14, 20, 30, 0.85)',
             backdropFilter: 'blur(32px)',
             WebkitBackdropFilter: 'blur(32px)',
-            border: '1px solid rgba(59, 130, 246, 0.18)',
-            boxShadow: '0 32px 80px rgba(0,0,0,0.7), 0 0 40px rgba(59,130,246,0.08), inset 0 1px 0 rgba(255,255,255,0.05)',
+            border: '1px solid rgba(14, 165, 233, 0.18)',
+            boxShadow: '0 32px 80px rgba(0,0,0,0.7), 0 0 40px rgba(14,165,233,0.08), inset 0 1px 0 rgba(255,255,255,0.05)',
           }}
         >
           {/* Top gradient strip */}
           <div
             style={{
               height: '2px',
-              background: 'linear-gradient(90deg, transparent, #3B82F6 40%, #818CF8 70%, transparent)',
+              background: 'linear-gradient(90deg, transparent, #0EA5E9 40%, #38BDF8 70%, transparent)',
             }}
           />
 
@@ -131,8 +131,8 @@ export default function Login({ onLogin }) {
               <div
                 className="relative w-16 h-16 rounded-2xl flex items-center justify-center"
                 style={{
-                  background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 50%, #1D4ED8 100%)',
-                  boxShadow: '0 8px 32px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
+                  background: 'linear-gradient(135deg, #0EA5E9 0%, #0284C7 50%, #0369A1 100%)',
+                  boxShadow: '0 8px 32px rgba(14,165,233,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
                 }}
               >
                 <ShieldCheck className="w-8 h-8 text-white" strokeWidth={1.75} />

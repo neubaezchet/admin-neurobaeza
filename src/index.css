@@ -3,47 +3,48 @@
 @tailwind utilities;
 
 /* ═══════════════════════════════════════════════════════════════
-   GOOGLE FONTS — Inter + DM Sans (Enterprise Grade)
+   GOOGLE FONTS — Plus Jakarta Sans + Outfit + JetBrains Mono
+   (Neurobaeza Obsidian 2026)
    ═══════════════════════════════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 /* ═══════════════════════════════════════════════════════════════
-   ENTERPRISE DARK THEME — "Midnight Slate" 2026
-   Paleta corporativa: Navy profundo + Azul eléctrico + Dorado
+   NEUROBAEZA — "Obsidian 2026"
+   Obsidiana profunda + Zafiro + Champaña
    ═══════════════════════════════════════════════════════════════ */
 :root {
-  /* ── Backgrounds ── */
-  --bg-primary:        #0D1117;
-  --bg-secondary:      #0A0F14;
-  --bg-card:           rgba(16, 22, 30, 0.92);
-  --bg-card-solid:     #10161E;
-  --bg-card-elevated:  #141C26;
+  /* ── Backgrounds — Obsidian scale ── */
+  --bg-primary:        #0B0B10;
+  --bg-secondary:      #050507;
+  --bg-card:           rgba(11, 11, 16, 0.92);
+  --bg-card-solid:     #12121A;
+  --bg-card-elevated:  #1A1A24;
   --bg-input:          rgba(255, 255, 255, 0.05);
   --bg-input-focus:    rgba(255, 255, 255, 0.08);
-  --bg-hover:          rgba(59, 130, 246, 0.06);
-  --bg-sidebar:        #080D12;
+  --bg-hover:          rgba(14, 165, 233, 0.06);
+  --bg-sidebar:        #050507;
 
   /* ── Text ── */
-  --text-primary:      #F0F4F8;
+  --text-primary:      #F4F6FB;
   --text-secondary:    #A8B2BE;
   --text-tertiary:     #6B7A8D;
   --text-muted:        #4A5568;
 
   /* ── Borders ── */
-  --border-primary:    rgba(255, 255, 255, 0.06);
-  --border-focus:      #3B82F6;
+  --border-primary:    rgba(255, 255, 255, 0.08);
+  --border-focus:      #0EA5E9;
   --border-input:      rgba(255, 255, 255, 0.08);
-  --border-accent:     rgba(59, 130, 246, 0.3);
+  --border-accent:     rgba(14, 165, 233, 0.3);
 
-  /* ── Brand: Electric Blue (Principal) ── */
-  --accent-primary:        #3B82F6;
-  --accent-primary-hover:  #2563EB;
-  --accent-primary-dark:   #1D4ED8;
-  --accent-primary-soft:   rgba(59, 130, 246, 0.12);
+  /* ── Brand: Sapphire (Principal) ── */
+  --accent-primary:        #0EA5E9;
+  --accent-primary-hover:  #0284C7;
+  --accent-primary-dark:   #0369A1;
+  --accent-primary-soft:   rgba(14, 165, 233, 0.12);
   --accent-primary-text:   #FFFFFF;
-  --accent-glow:           rgba(59, 130, 246, 0.25);
+  --accent-glow:           rgba(14, 165, 233, 0.35);
 
-  /* ── Brand: Gold (Secundario) ── */
+  /* ── Brand: Champagne (Secundario) ── */
   --accent-gold:       #F59E0B;
   --accent-gold-soft:  rgba(245, 158, 11, 0.12);
   --accent-gold-hover: #D97706;
@@ -59,22 +60,22 @@
   --error-soft:   rgba(239, 68, 68, 0.10);
   --warning:      #F59E0B;
   --warning-soft: rgba(245, 158, 11, 0.10);
-  --info:         #6366F1;
-  --info-soft:    rgba(99, 102, 241, 0.10);
+  --info:         #3B82F6;
+  --info-soft:    rgba(59, 130, 246, 0.10);
 
-  /* ── Shadows ── */
-  --shadow-sm:    0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow-md:    0 4px 12px rgba(0, 0, 0, 0.5);
-  --shadow-lg:    0 8px 32px rgba(0, 0, 0, 0.6);
+  /* ── Shadows — Glass elevation system ── */
+  --shadow-sm:    0 4px 20px rgba(0, 0, 0, 0.3);
+  --shadow-md:    0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-lg:    0 16px 48px rgba(0, 0, 0, 0.5);
   --shadow-xl:    0 20px 60px rgba(0, 0, 0, 0.7);
-  --shadow-glow:  0 0 24px rgba(59, 130, 246, 0.2);
-  --glass-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-glow:  0 0 24px rgba(14, 165, 233, 0.35);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 
-  /* ── Vanta: Dark nebula azul-espacial ── */
-  --nebula-highlight: 0x3B82F6;
-  --nebula-midtone:   0x0D1117;
-  --nebula-lowlight:  0x1E3A5F;
-  --nebula-base:      0x080D12;
+  /* ── Vanta: Obsidiana + zafiro ── */
+  --nebula-highlight: 0x0EA5E9;
+  --nebula-midtone:   0x0B0B10;
+  --nebula-lowlight:  0x0C4A6E;
+  --nebula-base:      0x050507;
 }
 
 /* ═══ Base ═══ */
@@ -85,13 +86,19 @@
     box-sizing: border-box;
   }
   body {
-    font-family: 'Inter', 'DM Sans', system-ui, -apple-system, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     color: var(--text-primary);
     background-color: var(--bg-secondary);
-    line-height: 1.5;
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  /* Display headings — Outfit, tight tracking */
+  h1, h2, h3, h4 {
+    font-family: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
+    letter-spacing: -0.02em;
   }
   ::selection {
-    background: rgba(59, 130, 246, 0.35);
+    background: rgba(14, 165, 233, 0.35);
     color: #fff;
   }
   input, select, textarea, button {
@@ -106,28 +113,37 @@
 
   /* ── Cards ── */
   .neo-card {
-    @apply rounded-2xl transition-all duration-300;
+    @apply rounded-[20px] transition-all duration-300;
     background: var(--bg-card-solid);
     border: 1px solid var(--border-primary);
     box-shadow: var(--shadow-sm);
   }
   .neo-card:hover {
-    border-color: rgba(59, 130, 246, 0.15);
+    border-color: rgba(14, 165, 233, 0.18);
     box-shadow: var(--shadow-md);
   }
   .neo-card-glass {
-    @apply rounded-2xl transition-all duration-300;
-    background: rgba(16, 22, 30, 0.75);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    @apply rounded-[20px] transition-all duration-300 relative;
+    background: rgba(11, 11, 16, 0.75);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: var(--glass-shadow);
+  }
+  /* Signature polished-glass top edge */
+  .neo-card-glass::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 24px; right: 24px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    pointer-events: none;
   }
 
   /* ── Buttons ── */
   .neo-btn {
-    @apply inline-flex items-center justify-center px-4 py-2.5 rounded-xl font-semibold text-sm
-           transition-all duration-200 active:scale-[0.97]
+    @apply inline-flex items-center justify-center px-4 py-2.5 rounded-2xl font-semibold text-sm
+           transition-all duration-200 active:scale-[0.98]
            disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none;
     letter-spacing: 0.01em;
   }
@@ -135,11 +151,11 @@
   .neo-btn-primary {
     @apply neo-btn text-white;
     background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-primary-hover) 100%);
-    box-shadow: 0 2px 12px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.15);
+    box-shadow: 0 0 24px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.15);
   }
   .neo-btn-primary:hover:not(:disabled) {
-    background: linear-gradient(135deg, #4F90F8 0%, var(--accent-primary) 100%);
-    box-shadow: 0 4px 20px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+    background: linear-gradient(135deg, #38BDF8 0%, var(--accent-primary) 100%);
+    box-shadow: 0 0 32px rgba(14,165,233,0.55), inset 0 1px 0 rgba(255,255,255,0.2);
     transform: translateY(-1px);
   }
 
@@ -187,7 +203,7 @@
 
   /* ── Inputs ── */
   .neo-input {
-    @apply w-full px-4 py-2.5 rounded-xl text-sm
+    @apply w-full px-4 py-2.5 rounded-2xl text-sm
            focus:outline-none transition-all duration-200;
     background: var(--bg-input);
     border: 1px solid var(--border-input);
@@ -258,7 +274,7 @@
 
   /* ── Nav Item ── */
   .nav-item {
-    @apply flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium
+    @apply flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-[13px] font-medium
            transition-all duration-200;
     color: var(--text-tertiary);
   }
@@ -295,7 +311,7 @@
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
 
 /* ═══════════════════════════════════════════════════════════════
-   ANIMATIONS — Premium Spring Physics
+   ANIMATIONS — Snappy ease-out (cubic-bezier 0.22, 1, 0.36, 1)
    ═══════════════════════════════════════════════════════════════ */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
@@ -310,7 +326,7 @@
   to   { opacity: 1; transform: scale(1); }
 }
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes shimmer {
@@ -318,19 +334,19 @@
   100% { background-position: 200% 0; }
 }
 @keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); }
-  50%       { box-shadow: 0 0 16px 4px rgba(59,130,246,0.2); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(14,165,233,0); }
+  50%       { box-shadow: 0 0 24px 6px rgba(14,165,233,0.25); }
 }
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50%       { transform: translateY(-4px); }
 }
 
-.animate-fade-in   { animation: fadeIn  0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
-.animate-slide-in  { animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
-.animate-scale-in  { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
-.animate-slide-up  { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
-.animate-pulse-glow { animation: pulseGlow 2.5s ease-in-out infinite; }
+.animate-fade-in   { animation: fadeIn  0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-slide-in  { animation: slideIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-scale-in  { animation: scaleIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-slide-up  { animation: slideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-pulse-glow { animation: pulseGlow 3s ease-in-out infinite; }
 .animate-float      { animation: float 3s ease-in-out infinite; }
 
 /* Stagger children */
@@ -344,7 +360,7 @@
    GRADIENT UTILITIES
    ═══════════════════════════════════════════════════════════════ */
 .gradient-text {
-  background: linear-gradient(135deg, #60A5FA, #3B82F6, #818CF8);
+  background: linear-gradient(135deg, #38BDF8, #0EA5E9, #7DD3FC);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -364,7 +380,7 @@
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(59,130,246,0.5), rgba(99,102,241,0.2));
+  background: linear-gradient(135deg, rgba(14,165,233,0.5), rgba(14,165,233,0.2));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -379,6 +395,6 @@
     rgba(255,255,255,0.04) 75%
   );
   background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+  animation: shimmer 2.5s infinite;
   border-radius: 8px;
 }

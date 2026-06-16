@@ -49,7 +49,7 @@ export default function Layout({ user, children }) {
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: 'radial-gradient(ellipse 120% 60% at 50% -20%, rgba(59,130,246,0.06) 0%, transparent 60%)',
+            background: 'radial-gradient(ellipse 120% 60% at 50% -20%, rgba(14,165,233,0.06) 0%, transparent 60%)',
           }}
         />
 
@@ -62,8 +62,8 @@ export default function Layout({ user, children }) {
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
               style={{
-                background: 'linear-gradient(135deg, #3B82F6, #2563EB)',
-                boxShadow: '0 4px 12px rgba(59,130,246,0.35)',
+                background: 'linear-gradient(135deg, #0EA5E9, #0284C7)',
+                boxShadow: '0 4px 12px rgba(14,165,233,0.35)',
               }}
             >
               <ShieldCheck className="w-5 h-5 text-white" strokeWidth={1.75} />
@@ -80,9 +80,9 @@ export default function Layout({ user, children }) {
           {/* Badge tenant admin */}
           {isTenantAdmin && (
             <div className="flex items-center gap-1.5 mt-3 px-2 py-1 rounded-lg"
-              style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)' }}>
-              <Building2 className="w-3 h-3 flex-shrink-0" style={{ color: '#818CF8' }} />
-              <span className="text-[10px] font-semibold truncate" style={{ color: '#818CF8' }}>
+              style={{ background: 'rgba(14,165,233,0.1)', border: '1px solid rgba(14,165,233,0.2)' }}>
+              <Building2 className="w-3 h-3 flex-shrink-0" style={{ color: '#38BDF8' }} />
+              <span className="text-[10px] font-semibold truncate" style={{ color: '#38BDF8' }}>
                 {user?.nombre || user?.username}
               </span>
             </div>
@@ -104,9 +104,9 @@ export default function Layout({ user, children }) {
                  ${isActive ? 'active' : ''}`
               }
               style={({ isActive }) => ({
-                backgroundColor: isActive ? 'rgba(59,130,246,0.1)' : 'transparent',
-                color: isActive ? '#60A5FA' : 'var(--text-tertiary)',
-                border: isActive ? '1px solid rgba(59,130,246,0.25)' : '1px solid transparent',
+                backgroundColor: isActive ? 'rgba(14,165,233,0.1)' : 'transparent',
+                color: isActive ? '#38BDF8' : 'var(--text-tertiary)',
+                border: isActive ? '1px solid rgba(14,165,233,0.25)' : '1px solid transparent',
               })}
             >
               {({ isActive }) => (
@@ -114,7 +114,7 @@ export default function Layout({ user, children }) {
                   <div
                     className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
                     style={{
-                      background: isActive ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.04)',
+                      background: isActive ? 'rgba(14,165,233,0.15)' : 'rgba(255,255,255,0.04)',
                     }}
                   >
                     <Icon className="w-4 h-4" />
@@ -130,7 +130,7 @@ export default function Layout({ user, children }) {
                   {isActive && (
                     <div
                       className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r-full"
-                      style={{ background: '#3B82F6', boxShadow: '0 0 8px rgba(59,130,246,0.6)' }}
+                      style={{ background: '#0EA5E9', boxShadow: '0 0 8px rgba(14,165,233,0.6)' }}
                     />
                   )}
                 </>
@@ -152,9 +152,9 @@ export default function Layout({ user, children }) {
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0"
               style={{
-                background: 'linear-gradient(135deg, rgba(59,130,246,0.25), rgba(99,102,241,0.25))',
-                color: '#60A5FA',
-                border: '1px solid rgba(59,130,246,0.2)',
+                background: 'linear-gradient(135deg, rgba(14,165,233,0.25), rgba(14,165,233,0.25))',
+                color: '#38BDF8',
+                border: '1px solid rgba(14,165,233,0.2)',
               }}
             >
               {initials}

@@ -13,7 +13,7 @@ const BOTS_CATÁLOGO = {
     nombre: 'EPS SURA',
     categoria: 'EPS',
     medio: 'portal',
-    color: '#3B82F6',
+    color: '#0EA5E9',
     descripcion: 'Plataforma de radicación SURA',
     campos: [
       { key: 'usuario', label: 'Número de documento', tipo: 'text', placeholder: '900123456', requerido: true },
@@ -71,12 +71,12 @@ export default function BotConfiguration() {
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null)
   const [bots, setBots] = useState([])
   const [botsDisponibles, setBotsDisponibles] = useState([])
-  
+
   const [cargando, setCargando] = useState(false)
   const [modalAbierto, setModalAbierto] = useState(false)
   const [editando, setEditando] = useState(null)
   const [mostrando, setMostrando] = useState({})
-  
+
   const [formulario, setFormulario] = useState({
     bot_nombre: '',
     bot_tipo_medio: 'portal',
@@ -84,7 +84,7 @@ export default function BotConfiguration() {
     credenciales: {},
     observaciones: '',
   })
-  
+
   const [errores, setErrores] = useState({})
   const [mensaje, setMensaje] = useState(null)
 
@@ -126,7 +126,7 @@ export default function BotConfiguration() {
 
   const cargarBots = async () => {
     if (!empresaSeleccionada) return
-    
+
     setCargando(true)
     try {
       const data = await getBotsEmpresa(empresaSeleccionada)
@@ -254,22 +254,24 @@ export default function BotConfiguration() {
   )
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6">
+    <div className="min-h-screen p-8 animate-fade-in">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <Bot className="w-8 h-8 text-blue-600" />
-          <h1 className="text-3xl font-bold text-slate-900">Configuración de Bots</h1>
+          <div className="w-11 h-11 rounded-2026 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0EA5E9, #0284C7)', boxShadow: '0 0 24px rgba(14,165,233,0.35)' }}>
+            <Bot className="w-6 h-6 text-white" strokeWidth={1.75} />
+          </div>
+          <h1 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>🤖 Configuración de Bots</h1>
         </div>
-        <p className="text-slate-600">Asigna y gestiona bots de radicación por empresa</p>
+        <p style={{ color: 'var(--text-secondary)' }}>Asigna y gestiona bots de radicación por empresa</p>
       </div>
 
       {/* Mensaje */}
       {mensaje && (
-        <div className={`mb-6 p-4 rounded-lg flex items-center gap-3 ${
-          mensaje.tipo === 'success' ? 'bg-green-50 text-green-800 border border-green-200' :
-          mensaje.tipo === 'error' ? 'bg-red-50 text-red-800 border border-red-200' :
-          'bg-blue-50 text-blue-800 border border-blue-200'
+        <div className={`mb-6 p-4 rounded-2026 flex items-center gap-3 border ${
+          mensaje.tipo === 'success' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' :
+          mensaje.tipo === 'error' ? 'bg-red-500/15 text-red-400 border-red-500/30' :
+          'bg-sky-500/15 text-sky-400 border-sky-500/30'
         }`}>
           {mensaje.tipo === 'success' ? <Check className="w-5 h-5" /> :
            mensaje.tipo === 'error' ? <AlertCircle className="w-5 h-5" /> :
@@ -279,20 +281,19 @@ export default function BotConfiguration() {
       )}
 
       {/* Selector de empresa */}
-      <div className="mb-6">
-        <label className="block text-sm font-semibold text-slate-700 mb-3">Selecciona una empresa</label>
+      <div className="mb-6 max-w-md">
+        <label className="neo-label">Selecciona una empresa</label>
         <div className="relative">
           <select
             value={empresaSeleccionada || ''}
             onChange={(e) => setEmpresaSeleccionada(e.target.value)}
-            className="w-full px-4 py-3 border border-slate-300 rounded-lg bg-white text-slate-900 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="neo-select py-3"
           >
             <option value="">-- Selecciona una empresa --</option>
             {empresas.map(e => (
               <option key={e.id} value={e.nombre}>{e.nombre}</option>
             ))}
           </select>
-          <ChevronDown className="absolute right-4 top-3.5 w-5 h-5 text-slate-400 pointer-events-none" />
         </div>
       </div>
 
@@ -301,11 +302,11 @@ export default function BotConfiguration() {
         <div className="space-y-6">
           {/* Botón agregar */}
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold text-slate-900">Bots asignados: {bots.length}</h2>
+            <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Bots asignados: {bots.length}</h2>
             {botsNoAsignados.length > 0 && (
               <button
                 onClick={() => abrirModal()}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition"
+                className="neo-btn-primary gap-2"
               >
                 <Plus className="w-5 h-5" />
                 Asignar Bot
@@ -316,16 +317,16 @@ export default function BotConfiguration() {
           {/* Lista de bots */}
           {cargando ? (
             <div className="flex justify-center py-12">
-              <Loader className="w-8 h-8 text-blue-600 animate-spin" />
+              <Loader className="w-8 h-8 animate-spin" style={{ color: 'var(--accent-primary)' }} />
             </div>
           ) : bots.length === 0 ? (
-            <div className="bg-white rounded-lg p-8 text-center border border-slate-200">
-              <Bot className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-              <p className="text-slate-600 mb-4">No hay bots asignados a esta empresa</p>
+            <div className="neo-card-glass p-10 text-center">
+              <Bot className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
+              <p className="mb-5" style={{ color: 'var(--text-secondary)' }}>No hay bots asignados a esta empresa</p>
               {botsNoAsignados.length > 0 && (
                 <button
                   onClick={() => abrirModal()}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition"
+                  className="neo-btn-primary px-6"
                 >
                   Asignar primer bot
                 </button>
@@ -336,18 +337,18 @@ export default function BotConfiguration() {
               {bots.map(bot => {
                 const info = obtenerInfoBot(bot.bot_nombre)
                 return (
-                  <div key={bot.id} className="bg-white rounded-lg border border-slate-200 p-6 shadow-sm hover:shadow-md transition">
+                  <div key={bot.id} className="neo-card p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-4">
                         <div
-                          className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold"
-                          style={{ backgroundColor: info.color || '#6B7280' }}
+                          className="w-12 h-12 rounded-2026 flex items-center justify-center text-white font-bold"
+                          style={{ backgroundColor: info.color || '#6B7280', boxShadow: `0 0 20px ${info.color || '#6B7280'}40` }}
                         >
                           {info.nombre?.charAt(0)}
                         </div>
                         <div>
-                          <h3 className="text-lg font-bold text-slate-900">{info.nombre || bot.bot_nombre}</h3>
-                          <p className="text-sm text-slate-600">
+                          <h3 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{info.nombre || bot.bot_nombre}</h3>
+                          <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
                             {info.categoria} • {bot.bot_tipo_medio}
                           </p>
                         </div>
@@ -355,13 +356,14 @@ export default function BotConfiguration() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => abrirModal(bot)}
-                          className="p-2 hover:bg-slate-100 rounded-lg transition text-slate-600"
+                          className="p-2 rounded-2xl transition hover:bg-white/5"
+                          style={{ color: 'var(--text-secondary)' }}
                         >
                           <Pencil className="w-5 h-5" />
                         </button>
                         <button
                           onClick={() => eliminarBot(bot.bot_nombre)}
-                          className="p-2 hover:bg-red-100 rounded-lg transition text-red-600"
+                          className="p-2 rounded-2xl transition hover:bg-red-500/10 text-red-400"
                         >
                           <Trash2 className="w-5 h-5" />
                         </button>
@@ -370,11 +372,11 @@ export default function BotConfiguration() {
 
                     {/* Estado */}
                     <div className="mb-4">
-                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                        bot.estado === 'activo' ? 'bg-green-100 text-green-800' :
-                        bot.estado === 'configuracion' ? 'bg-yellow-100 text-yellow-800' :
-                        bot.estado === 'suspendido' ? 'bg-red-100 text-red-800' :
-                        'bg-slate-100 text-slate-800'
+                      <span className={`inline-block px-3 py-1 rounded-full text-[11px] font-semibold tracking-wide uppercase ${
+                        bot.estado === 'activo' ? 'bg-emerald-500/20 text-emerald-400' :
+                        bot.estado === 'configuracion' ? 'bg-amber-500/20 text-amber-400' :
+                        bot.estado === 'suspendido' ? 'bg-red-500/20 text-red-400' :
+                        'bg-white/10 text-slate-400'
                       }`}>
                         {bot.estado}
                       </span>
@@ -382,20 +384,20 @@ export default function BotConfiguration() {
 
                     {/* Credenciales guardadas */}
                     {bot.credenciales_guardadas && (
-                      <div className="text-sm text-green-700 flex items-center gap-2">
+                      <div className="text-sm text-emerald-400 flex items-center gap-2">
                         <Check className="w-4 h-4" />
                         Credenciales configuradas
                       </div>
                     )}
 
                     {bot.observaciones && (
-                      <p className="text-sm text-slate-600 mt-2">
+                      <p className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>
                         <span className="font-semibold">Notas:</span> {bot.observaciones}
                       </p>
                     )}
 
                     {bot.actualizado_en && (
-                      <p className="text-xs text-slate-500 mt-2">
+                      <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
                         Actualizado: {new Date(bot.actualizado_en).toLocaleDateString()}
                         {bot.actualizado_por && ` por ${bot.actualizado_por}`}
                       </p>
@@ -410,13 +412,13 @@ export default function BotConfiguration() {
 
       {/* Modal agregar/editar */}
       {modalAbierto && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-slate-900">
-                {editando ? 'Editar Bot' : 'Asignar Nuevo Bot'} - {empresaSeleccionada}
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="neo-card-glass max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-slide-up" style={{ borderRadius: '28px' }}>
+            <div className="sticky top-0 px-6 py-4 flex items-center justify-between z-10" style={{ background: 'rgba(11,11,16,0.85)', backdropFilter: 'blur(40px)', borderBottom: '1px solid var(--border-primary)' }}>
+              <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                {editando ? '✏️ Editar Bot' : '➕ Asignar Nuevo Bot'} — {empresaSeleccionada}
               </h2>
-              <button onClick={cerrarModal} className="p-2 hover:bg-slate-100 rounded-lg">
+              <button onClick={cerrarModal} className="p-2 rounded-2xl hover:bg-white/5 transition" style={{ color: 'var(--text-secondary)' }}>
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -425,7 +427,7 @@ export default function BotConfiguration() {
               {/* Seleccionar bot */}
               {!editando && (
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Bot</label>
+                  <label className="neo-label">Bot</label>
                   <select
                     value={formulario.bot_nombre}
                     onChange={(e) => {
@@ -439,7 +441,7 @@ export default function BotConfiguration() {
                       }))
                       setErrores({})
                     }}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg"
+                    className="neo-select"
                   >
                     <option value="">-- Selecciona un bot --</option>
                     {botsNoAsignados.map(bot => (
@@ -448,26 +450,26 @@ export default function BotConfiguration() {
                       </option>
                     ))}
                   </select>
-                  {errores.bot_nombre && <p className="text-red-600 text-sm mt-1">{errores.bot_nombre}</p>}
+                  {errores.bot_nombre && <p className="text-red-400 text-sm mt-1">{errores.bot_nombre}</p>}
                 </div>
               )}
 
               {/* Mostrar campos de credenciales según el bot seleccionado */}
               {formulario.bot_nombre && (
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-3">Credenciales</label>
-                  <div className="space-y-4 bg-slate-50 p-4 rounded-lg">
+                  <label className="neo-label">Credenciales</label>
+                  <div className="space-y-4 p-4 rounded-2026" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-primary)' }}>
                     {obtenerCampos(formulario.bot_nombre).map(campo => (
                       <div key={campo.key}>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                        <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                           {campo.label}
-                          {campo.requerido && <span className="text-red-600">*</span>}
+                          {campo.requerido && <span className="text-red-400">*</span>}
                         </label>
                         {campo.tipo === 'select' ? (
                           <select
                             value={formulario.credenciales[campo.key] || ''}
                             onChange={(e) => actualizarCredencial(campo.key, e.target.value)}
-                            className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                            className="neo-select"
                           >
                             <option value="">-- Selecciona --</option>
                             {campo.opciones.map(opt => (
@@ -480,23 +482,23 @@ export default function BotConfiguration() {
                             placeholder={campo.placeholder}
                             value={formulario.credenciales[campo.key] || ''}
                             onChange={(e) => actualizarCredencial(campo.key, e.target.value)}
-                            className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                            className="neo-input"
                           />
                         )}
                       </div>
                     ))}
                   </div>
-                  {errores.credenciales && <p className="text-red-600 text-sm mt-1">{errores.credenciales}</p>}
+                  {errores.credenciales && <p className="text-red-400 text-sm mt-1">{errores.credenciales}</p>}
                 </div>
               )}
 
               {/* Estado */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Estado</label>
+                <label className="neo-label">Estado</label>
                 <select
                   value={formulario.estado}
                   onChange={(e) => setFormulario(prev => ({ ...prev, estado: e.target.value }))}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg"
+                  className="neo-select"
                 >
                   <option value="configuracion">En configuración</option>
                   <option value="activo">Activo</option>
@@ -507,29 +509,29 @@ export default function BotConfiguration() {
 
               {/* Observaciones */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Observaciones (opcional)</label>
+                <label className="neo-label">Observaciones (opcional)</label>
                 <textarea
                   value={formulario.observaciones}
                   onChange={(e) => setFormulario(prev => ({ ...prev, observaciones: e.target.value }))}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg"
+                  className="neo-input"
                   rows={3}
                   placeholder="Notas sobre esta configuración..."
                 />
               </div>
 
               {/* Botones */}
-              <div className="flex gap-3 justify-end pt-4 border-t border-slate-200">
+              <div className="flex gap-3 justify-end pt-4" style={{ borderTop: '1px solid var(--border-primary)' }}>
                 <button
                   onClick={cerrarModal}
                   disabled={cargando}
-                  className="px-6 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50"
+                  className="neo-btn-outline px-6"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={guardarBot}
                   disabled={cargando}
-                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg disabled:opacity-50 flex items-center gap-2"
+                  className="neo-btn-primary px-6 gap-2"
                 >
                   {cargando && <Loader className="w-4 h-4 animate-spin" />}
                   {editando ? 'Actualizar' : 'Guardar'}
