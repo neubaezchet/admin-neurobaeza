@@ -9,6 +9,7 @@ import { getEmpresas, getBotsDisponibles, getBotsEmpresa, createBotEmpresa, upda
 // CATÁLOGO DE BOTS CONOCIDOS - Con campos específicos
 // ─────────────────────────────────────────────────────────────
 const BOTS_CATÁLOGO = {
+  // ── EPS ──────────────────────────────────────────────────────
   sura_eps: {
     nombre: 'EPS SURA',
     categoria: 'EPS',
@@ -19,6 +20,28 @@ const BOTS_CATÁLOGO = {
       { key: 'usuario', label: 'Número de documento', tipo: 'text', placeholder: '900123456', requerido: true },
       { key: 'tipo_doc', label: 'Tipo de documento', tipo: 'select', opciones: ['NIT', 'CEDULA', 'PASAPORTE'], requerido: true },
       { key: 'clave', label: 'Clave del portal', tipo: 'password', placeholder: '••••••', requerido: true },
+    ],
+  },
+  sanitas: {
+    nombre: 'Sanitas (Keralty)',
+    categoria: 'EPS',
+    medio: 'portal',
+    color: '#3B82F6',
+    descripcion: 'Portal EPS Sanitas',
+    campos: [
+      { key: 'usuario', label: 'Usuario', tipo: 'text', requerido: true },
+      { key: 'clave', label: 'Contraseña', tipo: 'password', requerido: true },
+    ],
+  },
+  salud_total: {
+    nombre: 'Salud Total',
+    categoria: 'EPS',
+    medio: 'portal',
+    color: '#6366F1',
+    descripcion: 'Portal Salud Total',
+    campos: [
+      { key: 'usuario', label: 'Usuario', tipo: 'text', requerido: true },
+      { key: 'clave', label: 'Contraseña', tipo: 'password', requerido: true },
     ],
   },
   famisanar: {
@@ -42,6 +65,17 @@ const BOTS_CATÁLOGO = {
       { key: 'clave', label: 'Contraseña', tipo: 'password', requerido: true },
     ],
   },
+  colsanitas: {
+    nombre: 'Colsanitas',
+    categoria: 'EPS',
+    medio: 'portal',
+    color: '#EC4899',
+    descripcion: 'Portal Colsanitas',
+    campos: [
+      { key: 'usuario', label: 'Usuario', tipo: 'text', requerido: true },
+      { key: 'clave', label: 'Contraseña', tipo: 'password', requerido: true },
+    ],
+  },
   nueva_eps: {
     nombre: 'Nueva EPS',
     categoria: 'EPS',
@@ -53,14 +87,160 @@ const BOTS_CATÁLOGO = {
       { key: 'clave', label: 'Contraseña', tipo: 'password', requerido: true },
     ],
   },
+  medimas: {
+    nombre: 'Medimás',
+    categoria: 'EPS',
+    medio: 'portal',
+    color: '#14B8A6',
+    descripcion: 'Portal Medimás EPS',
+    campos: [
+      { key: 'usuario', label: 'Usuario', tipo: 'text', requerido: true },
+      { key: 'clave', label: 'Contraseña', tipo: 'password', requerido: true },
+    ],
+  },
+  coosalud: {
+    nombre: 'Coosalud',
+    categoria: 'EPS',
+    medio: 'email',
+    color: '#F97316',
+    descripcion: 'Radicación por email a Coosalud',
+    campos: [
+      { key: 'correo_destino', label: 'Correo destino', tipo: 'email', placeholder: 'radicaciones@coosalud.com', requerido: true },
+    ],
+  },
+  aliansalud: {
+    nombre: 'Aliansalud',
+    categoria: 'EPS',
+    medio: 'email',
+    color: '#84CC16',
+    descripcion: 'Radicación por email a Aliansalud',
+    campos: [
+      { key: 'correo_destino', label: 'Correo destino', tipo: 'email', placeholder: 'incapacidades@aliansalud.com.co', requerido: true },
+    ],
+  },
+  cruz_blanca: {
+    nombre: 'Cruz Blanca / Emssanar',
+    categoria: 'EPS',
+    medio: 'email',
+    color: '#EF4444',
+    descripcion: 'Radicación por email',
+    campos: [
+      { key: 'correo_destino', label: 'Correo destino', tipo: 'email', placeholder: 'radicacion@cruzblanca.com.co', requerido: true },
+    ],
+  },
+  mutual_ser: {
+    nombre: 'Mutual Ser',
+    categoria: 'EPS',
+    medio: 'email',
+    color: '#A855F7',
+    descripcion: 'Radicación por email a Mutual Ser',
+    campos: [
+      { key: 'correo_destino', label: 'Correo destino', tipo: 'email', placeholder: 'incapacidades@mutualser.com.co', requerido: true },
+    ],
+  },
+  cafe_salud: {
+    nombre: 'Café Salud',
+    categoria: 'EPS',
+    medio: 'email',
+    color: '#92400E',
+    descripcion: 'Radicación por email a Café Salud',
+    campos: [
+      { key: 'correo_destino', label: 'Correo destino', tipo: 'email', placeholder: 'incapacidades@cafesalud.com.co', requerido: true },
+    ],
+  },
+  coomeva: {
+    nombre: 'Coomeva EPS',
+    categoria: 'EPS',
+    medio: 'portal',
+    color: '#059669',
+    descripcion: 'Portal Coomeva EPS',
+    campos: [
+      { key: 'usuario', label: 'Usuario', tipo: 'text', requerido: true },
+      { key: 'clave', label: 'Contraseña', tipo: 'password', requerido: true },
+    ],
+  },
+  // ── ARL ──────────────────────────────────────────────────────
   arl_sura: {
     nombre: 'ARL SURA',
     categoria: 'ARL',
     medio: 'portal',
     color: '#06B6D4',
-    descripcion: 'ARL - Sura',
+    descripcion: 'ARL SURA — Portal radicación',
     campos: [
       { key: 'usuario', label: 'Usuario portal', tipo: 'text', requerido: true },
+      { key: 'clave', label: 'Contraseña', tipo: 'password', requerido: true },
+    ],
+  },
+  positiva: {
+    nombre: 'Positiva ARL',
+    categoria: 'ARL',
+    medio: 'portal',
+    color: '#0EA5E9',
+    descripcion: 'Portal Positiva Compañía de Seguros',
+    campos: [
+      { key: 'usuario', label: 'Usuario', tipo: 'text', requerido: true },
+      { key: 'clave', label: 'Contraseña', tipo: 'password', requerido: true },
+    ],
+  },
+  colmena: {
+    nombre: 'Colmena Seguros ARL',
+    categoria: 'ARL',
+    medio: 'portal',
+    color: '#F59E0B',
+    descripcion: 'Portal Colmena Seguros',
+    campos: [
+      { key: 'usuario', label: 'Usuario', tipo: 'text', requerido: true },
+      { key: 'clave', label: 'Contraseña', tipo: 'password', requerido: true },
+    ],
+  },
+  liberty: {
+    nombre: 'Liberty Seguros ARL',
+    categoria: 'ARL',
+    medio: 'email',
+    color: '#10B981',
+    descripcion: 'Radicación por email Liberty',
+    campos: [
+      { key: 'correo_destino', label: 'Correo destino', tipo: 'email', placeholder: 'arl@libertyseguros.com.co', requerido: true },
+    ],
+  },
+  bolivar: {
+    nombre: 'Seguros Bolívar ARL',
+    categoria: 'ARL',
+    medio: 'email',
+    color: '#EF4444',
+    descripcion: 'Radicación por email Bolívar',
+    campos: [
+      { key: 'correo_destino', label: 'Correo destino', tipo: 'email', placeholder: 'arl@segurosbolivar.com', requerido: true },
+    ],
+  },
+  mapfre: {
+    nombre: 'Mapfre ARL',
+    categoria: 'ARL',
+    medio: 'email',
+    color: '#DC2626',
+    descripcion: 'Radicación por email Mapfre',
+    campos: [
+      { key: 'correo_destino', label: 'Correo destino', tipo: 'email', placeholder: 'arl@mapfre.com.co', requerido: true },
+    ],
+  },
+  equidad: {
+    nombre: 'La Equidad Seguros ARL',
+    categoria: 'ARL',
+    medio: 'email',
+    color: '#7C3AED',
+    descripcion: 'Radicación por email La Equidad',
+    campos: [
+      { key: 'correo_destino', label: 'Correo destino', tipo: 'email', placeholder: 'arl@laequidad.com.co', requerido: true },
+    ],
+  },
+  axa_colpatria: {
+    nombre: 'AXA Colpatria ARL',
+    categoria: 'ARL',
+    medio: 'portal',
+    color: '#1D4ED8',
+    descripcion: 'Portal AXA Colpatria',
+    campos: [
+      { key: 'usuario', label: 'Usuario', tipo: 'text', requerido: true },
       { key: 'clave', label: 'Contraseña', tipo: 'password', requerido: true },
     ],
   },

@@ -6,7 +6,6 @@ import Login from './pages/Login'
 import EmailDirectory from './pages/EmailDirectory'
 import UsersPermissions from './pages/UsersPermissions'
 import SystemConsole from './pages/SystemConsole'
-import ConnectionDirectory from './pages/ConnectionDirectory'
 import BotConfiguration from './pages/BotConfiguration'
 import TenantOnboarding from './pages/TenantOnboarding'
 import TenantWelcome from './pages/TenantWelcome'
@@ -50,8 +49,7 @@ export default function App() {
           <ProtectedRoute>
             <Layout user={user}>
               <Routes>
-                <Route path="/" element={<Navigate to="/conexiones" replace />} />
-                <Route path="/conexiones" element={<ConnectionDirectory />} />
+                <Route path="/" element={<Navigate to="/bots" replace />} />
                 <Route path="/bots" element={<BotConfiguration />} />
                 <Route path="/correos"    element={<EmailDirectory />} />
                 <Route path="/usuarios"   element={<UsersPermissions />} />
