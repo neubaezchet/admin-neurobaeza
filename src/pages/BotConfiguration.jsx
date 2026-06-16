@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import {
-  Bot, Plus, Check, AlertCircle, Info, Globe, Mail,
-  ChevronDown, Eye, EyeOff, Save, Lock, Building2, Layers, X, Trash2, Loader
+  Bot, Check, AlertCircle, Globe, Mail,
+  ChevronDown, Eye, EyeOff, Save, Lock, Building2, Layers, Loader
 } from 'lucide-react'
-import { getEmpresas, getBotsDisponibles, getBotsEmpresa, createBotEmpresa, updateBotEmpresa, deleteBotEmpresa } from '../api'
+import { getEmpresas, getBotsEmpresa, createBotEmpresa, updateBotEmpresa } from '../api'
 
 // ─────────────────────────────────────────────────────────────
 // CATÁLOGO COMPLETO DE EPS / ARL
@@ -58,8 +58,8 @@ const CATALOGO = {
     logo: null,
     descripcion: 'Portal Colsanitas',
     campos: [
-      { key: 'usuario', label: 'Usuario',    tipo: 'text',     requerido: true },
-      { key: 'clave',   label: 'Contraseña', tipo: 'password', requerido: true },
+      { key: 'usuario', label: 'Usuario',    tipo: 'text',     placeholder: 'usuario',   requerido: true },
+      { key: 'clave',   label: 'Contraseña', tipo: 'password', placeholder: '••••••••', requerido: true },
     ],
   },
   nueva_eps: {
@@ -76,8 +76,8 @@ const CATALOGO = {
     logo: null,
     descripcion: 'Portal Medimás EPS',
     campos: [
-      { key: 'usuario', label: 'Usuario',    tipo: 'text',     requerido: true },
-      { key: 'clave',   label: 'Contraseña', tipo: 'password', requerido: true },
+      { key: 'usuario', label: 'Usuario',    tipo: 'text',     placeholder: 'usuario',   requerido: true },
+      { key: 'clave',   label: 'Contraseña', tipo: 'password', placeholder: '••••••••', requerido: true },
     ],
   },
   coosalud: {
@@ -125,8 +125,8 @@ const CATALOGO = {
     logo: null,
     descripcion: 'Portal Coomeva EPS',
     campos: [
-      { key: 'usuario', label: 'Usuario',    tipo: 'text',     requerido: true },
-      { key: 'clave',   label: 'Contraseña', tipo: 'password', requerido: true },
+      { key: 'usuario', label: 'Usuario',    tipo: 'text',     placeholder: 'usuario',   requerido: true },
+      { key: 'clave',   label: 'Contraseña', tipo: 'password', placeholder: '••••••••', requerido: true },
     ],
   },
   // ── ARL ──────────────────────────────────────────────────────
@@ -153,8 +153,8 @@ const CATALOGO = {
     logo: null,
     descripcion: 'Portal Colmena Seguros',
     campos: [
-      { key: 'usuario', label: 'Usuario',    tipo: 'text',     requerido: true },
-      { key: 'clave',   label: 'Contraseña', tipo: 'password', requerido: true },
+      { key: 'usuario', label: 'Usuario',    tipo: 'text',     placeholder: 'usuario',   requerido: true },
+      { key: 'clave',   label: 'Contraseña', tipo: 'password', placeholder: '••••••••', requerido: true },
     ],
   },
   liberty: {
@@ -194,20 +194,20 @@ const CATALOGO = {
     logo: null,
     descripcion: 'Portal AXA Colpatria',
     campos: [
-      { key: 'usuario', label: 'Usuario',    tipo: 'text',     requerido: true },
-      { key: 'clave',   label: 'Contraseña', tipo: 'password', requerido: true },
+      { key: 'usuario', label: 'Usuario',    tipo: 'text',     placeholder: 'usuario',   requerido: true },
+      { key: 'clave',   label: 'Contraseña', tipo: 'password', placeholder: '••••••••', requerido: true },
     ],
   },
 }
 
 const ESTADOS = {
-  activo:        { label: 'Activo',           cls: 'activo',     dot: '#10B981' },
-  configuracion: { label: 'En configuración', cls: 'config',     dot: '#F59E0B' },
-  inactivo:      { label: 'Inactivo',         cls: 'inactivo',   dot: '#4A5568' },
-  suspendido:    { label: 'Suspendido',       cls: 'suspendido', dot: '#EF4444' },
+  activo:          { label: 'Activo',           dot: '#10B981', bg: 'rgba(16,185,129,0.10)',  color: '#34D399' },
+  configuracion:   { label: 'En configuración', dot: '#F59E0B', bg: 'rgba(245,158,11,0.10)',  color: '#FBBF24' },
+  inactivo:        { label: 'Inactivo',         dot: '#4A5568', bg: 'rgba(255,255,255,0.06)', color: 'var(--text-tertiary)' },
+  suspendido:      { label: 'Suspendido',       dot: '#EF4444', bg: 'rgba(239,68,68,0.10)',   color: '#F87171' },
+  sin_configurar:  { label: 'Sin configurar',   dot: '#374151', bg: 'rgba(255,255,255,0.04)', color: 'var(--text-muted)' },
 }
 
-// Colores para empresas sin color definido
 const EMPRESA_COLORS = ['#0EA5E9','#10B981','#F59E0B','#8B5CF6','#06B6D4','#E11D48','#22C55E','#F97316']
 
 function shade(hex) {
@@ -218,7 +218,6 @@ function shade(hex) {
   return `rgb(${r},${g},${b})`
 }
 
-// ── Logo de EPS: imagen real o monograma ──
 function EpsLogo({ cat, dot }) {
   const [err, setErr] = useState(false)
   return (
@@ -243,31 +242,35 @@ function EpsLogo({ cat, dot }) {
           {cat.sigla}
         </div>
       )}
-      {dot && (
-        <span style={{
-          position: 'absolute', bottom: -1, right: -1,
-          width: 13, height: 13, borderRadius: '50%',
-          background: dot, border: '2.5px solid #12121A',
-        }} />
-      )}
+      <span style={{
+        position: 'absolute', bottom: -1, right: -1,
+        width: 13, height: 13, borderRadius: '50%',
+        background: dot, border: '2.5px solid #12121A',
+      }} />
     </div>
   )
 }
 
-// ── Fila accordion de EPS ──
-function EpsRow({ bot, open, onToggle, onSave, onDelete }) {
-  const cat = CATALOGO[bot.bot_nombre] || { nombre: bot.bot_nombre, sigla: bot.bot_nombre[0], color: '#6B7280', campos: [] }
-  const est = ESTADOS[bot.estado] || ESTADOS.inactivo
-  const [medio, setMedio] = useState(bot.bot_tipo_medio || cat.medio || 'portal')
-  const [cred, setCred] = useState({ ...(bot.credenciales || {}) })
+function EpsRow({ catKey, cat, apiBot, open, onToggle, onSave }) {
+  const estadoKey = apiBot?.estado || 'sin_configurar'
+  const est = ESTADOS[estadoKey] || ESTADOS.sin_configurar
+  const [medio, setMedio] = useState(apiBot?.bot_tipo_medio || cat.medio || 'portal')
+  const [cred, setCred] = useState({ ...(apiBot?.credenciales || {}) })
   const [show, setShow] = useState({})
   const [guardando, setGuardando] = useState(false)
+
+  // Sync when apiBot changes (company switch)
+  useEffect(() => {
+    setMedio(apiBot?.bot_tipo_medio || cat.medio || 'portal')
+    setCred({ ...(apiBot?.credenciales || {}) })
+    setShow({})
+  }, [apiBot, catKey])
 
   const campos = cat.campos || []
 
   const handleSave = async () => {
     setGuardando(true)
-    await onSave(bot.bot_nombre, { estado: bot.estado, credenciales: cred, bot_tipo_medio: medio })
+    await onSave(catKey, { estado: apiBot?.estado || 'configuracion', credenciales: cred, bot_tipo_medio: medio }, !!apiBot)
     setGuardando(false)
   }
 
@@ -278,14 +281,10 @@ function EpsRow({ bot, open, onToggle, onSave, onDelete }) {
       boxShadow: open ? '0 8px 28px rgba(0,0,0,0.4)' : 'none',
       transition: 'all .2s', overflow: 'hidden',
     }}>
-      {/* Fila principal clickeable */}
       <div
         onClick={onToggle}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 13,
-          padding: '10px 16px', cursor: 'pointer',
-        }}
-        onMouseEnter={e => { if (!open) e.currentTarget.style.background = '#0F1A24' }}
+        style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '10px 16px', cursor: 'pointer' }}
+        onMouseEnter={e => { if (!open) e.currentTarget.style.background = 'rgba(255,255,255,0.02)' }}
         onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
       >
         <EpsLogo cat={cat} dot={est.dot} />
@@ -317,11 +316,7 @@ function EpsRow({ bot, open, onToggle, onSave, onDelete }) {
         <span style={{
           display: 'inline-flex', alignItems: 'center', gap: 5,
           fontSize: 10.5, fontWeight: 700, padding: '4px 10px', borderRadius: 999, flexShrink: 0,
-          background: {
-            activo: 'rgba(16,185,129,0.10)', config: 'rgba(245,158,11,0.10)',
-            inactivo: 'rgba(255,255,255,0.06)', suspendido: 'rgba(239,68,68,0.10)',
-          }[est.cls],
-          color: { activo: '#34D399', config: '#FBBF24', inactivo: 'var(--text-tertiary)', suspendido: '#F87171' }[est.cls],
+          background: est.bg, color: est.color,
         }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: est.dot }} />
           {est.label}
@@ -334,10 +329,9 @@ function EpsRow({ bot, open, onToggle, onSave, onDelete }) {
         }} />
       </div>
 
-      {/* Cuerpo expandible */}
       {open && (
         <div style={{ padding: '0 18px 18px', borderTop: '1px solid var(--border-primary)' }}>
-          {/* Toggle de medio */}
+          {/* Toggle medio */}
           <div style={{ paddingTop: 18 }}>
             <label style={{ display: 'block', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: 7 }}>
               Medio de radicación
@@ -358,7 +352,7 @@ function EpsRow({ bot, open, onToggle, onSave, onDelete }) {
             </div>
           </div>
 
-          {/* Campos de credenciales */}
+          {/* Campos credenciales */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: campos.length === 1 ? '1fr' : '1fr 1fr',
@@ -407,27 +401,19 @@ function EpsRow({ bot, open, onToggle, onSave, onDelete }) {
             ))}
           </div>
 
-          {/* Footer de acciones */}
+          {/* Footer */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 18 }}>
             <span style={{ fontSize: 11.5, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 7 }}>
               <Lock size={13} /> Credenciales cifradas — solo visibles para administradores
             </span>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button
-                onClick={() => onDelete(bot.bot_nombre)}
-                style={{ padding: '9px 13px', borderRadius: 11, fontSize: 13, fontWeight: 600, color: '#F87171', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, transition: 'all .2s' }}
-              >
-                <Trash2 size={14} /> Quitar
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={guardando}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 17px', borderRadius: 11, fontSize: 13, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #0EA5E9, #0284C7)', boxShadow: '0 2px 12px rgba(14,165,233,0.35)', border: 'none', cursor: 'pointer', transition: 'all .2s', opacity: guardando ? 0.6 : 1 }}
-              >
-                {guardando ? <Loader size={15} className="animate-spin" /> : <Save size={15} />}
-                Guardar credenciales
-              </button>
-            </div>
+            <button
+              onClick={handleSave}
+              disabled={guardando}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 17px', borderRadius: 11, fontSize: 13, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #0EA5E9, #0284C7)', boxShadow: '0 2px 12px rgba(14,165,233,0.35)', border: 'none', cursor: 'pointer', transition: 'all .2s', opacity: guardando ? 0.6 : 1 }}
+            >
+              {guardando ? <Loader size={15} className="animate-spin" /> : <Save size={15} />}
+              Guardar credenciales
+            </button>
           </div>
         </div>
       )}
@@ -435,23 +421,19 @@ function EpsRow({ bot, open, onToggle, onSave, onDelete }) {
   )
 }
 
-// ── Componente principal ──
 export default function BotConfiguration() {
   const [empresas, setEmpresas] = useState([])
   const [selId, setSelId] = useState(null)
-  const [bots, setBots] = useState([])
-  const [botsDisponibles, setBotsDisponibles] = useState([])
+  const [apiBotsMap, setApiBotsMap] = useState({})
   const [cargando, setCargando] = useState(false)
   const [openBot, setOpenBot] = useState(null)
   const [toast, setToast] = useState(null)
-  const [modalAsignar, setModalAsignar] = useState(false)
-  const [botNuevo, setBotNuevo] = useState('')
 
-  useEffect(() => { cargarEmpresas(); cargarBotsDisponibles() }, [])
+  useEffect(() => { cargarEmpresas() }, [])
 
   useEffect(() => {
     if (selId) cargarBots()
-    else setBots([])
+    else setApiBotsMap({})
   }, [selId])
 
   const cargarEmpresas = async () => {
@@ -463,55 +445,31 @@ export default function BotConfiguration() {
     } catch (err) { showToast(`Error: ${err.message}`, 'error') }
   }
 
-  const cargarBotsDisponibles = async () => {
-    try {
-      const data = await getBotsDisponibles()
-      setBotsDisponibles(data.bots || [])
-    } catch {}
-  }
-
   const cargarBots = async () => {
     const emp = empresas.find(e => (e.id ?? e.nombre) === selId)
     if (!emp) return
     setCargando(true)
     try {
       const data = await getBotsEmpresa(emp.nombre)
-      setBots(data.bots || [])
+      const map = {}
+      for (const b of (data.bots || [])) map[b.bot_nombre] = b
+      setApiBotsMap(map)
     } catch (err) {
       showToast(`Error: ${err.message}`, 'error')
-      setBots([])
+      setApiBotsMap({})
     } finally { setCargando(false) }
   }
 
-  const handleSave = async (botNombre, payload) => {
+  const handleSave = async (botKey, payload, exists) => {
     const emp = empresas.find(e => (e.id ?? e.nombre) === selId)
     try {
-      await updateBotEmpresa(emp.nombre, botNombre, payload)
-      showToast(`Credenciales de ${CATALOGO[botNombre]?.nombre || botNombre} guardadas`)
+      if (exists) {
+        await updateBotEmpresa(emp.nombre, botKey, payload)
+      } else {
+        await createBotEmpresa(emp.nombre, { bot_nombre: botKey, ...payload })
+      }
+      showToast(`Credenciales de ${CATALOGO[botKey]?.nombre || botKey} guardadas`)
       setOpenBot(null)
-      cargarBots()
-    } catch (err) { showToast(`Error: ${err.message}`, 'error') }
-  }
-
-  const handleDelete = async (botNombre) => {
-    if (!window.confirm(`¿Quitar bot '${CATALOGO[botNombre]?.nombre || botNombre}'?`)) return
-    const emp = empresas.find(e => (e.id ?? e.nombre) === selId)
-    try {
-      await deleteBotEmpresa(emp.nombre, botNombre)
-      showToast(`Bot removido`)
-      cargarBots()
-    } catch (err) { showToast(`Error: ${err.message}`, 'error') }
-  }
-
-  const handleAsignar = async () => {
-    if (!botNuevo) return
-    const emp = empresas.find(e => (e.id ?? e.nombre) === selId)
-    const cat = CATALOGO[botNuevo] || {}
-    try {
-      await createBotEmpresa(emp.nombre, { bot_nombre: botNuevo, bot_tipo_medio: cat.medio || 'portal', estado: 'configuracion', credenciales: {}, observaciones: '' })
-      showToast(`${cat.nombre || botNuevo} asignado`)
-      setBotNuevo('')
-      setModalAsignar(false)
       cargarBots()
     } catch (err) { showToast(`Error: ${err.message}`, 'error') }
   }
@@ -522,9 +480,12 @@ export default function BotConfiguration() {
   }
 
   const empActual = empresas.find(e => (e.id ?? e.nombre) === selId)
-  const botsAsignados = bots.map(b => b.bot_nombre)
-  const botsNoAsignados = botsDisponibles.filter(b => !botsAsignados.includes(b.id))
-  const activos = bots.filter(b => b.estado === 'activo').length
+  const configurados = Object.keys(apiBotsMap).length
+  const activos = Object.values(apiBotsMap).filter(b => b.estado === 'activo').length
+
+  // Separate EPS and ARL entries from catalog for grouped display
+  const epsEntries = Object.entries(CATALOGO).filter(([, c]) => c.categoria === 'EPS')
+  const arlEntries = Object.entries(CATALOGO).filter(([, c]) => c.categoria === 'ARL')
 
   return (
     <div style={{ maxWidth: 1180, margin: '0 auto', padding: '32px 40px 64px' }}>
@@ -567,16 +528,18 @@ export default function BotConfiguration() {
                     {sigla}
                   </div>
                 </div>
-                <span style={{ fontSize: 11, fontWeight: 600, color: isSel ? 'var(--text-primary)' : 'var(--text-tertiary)', textAlign: 'center', lineHeight: 1.2, maxWidth: 76 }}>
-                  {e.nombre.split(' ')[0]}
-                </span>
+                <div style={{ textAlign: 'center' }}>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: isSel ? 'var(--text-primary)' : 'var(--text-tertiary)', display: 'block', lineHeight: 1.2 }}>
+                    {e.nombre.split(' ')[0]}
+                  </span>
+                </div>
               </button>
             )
           })}
         </div>
       </div>
 
-      {/* Profile header de empresa seleccionada */}
+      {/* Profile header empresa */}
       {empActual && (
         <div className="animate-fade-in" key={selId} style={{
           display: 'flex', alignItems: 'center', gap: 22, padding: '24px 26px', borderRadius: 20,
@@ -613,7 +576,7 @@ export default function BotConfiguration() {
           </div>
           <div style={{ display: 'flex', gap: 28 }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 28, fontWeight: 800, lineHeight: 1, color: 'var(--text-primary)' }}>{bots.length}</div>
+              <div style={{ fontSize: 28, fontWeight: 800, lineHeight: 1, color: 'var(--text-primary)' }}>{configurados}</div>
               <div style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', marginTop: 6 }}>Bots</div>
             </div>
             <div style={{ textAlign: 'center' }}>
@@ -627,92 +590,58 @@ export default function BotConfiguration() {
       {/* Lista de bots */}
       {empActual && (
         <>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '26px 2px 14px' }}>
-            <h4 style={{ fontSize: 15, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 9, color: 'var(--text-primary)' }}>
-              <Layers size={16} /> Bots de radicación
-              <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 9px', borderRadius: 999, background: 'rgba(14,165,233,0.15)', color: '#38BDF8' }}>
-                {bots.length}
-              </span>
-            </h4>
-            <button
-              onClick={() => setModalAsignar(true)}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 15px', borderRadius: 12, fontSize: 13, fontWeight: 600, color: '#fff', background: 'linear-gradient(135deg, #0EA5E9, #0284C7)', boxShadow: '0 2px 12px rgba(14,165,233,0.35)', border: 'none', cursor: 'pointer', transition: 'all .2s' }}
-            >
-              <Plus size={16} /> Asignar EPS / ARL
-            </button>
-          </div>
-
           {cargando ? (
-            <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
               <Loader size={32} className="animate-spin" style={{ color: 'var(--accent-primary)' }} />
             </div>
-          ) : bots.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '50px 20px', borderRadius: 18, border: '1px dashed var(--border-input)', background: 'rgba(255,255,255,0.015)' }}>
-              <div style={{ color: 'var(--text-muted)', display: 'flex', justifyContent: 'center', marginBottom: 10 }}><Bot size={40} /></div>
-              <p style={{ color: 'var(--text-tertiary)', fontSize: 14, marginBottom: 16 }}>Esta empresa aún no tiene bots asignados.</p>
-              <button
-                onClick={() => setModalAsignar(true)}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 15px', borderRadius: 12, fontSize: 13, fontWeight: 600, color: '#fff', background: 'linear-gradient(135deg, #0EA5E9, #0284C7)', boxShadow: '0 2px 12px rgba(14,165,233,0.35)', border: 'none', cursor: 'pointer' }}
-              >
-                <Plus size={16} /> Asignar primer bot
-              </button>
-            </div>
           ) : (
-            <div className="animate-fade-in" key={selId} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {bots.map(b => (
-                <EpsRow
-                  key={b.bot_nombre}
-                  bot={b}
-                  open={openBot === b.bot_nombre}
-                  onToggle={() => setOpenBot(openBot === b.bot_nombre ? null : b.bot_nombre)}
-                  onSave={handleSave}
-                  onDelete={handleDelete}
-                />
-              ))}
+            <div className="animate-fade-in" key={selId}>
+              {/* Sección EPS */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 9, margin: '26px 2px 14px', color: 'var(--text-primary)' }}>
+                <Layers size={16} />
+                <h4 style={{ fontSize: 15, fontWeight: 700 }}>EPS</h4>
+                <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 9px', borderRadius: 999, background: 'rgba(14,165,233,0.15)', color: '#38BDF8' }}>
+                  {epsEntries.length}
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {epsEntries.map(([key, cat]) => (
+                  <EpsRow
+                    key={key}
+                    catKey={key}
+                    cat={cat}
+                    apiBot={apiBotsMap[key] || null}
+                    open={openBot === key}
+                    onToggle={() => setOpenBot(openBot === key ? null : key)}
+                    onSave={handleSave}
+                  />
+                ))}
+              </div>
+
+              {/* Sección ARL */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 9, margin: '32px 2px 14px', color: 'var(--text-primary)' }}>
+                <Layers size={16} />
+                <h4 style={{ fontSize: 15, fontWeight: 700 }}>ARL</h4>
+                <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 9px', borderRadius: 999, background: 'rgba(14,165,233,0.15)', color: '#38BDF8' }}>
+                  {arlEntries.length}
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {arlEntries.map(([key, cat]) => (
+                  <EpsRow
+                    key={key}
+                    catKey={key}
+                    cat={cat}
+                    apiBot={apiBotsMap[key] || null}
+                    open={openBot === key}
+                    onToggle={() => setOpenBot(openBot === key ? null : key)}
+                    onSave={handleSave}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </>
-      )}
-
-      {/* Modal asignar bot */}
-      {modalAsignar && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, zIndex: 50 }}
-          className="animate-fade-in">
-          <div className="neo-card-glass animate-slide-up" style={{ borderRadius: 28, width: '100%', maxWidth: 480 }}>
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-primary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>
-                ➕ Asignar EPS / ARL — {empActual?.nombre}
-              </h2>
-              <button onClick={() => { setModalAsignar(false); setBotNuevo('') }} style={{ color: 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer', padding: 8, borderRadius: 10 }}>
-                <X size={20} />
-              </button>
-            </div>
-            <div style={{ padding: 24 }}>
-              <label className="neo-label">Selecciona EPS o ARL</label>
-              <select
-                value={botNuevo}
-                onChange={e => setBotNuevo(e.target.value)}
-                className="neo-select"
-                style={{ marginBottom: 20 }}
-              >
-                <option value="">— Selecciona —</option>
-                {Object.entries(CATALOGO)
-                  .filter(([key]) => !botsAsignados.includes(key))
-                  .map(([key, cat]) => (
-                    <option key={key} value={key}>{cat.nombre} · {cat.categoria}</option>
-                  ))}
-              </select>
-              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-                <button onClick={() => { setModalAsignar(false); setBotNuevo('') }} className="neo-btn-outline" style={{ padding: '10px 20px' }}>
-                  Cancelar
-                </button>
-                <button onClick={handleAsignar} disabled={!botNuevo} className="neo-btn-primary" style={{ padding: '10px 20px' }}>
-                  Asignar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
       )}
 
       {/* Toast */}
@@ -723,7 +652,6 @@ export default function BotConfiguration() {
           fontSize: 13.5, fontWeight: 600,
           background: 'var(--bg-card-elevated)', border: '1px solid var(--border-primary)', boxShadow: '0 20px 60px rgba(0,0,0,0.7)',
           color: toast.tipo === 'error' ? '#F87171' : '#34D399',
-          animation: 'fadeIn 0.35s cubic-bezier(0.22,1,0.36,1) both',
         }}>
           {toast.tipo === 'error' ? <AlertCircle size={17} /> : <Check size={17} />}
           {toast.msg}
