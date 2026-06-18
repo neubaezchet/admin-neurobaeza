@@ -1,12 +1,14 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { Mail, Users, Monitor, LogOut, ShieldCheck, ChevronRight, Cpu, Bot, Settings, Building2 } from 'lucide-react'
+import { Mail, Users, Monitor, LogOut, ShieldCheck, ChevronRight, Cpu, Bot, Settings, Building2, LayoutList, Activity } from 'lucide-react'
 import { logout } from '../api'
 
 const NAV_FULL = [
-  { to: '/bots',       icon: Bot,      label: 'Configuración de Bots',     desc: 'Bots de radicación' },
-  { to: '/correos',    icon: Mail,     label: 'Directorio de Correos',    desc: 'Gestión de contactos' },
-  { to: '/usuarios',   icon: Users,    label: 'Usuarios y Permisos',      desc: 'Control de acceso' },
-  { to: '/consola',    icon: Monitor,  label: 'Consola del Sistema',      desc: 'Logs y monitoreo' },
+  { to: '/bots',                   icon: Bot,         label: 'Configuración de Bots',   desc: 'Bots de radicación' },
+  { to: '/radicacion/campos',      icon: LayoutList,  label: 'Campos EPS / ARL',        desc: 'Manifests y OCR' },
+  { to: '/radicacion/monitoreo',   icon: Activity,    label: 'Estado de Radicación',    desc: 'Sesiones en vivo' },
+  { to: '/correos',                icon: Mail,        label: 'Directorio de Correos',   desc: 'Gestión de contactos' },
+  { to: '/usuarios',               icon: Users,       label: 'Usuarios y Permisos',     desc: 'Control de acceso' },
+  { to: '/consola',                icon: Monitor,     label: 'Consola del Sistema',     desc: 'Logs y monitoreo' },
 ]
 
 export default function Layout({ user, children }) {

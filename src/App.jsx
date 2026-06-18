@@ -7,6 +7,8 @@ import EmailDirectory from './pages/EmailDirectory'
 import UsersPermissions from './pages/UsersPermissions'
 import SystemConsole from './pages/SystemConsole'
 import BotConfiguration from './pages/BotConfiguration'
+import RadicacionCampos from './pages/RadicacionCampos'
+import RadicacionMonitoreo from './pages/RadicacionMonitoreo'
 import TenantOnboarding from './pages/TenantOnboarding'
 import TenantWelcome from './pages/TenantWelcome'
 
@@ -51,6 +53,8 @@ export default function App() {
               <Routes>
                 <Route path="/" element={<Navigate to="/bots" replace />} />
                 <Route path="/bots" element={<BotConfiguration />} />
+                <Route path="/radicacion/campos"    element={<RadicacionCampos />} />
+                <Route path="/radicacion/monitoreo" element={<RadicacionMonitoreo />} />
                 <Route path="/correos"    element={<EmailDirectory />} />
                 <Route path="/usuarios"   element={<UsersPermissions />} />
                 <Route path="/consola"    element={<SystemConsole />} />
