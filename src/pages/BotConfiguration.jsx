@@ -3,7 +3,7 @@ import {
   Bot, Check, AlertCircle, Globe, Mail,
   ChevronDown, Eye, EyeOff, Save, Lock, Building2, Layers, Loader
 } from 'lucide-react'
-import { getEmpresas, getBotsEmpresa, createBotEmpresa, updateBotEmpresa } from '../api'
+import { getEmpresas, getBotsEmpresa, createBotEmpresa, updateBotEmpresa, getRadicacionSkills } from '../api'
 
 // ─────────────────────────────────────────────────────────────
 // CATÁLOGO COMPLETO DE EPS / ARL
@@ -47,10 +47,11 @@ const CATALOGO = {
   compensar: {
     nombre: 'Compensar', sigla: 'Co', categoria: 'EPS', medio: 'portal', color: '#F59E0B',
     logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwth7eASCnSPK5X-NAjrTCm7STiqojHM7qgg&s',
-    descripcion: 'Portal de Compensar EPS',
+    descripcion: 'Portal corporativo.compensar.com',
     campos: [
-      { key: 'usuario', label: 'Usuario',    tipo: 'text',     placeholder: 'empresa_user', requerido: true },
-      { key: 'clave',   label: 'Contraseña', tipo: 'password', placeholder: '••••••••',     requerido: true },
+      { key: 'tipo_doc', label: 'Tipo de documento',   tipo: 'select',   opciones: ['NIT','Cédula de Ciudadanía','Cédula de Extranjería','Pasaporte'], requerido: true },
+      { key: 'usuario',  label: 'Número de documento', tipo: 'text',     placeholder: '860000452', requerido: true },
+      { key: 'clave',    label: 'Contraseña',          tipo: 'password', placeholder: '••••••••',  requerido: true },
     ],
   },
   colsanitas: {
@@ -251,7 +252,7 @@ function EpsLogo({ cat, dot }) {
   )
 }
 
-function EpsRow({ catKey, cat, apiBot, open, onToggle, onSave }) {
+function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave }) {
   const estadoKey = apiBot?.estado || 'sin_configurar'
   const est = ESTADOS[estadoKey] || ESTADOS.sin_configurar
   const [medio, setMedio] = useState(apiBot?.bot_tipo_medio || cat.medio || 'portal')
@@ -266,7 +267,9 @@ function EpsRow({ catKey, cat, apiBot, open, onToggle, onSave }) {
     setShow({})
   }, [apiBot, catKey])
 
-  const campos = cat.campos || []
+  // Usa campos descubiertos por el bot si existen, si no usa los del catálogo
+  const campos = skillCampos || cat.campos || []
+  const camposDesdeSkill = !!skillCampos
 
   const handleSave = async () => {
     setGuardando(true)
@@ -403,9 +406,21 @@ function EpsRow({ catKey, cat, apiBot, open, onToggle, onSave }) {
 
           {/* Footer */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 18 }}>
-            <span style={{ fontSize: 11.5, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 7 }}>
-              <Lock size={13} /> Credenciales cifradas — solo visibles para administradores
-            </span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+              <span style={{ fontSize: 11.5, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 7 }}>
+                <Lock size={13} /> Credenciales cifradas — solo visibles para administradores
+              </span>
+              {camposDesdeSkill ? (
+                <span style={{ fontSize: 10.5, display: 'flex', alignItems: 'center', gap: 5, color: '#34D399' }}>
+                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#34D399', display: 'inline-block' }} />
+                  Campos detectados automáticamente por el bot
+                </span>
+              ) : (
+                <span style={{ fontSize: 10.5, color: 'var(--text-muted)' }}>
+                  Campos predeterminados — se actualizarán cuando el bot radique por primera vez
+                </span>
+              )}
+            </div>
             <button
               onClick={handleSave}
               disabled={guardando}
@@ -425,16 +440,31 @@ export default function BotConfiguration() {
   const [empresas, setEmpresas] = useState([])
   const [selId, setSelId] = useState(null)
   const [apiBotsMap, setApiBotsMap] = useState({})
+  const [skillsMap, setSkillsMap] = useState({})   // eps_key → campos_credenciales del backend
   const [cargando, setCargando] = useState(false)
   const [openBot, setOpenBot] = useState(null)
   const [toast, setToast] = useState(null)
 
-  useEffect(() => { cargarEmpresas() }, [])
+  useEffect(() => {
+    cargarEmpresas()
+    cargarSkills()
+  }, [])
 
   useEffect(() => {
     if (selId) cargarBots()
     else setApiBotsMap({})
   }, [selId])
+
+  const cargarSkills = async () => {
+    try {
+      const data = await getRadicacionSkills()
+      const map = {}
+      for (const s of (data.skills || [])) {
+        if (s.campos_credenciales) map[s.key] = s.campos_credenciales
+      }
+      setSkillsMap(map)
+    } catch { /* skills son opcionales — no bloquear UI */ }
+  }
 
   const cargarEmpresas = async () => {
     try {
@@ -611,6 +641,7 @@ export default function BotConfiguration() {
                     catKey={key}
                     cat={cat}
                     apiBot={apiBotsMap[key] || null}
+                    skillCampos={skillsMap[key] || null}
                     open={openBot === key}
                     onToggle={() => setOpenBot(openBot === key ? null : key)}
                     onSave={handleSave}
@@ -633,6 +664,7 @@ export default function BotConfiguration() {
                     catKey={key}
                     cat={cat}
                     apiBot={apiBotsMap[key] || null}
+                    skillCampos={skillsMap[key] || null}
                     open={openBot === key}
                     onToggle={() => setOpenBot(openBot === key ? null : key)}
                     onSave={handleSave}

@@ -193,6 +193,11 @@ export function syncRadicacionBots() {
   return apiFetch('/admin/bots/sync-radicacion', { method: 'POST' });
 }
 
+// ─── Radicación — Skills ─────────────────────────────────
+export function getRadicacionSkills() {
+  return apiFetch('/admin/radicacion/skills');
+}
+
 // ─── Multi-tenant ────────────────────────────────────────
 export function getTenants(params = {}) {
   const q = new URLSearchParams(params).toString()
