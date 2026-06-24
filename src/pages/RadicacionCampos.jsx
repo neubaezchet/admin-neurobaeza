@@ -1,5 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { LayoutList, Globe, Mail, CheckCircle, Clock, FileText, ScanLine, Pencil, Lock } from 'lucide-react'
+
+const API_BASE = import.meta.env.VITE_API_URL || 'https://web-production-95ed.up.railway.app'
+
+function authHeaders() {
+  const token = localStorage.getItem('admin_token')
+  return { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }
+}
 
 // ─── Manifest de campos por EPS/ARL ───────────────────────
 const MANIFESTS = [
@@ -230,8 +237,27 @@ function Campo({ tipo, label }) {
 export default function RadicacionCampos() {
   const [filtro, setFiltro] = useState('todos')
   const [tipo, setTipo] = useState('general')
+  const [skillsReal, setSkillsReal] = useState({})
 
-  const filtered = MANIFESTS.filter(m => {
+  useEffect(() => {
+    fetch(`${API_BASE}/admin/radicacion/skills`, { headers: authHeaders() })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data?.skills) return
+        const map = {}
+        data.skills.forEach(s => { map[s.key] = s.estado })
+        setSkillsReal(map)
+      })
+      .catch(() => {})
+  }, [])
+
+  // Merge estado real del backend sobre los manifests estáticos
+  const manifests = MANIFESTS.map(m => ({
+    ...m,
+    skill: skillsReal[m.key] ?? m.skill,
+  }))
+
+  const filtered = manifests.filter(m => {
     if (filtro === 'portal') return m.medio === 'portal'
     if (filtro === 'email') return m.medio === 'email'
     if (filtro === 'eps') return m.tipo === 'EPS'
@@ -241,6 +267,7 @@ export default function RadicacionCampos() {
 
   const activas = filtered.filter(m => m.skill === 'activa').length
   const camposOcrUnicos = [...new Set(filtered.flatMap(m => m.ocr))].length
+
   const camposFields = TIPOS_INCAPACIDAD[tipo] || []
 
   return (
