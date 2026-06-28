@@ -324,3 +324,15 @@ export function rechazarLead(id, data = {}) {
 export function getServiceAccountEmail() {
   return apiFetch('/tenants/service-account-email')
 }
+
+// Factory reset — borra toda la data operativa
+export function factoryReset(adminToken) {
+  return fetch(`${API_BASE}/admin/factory-reset`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': adminToken,
+    },
+    body: JSON.stringify({ confirmacion: 'RESET' }),
+  }).then(r => r.json())
+}

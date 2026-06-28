@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback } from 'react'
 import {
   Monitor, RefreshCw, Activity, Database, Users, Building2,
   FileText, AlertTriangle, Clock, CheckCircle2, XCircle,
-  ChevronDown, ChevronUp, Zap, Server, Heart
+  ChevronDown, ChevronUp, Zap, Server, Heart, Trash2
 } from 'lucide-react'
-import { getStats, getHealth, getActivity } from '../api'
+import { getStats, getHealth, getActivity, factoryReset } from '../api'
 
 const ESTADO_COLORS = {
   NUEVO:             'bg-blue-500',
@@ -33,6 +33,13 @@ export default function SystemConsole() {
   const [loading, setLoading] = useState(true)
   const [showAllEvents, setShowAllEvents] = useState(false)
   const [autoRefresh, setAutoRefresh] = useState(true)
+
+  // Factory reset
+  const [showResetModal, setShowResetModal] = useState(false)
+  const [resetToken, setResetToken] = useState('')
+  const [resetConfirm, setResetConfirm] = useState('')
+  const [resetting, setResetting] = useState(false)
+  const [resetResult, setResetResult] = useState(null)
 
   const load = useCallback(async () => {
     try {
@@ -208,6 +215,133 @@ export default function SystemConsole() {
         Última actualización: {health?.timestamp ? new Date(health.timestamp).toLocaleString('es-CO') : 'N/A'}
         {autoRefresh && ' · Auto-refresh cada 30s'}
       </p>
+
+      {/* ── Zona Peligrosa ── */}
+      <div className="neo-card p-5 border" style={{ borderColor: 'var(--error)', borderWidth: 1 }}>
+        <h3 className="text-sm font-semibold mb-1 flex items-center gap-2" style={{ color: 'var(--error)' }}>
+          <AlertTriangle className="w-4 h-4" /> Zona Peligrosa
+        </h3>
+        <p className="text-xs mb-4" style={{ color: 'var(--text-muted)' }}>
+          Estas acciones son irreversibles. Úsalas solo en entornos de prueba.
+        </p>
+        <button
+          onClick={() => { setShowResetModal(true); setResetResult(null); setResetConfirm(''); setResetToken('') }}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+          style={{ background: 'var(--error-soft)', color: 'var(--error)', border: '1px solid var(--error)' }}
+        >
+          <Trash2 className="w-4 h-4" /> Factory Reset — Borrar todo
+        </button>
+      </div>
+
+      {/* Modal factory reset */}
+      {showResetModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.7)' }}>
+          <div className="neo-card p-6 w-full max-w-md mx-4 space-y-4">
+            <div className="flex items-center gap-2">
+              <Trash2 className="w-5 h-5" style={{ color: 'var(--error)' }} />
+              <h3 className="text-base font-bold" style={{ color: 'var(--error)' }}>Factory Reset</h3>
+            </div>
+
+            {!resetResult ? (
+              <>
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                  Esto borrará <strong>todas las empresas, empleados, casos y configuraciones de tenant</strong>.
+                  Los superadmins y configs del sistema se conservan.
+                </p>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs font-semibold block mb-1" style={{ color: 'var(--text-muted)' }}>
+                      ADMIN_TOKEN del servidor
+                    </label>
+                    <input
+                      type="password"
+                      value={resetToken}
+                      onChange={e => setResetToken(e.target.value)}
+                      placeholder="Token secreto..."
+                      className="neo-input w-full text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold block mb-1" style={{ color: 'var(--text-muted)' }}>
+                      Escribe <span style={{ color: 'var(--error)' }}>RESET</span> para confirmar
+                    </label>
+                    <input
+                      type="text"
+                      value={resetConfirm}
+                      onChange={e => setResetConfirm(e.target.value)}
+                      placeholder="RESET"
+                      className="neo-input w-full text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={() => setShowResetModal(false)}
+                    className="neo-btn-ghost flex-1 text-sm"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    disabled={resetConfirm !== 'RESET' || !resetToken || resetting}
+                    onClick={async () => {
+                      setResetting(true)
+                      try {
+                        const res = await factoryReset(resetToken)
+                        setResetResult(res)
+                        if (res.ok) load()
+                      } catch (e) {
+                        setResetResult({ ok: false, error: e.message })
+                      } finally {
+                        setResetting(false)
+                      }
+                    }}
+                    className="flex-1 px-4 py-2 rounded-xl text-sm font-bold transition-all"
+                    style={{
+                      background: (resetConfirm === 'RESET' && resetToken && !resetting) ? 'var(--error)' : 'rgba(255,255,255,0.05)',
+                      color: (resetConfirm === 'RESET' && resetToken && !resetting) ? 'white' : 'var(--text-muted)',
+                      cursor: (resetConfirm === 'RESET' && resetToken && !resetting) ? 'pointer' : 'not-allowed',
+                    }}
+                  >
+                    {resetting ? 'Borrando...' : 'Ejecutar Reset'}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                {resetResult.ok ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--success)' }}>
+                      <CheckCircle2 className="w-4 h-4" /> Reset completado
+                    </div>
+                    <div className="text-xs rounded-xl p-3 overflow-y-auto max-h-48" style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)' }}>
+                      {Object.entries(resetResult.resumen).map(([tabla, count]) => (
+                        <div key={tabla} className="flex justify-between py-0.5">
+                          <span>{tabla}</span>
+                          <span style={{ color: count > 0 ? 'var(--error)' : 'var(--text-muted)' }}>
+                            {typeof count === 'number' ? `−${count}` : count}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm" style={{ color: 'var(--error)' }}>
+                    Error: {resetResult.detail || resetResult.error}
+                  </p>
+                )}
+                <button
+                  onClick={() => setShowResetModal(false)}
+                  className="neo-btn-outline w-full text-sm"
+                >
+                  Cerrar
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
