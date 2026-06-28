@@ -48,7 +48,6 @@ const STEPS_CONFIG = [
   { id: 3, Icon: Clock,       label: 'Ciclo',        shortLabel: 'Ciclo' },
   { id: 4, Icon: Mail,        label: 'Contacto',     shortLabel: 'Contacto' },
   { id: 5, Icon: Palette,     label: 'Visual',       shortLabel: 'Visual' },
-  { id: 6, Icon: HardDrive,   label: 'Drive',        shortLabel: 'Drive' },
   { id: 7, Icon: CheckSquare, label: 'Activar',      shortLabel: 'Activar' },
 ]
 
@@ -1263,9 +1262,9 @@ export default function TenantOnboarding() {
     }
   }
 
-  const handleNext = () => { if (step < 7) saveStep(step + 1) }
-  const handleBack = () => { if (step > 1) setStep(step - 1) }
-  const handleSkipDrive = () => saveStep(7)
+  // Paso 5 → salta el 6 (Drive, provisionado automáticamente) → va al 7
+  const handleNext = () => { if (step < 7) saveStep(step === 5 ? 7 : step + 1) }
+  const handleBack = () => { if (step > 1) setStep(step === 7 ? 5 : step - 1) }
 
   const handleComplete = async () => {
     setSaving(true); setError('')
@@ -1447,20 +1446,8 @@ export default function TenantOnboarding() {
             </button>
           </div>
 
-          {/* Skip Drive */}
-          {step === 6 && !saving && (
-            <button
-              type="button"
-              onClick={handleSkipDrive}
-              style={{
-                marginTop: 12, background: 'none', border: 'none', cursor: 'pointer',
-                fontSize: 12, color: 'rgba(255,255,255,0.35)',
-                textDecoration: 'underline', textDecorationStyle: 'dotted',
-              }}
-            >
-              Configurar Drive después
-            </button>
-          )}
+
+
         </div>
       )}
 
