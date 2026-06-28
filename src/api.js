@@ -325,6 +325,14 @@ export function getServiceAccountEmail() {
   return apiFetch('/tenants/service-account-email')
 }
 
+// Crear empresa directamente + generar link de invitación
+export function crearEmpresaDirecta(data) {
+  return apiFetch('/admin/leads/crear-empresa', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
 // Factory reset — borra toda la data operativa
 export function factoryReset(adminToken) {
   return fetch(`${API_BASE}/admin/factory-reset`, {

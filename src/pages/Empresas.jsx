@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import {
   Building2, CheckCircle2, Clock, Mail, Hash, Search,
   ChevronRight, Loader2, AlertCircle, RefreshCw, ExternalLink,
-  FileSpreadsheet, Users,
+  FileSpreadsheet, Users, Plus, Copy, Check,
 } from 'lucide-react'
-import { getEmpresas, getTenant } from '../api'
+import { getEmpresas, getTenant, crearEmpresaDirecta } from '../api'
 
 // ─── Chip de estado ───────────────────────────────────────────────────────────
 
@@ -199,6 +199,38 @@ export default function Empresas() {
   const [error, setError] = useState('')
   const [busqueda, setBusqueda] = useState('')
 
+  // Modal nueva empresa
+  const [showModal, setShowModal] = useState(false)
+  const [form, setForm] = useState({ empresa_nombre: '', nit: '', contacto_email: '', contacto_telefono: '' })
+  const [creando, setCreando] = useState(false)
+  const [resultado, setResultado] = useState(null)
+  const [copiado, setCopiado] = useState(false)
+
+  const copiarLink = (link) => {
+    navigator.clipboard.writeText(link)
+    setCopiado(true)
+    setTimeout(() => setCopiado(false), 2000)
+  }
+
+  const handleCrear = async () => {
+    if (!form.empresa_nombre.trim() || !form.contacto_email.trim()) return
+    setCreando(true)
+    try {
+      const res = await crearEmpresaDirecta({
+        empresa_nombre: form.empresa_nombre.trim(),
+        nit: form.nit.trim() || undefined,
+        contacto_email: form.contacto_email.trim(),
+        contacto_telefono: form.contacto_telefono.trim() || undefined,
+      })
+      setResultado(res)
+      if (res.ok) cargar()
+    } catch (e) {
+      setResultado({ ok: false, detail: e.message })
+    } finally {
+      setCreando(false)
+    }
+  }
+
   const cargar = useCallback(async () => {
     setLoading(true); setError('')
     try {
@@ -234,16 +266,28 @@ export default function Empresas() {
               {loading ? 'Cargando...' : `${empresas.length} tenant${empresas.length !== 1 ? 's' : ''} en el sistema`}
             </p>
           </div>
-          <button
-            onClick={cargar}
-            style={{
-              padding: '8px 14px', borderRadius: 10, cursor: 'pointer',
-              background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-primary)',
-              color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13,
-            }}
-          >
-            <RefreshCw size={14} /> Actualizar
-          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={() => { setShowModal(true); setResultado(null); setForm({ empresa_nombre: '', nit: '', contacto_email: '', contacto_telefono: '' }) }}
+              style={{
+                padding: '8px 16px', borderRadius: 10, cursor: 'pointer',
+                background: 'var(--accent-primary)', border: 'none',
+                color: 'white', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600,
+              }}
+            >
+              <Plus size={15} /> Nueva Empresa
+            </button>
+            <button
+              onClick={cargar}
+              style={{
+                padding: '8px 14px', borderRadius: 10, cursor: 'pointer',
+                background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-primary)',
+                color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13,
+              }}
+            >
+              <RefreshCw size={14} /> Actualizar
+            </button>
+          </div>
         </div>
 
         {/* Buscador */}
@@ -313,6 +357,112 @@ export default function Empresas() {
             ))}
           </div>
         )
+      )}
+
+      {/* ── Modal Nueva Empresa ── */}
+      {showModal && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 50,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.72)',
+        }}>
+          <div style={{
+            background: 'var(--bg-card)', border: '1px solid var(--border-primary)',
+            borderRadius: 20, padding: 28, width: '100%', maxWidth: 440, margin: '0 16px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+              <Building2 size={20} color="var(--accent-primary)" />
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>
+                Nueva Empresa
+              </h3>
+            </div>
+
+            {!resultado ? (
+              <>
+                {[
+                  { key: 'empresa_nombre', label: 'Nombre de la empresa *', placeholder: 'Empresa XYZ S.A.S.' },
+                  { key: 'nit', label: 'NIT', placeholder: '900.123.456-7' },
+                  { key: 'contacto_email', label: 'Email del contacto *', placeholder: 'admin@empresa.com', type: 'email' },
+                  { key: 'contacto_telefono', label: 'Teléfono', placeholder: '+57 300 000 0000' },
+                ].map(({ key, label, placeholder, type }) => (
+                  <div key={key} style={{ marginBottom: 14 }}>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 700, marginBottom: 6, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+                      {label}
+                    </label>
+                    <input
+                      type={type || 'text'}
+                      value={form[key]}
+                      onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+                      placeholder={placeholder}
+                      className="neo-input"
+                      style={{ width: '100%', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                ))}
+
+                <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+                  <button
+                    onClick={() => setShowModal(false)}
+                    style={{ flex: 1, padding: '10px', borderRadius: 10, cursor: 'pointer', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-primary)', color: 'var(--text-muted)', fontSize: 13 }}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleCrear}
+                    disabled={!form.empresa_nombre.trim() || !form.contacto_email.trim() || creando}
+                    style={{
+                      flex: 1, padding: '10px', borderRadius: 10, cursor: 'pointer', fontSize: 13, fontWeight: 600,
+                      background: (!form.empresa_nombre.trim() || !form.contacto_email.trim() || creando) ? 'rgba(255,255,255,0.05)' : 'var(--accent-primary)',
+                      color: (!form.empresa_nombre.trim() || !form.contacto_email.trim() || creando) ? 'var(--text-muted)' : 'white',
+                      border: 'none',
+                    }}
+                  >
+                    {creando ? 'Creando...' : 'Crear y generar link'}
+                  </button>
+                </div>
+              </>
+            ) : resultado.ok ? (
+              <div style={{ textAlign: 'center' }}>
+                <CheckCircle2 size={36} color="var(--success)" style={{ marginBottom: 12 }} />
+                <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px' }}>
+                  ¡Empresa creada!
+                </p>
+                <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 16px' }}>
+                  Expira: {resultado.expires_label}
+                </p>
+                <div style={{
+                  background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-primary)',
+                  borderRadius: 10, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16,
+                }}>
+                  <span style={{ flex: 1, fontSize: 11, color: 'var(--text-secondary)', wordBreak: 'break-all', textAlign: 'left' }}>
+                    {resultado.link_registro}
+                  </span>
+                  <button
+                    onClick={() => copiarLink(resultado.link_registro)}
+                    style={{ flexShrink: 0, padding: '6px 10px', borderRadius: 8, cursor: 'pointer', background: copiado ? 'var(--success-soft)' : 'rgba(255,255,255,0.06)', border: '1px solid var(--border-primary)', color: copiado ? 'var(--success)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}
+                  >
+                    {copiado ? <><Check size={12} /> Copiado</> : <><Copy size={12} /> Copiar</>}
+                  </button>
+                </div>
+                <button
+                  onClick={() => setShowModal(false)}
+                  style={{ width: '100%', padding: '10px', borderRadius: 10, cursor: 'pointer', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-primary)', color: 'var(--text-muted)', fontSize: 13 }}
+                >
+                  Cerrar
+                </button>
+              </div>
+            ) : (
+              <div>
+                <p style={{ color: 'var(--error)', fontSize: 13, marginBottom: 16 }}>
+                  Error: {resultado.detail || 'No se pudo crear la empresa'}
+                </p>
+                <button onClick={() => setResultado(null)} style={{ width: '100%', padding: '10px', borderRadius: 10, cursor: 'pointer', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-primary)', color: 'var(--text-muted)', fontSize: 13 }}>
+                  Intentar de nuevo
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   )
