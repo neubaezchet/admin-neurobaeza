@@ -11,6 +11,9 @@ import RadicacionCampos from './pages/RadicacionCampos'
 import RadicacionMonitoreo from './pages/RadicacionMonitoreo'
 import TenantOnboarding from './pages/TenantOnboarding'
 import TenantWelcome from './pages/TenantWelcome'
+import RegistroEmpresa from './pages/RegistroEmpresa'
+import Leads from './pages/Leads'
+import Empresas from './pages/Empresas'
 
 function ProtectedRoute({ children }) {
   const token = getToken()
@@ -24,6 +27,9 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login onLogin={setUser} />} />
+
+      {/* Registro self-service — público, sin JWT, usa token de invitación */}
+      <Route path="/registro" element={<RegistroEmpresa />} />
 
       {/* Onboarding wizard — full screen, sin Layout */}
       <Route
@@ -58,6 +64,8 @@ export default function App() {
                 <Route path="/correos"    element={<EmailDirectory />} />
                 <Route path="/usuarios"   element={<UsersPermissions />} />
                 <Route path="/consola"    element={<SystemConsole />} />
+                <Route path="/leads"     element={<Leads />} />
+                <Route path="/empresas"  element={<Empresas />} />
               </Routes>
             </Layout>
           </ProtectedRoute>

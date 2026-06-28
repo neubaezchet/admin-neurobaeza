@@ -271,3 +271,51 @@ export function removeTenantUser(companyId, adminUserId) {
 export function getTenantAuditLog(companyId, { limit = 50, offset = 0 } = {}) {
   return apiFetch(`/tenants/${companyId}/audit?limit=${limit}&offset=${offset}`)
 }
+
+// ─── Demo / Solicitudes de acceso (públicos — sin token JWT) ─────────────────
+
+export function solicitarDemo(data) {
+  // Público: cualquiera puede solicitar acceso
+  return apiFetch('/demo/solicitar', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export function validarTokenRegistro(token) {
+  // Valida que el token de invitación sea válido antes de cargar el wizard
+  return apiFetch(`/tenants/registro/validar-token?token=${encodeURIComponent(token)}`)
+}
+
+export function completarRegistro(data) {
+  // Endpoint público: la empresa completa su propio registro
+  return apiFetch('/tenants/registro/completar', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+// ─── Leads (admin protegido) ─────────────────────────────────────────────────
+
+export function getLeads(params = {}) {
+  const q = new URLSearchParams(params).toString()
+  return apiFetch(`/admin/leads/${q ? `?${q}` : ''}`)
+}
+
+export function getLeadDetalle(id) {
+  return apiFetch(`/admin/leads/${id}`)
+}
+
+export function aprobarLead(id, data = {}) {
+  return apiFetch(`/admin/leads/${id}/aprobar`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export function rechazarLead(id, data = {}) {
+  return apiFetch(`/admin/leads/${id}/rechazar`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
