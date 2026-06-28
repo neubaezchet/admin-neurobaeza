@@ -319,3 +319,8 @@ export function rechazarLead(id, data = {}) {
     body: JSON.stringify(data),
   })
 }
+
+// Service account email (para mostrar al usuario qué correo usar al compartir Drive)
+export function getServiceAccountEmail() {
+  return apiFetch('/tenants/service-account-email')
+}

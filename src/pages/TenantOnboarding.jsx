@@ -17,7 +17,7 @@ import {
 } from 'lucide-react'
 import {
   getTenant, saveTenantOnboardingStep, completeTenantOnboarding,
-  verifyTenantDrive, getOnboardingProgress,
+  verifyTenantDrive, getOnboardingProgress, getServiceAccountEmail,
 } from '../api'
 
 // ─── Paletas ──────────────────────────────────────────────
@@ -48,6 +48,7 @@ const STEPS_CONFIG = [
   { id: 3, Icon: Clock,       label: 'Ciclo',        shortLabel: 'Ciclo' },
   { id: 4, Icon: Mail,        label: 'Contacto',     shortLabel: 'Contacto' },
   { id: 5, Icon: Palette,     label: 'Visual',       shortLabel: 'Visual' },
+  { id: 6, Icon: HardDrive,   label: 'Drive',        shortLabel: 'Drive' },
   { id: 7, Icon: CheckSquare, label: 'Activar',      shortLabel: 'Activar' },
 ]
 
@@ -889,15 +890,31 @@ function Step5({ data, onChange, nombre, logoUrl }) {
 
 // ─── Step 6: Google Drive ─────────────────────────────────
 
-function Step6({ data, onChange, companyId, paletaId }) {
+function Step6({ data, onChange, companyId, paletaId, serviceAccountEmail }) {
   const paleta = getPaleta(paletaId)
   const [verifying, setVerifying] = useState(false)
-  const [result, setResult] = useState(null)
-  const [err, setErr] = useState('')
+  const [result, setResult]       = useState(null)
+  const [err, setErr]             = useState('')
+  const [copied, setCopied]       = useState(false)
+
+  // Extrae el ID de carpeta desde un link de Drive pegado
+  const handleDriveUrl = (raw) => {
+    const match = raw.match(/\/folders\/([a-zA-Z0-9_-]{10,})/)
+    const id = match ? match[1] : raw.trim()
+    onChange({ google_workspace_drive_id: id, drive_verificado: false })
+    setResult(null); setErr('')
+  }
+
+  const copyEmail = () => {
+    if (!serviceAccountEmail) return
+    navigator.clipboard.writeText(serviceAccountEmail).then(() => {
+      setCopied(true); setTimeout(() => setCopied(false), 2000)
+    })
+  }
 
   const verify = async () => {
     if (!data.google_workspace_drive_id?.trim()) {
-      setErr('Ingresa el ID de la carpeta antes de verificar.')
+      setErr('Pega el link de la carpeta de Drive antes de verificar.')
       return
     }
     setVerifying(true); setErr(''); setResult(null)
@@ -917,65 +934,83 @@ function Step6({ data, onChange, companyId, paletaId }) {
 
   return (
     <WizardCard
-      Icon={HardDrive} title="Google Drive"
-      desc="Conecta la carpeta donde se almacenarán los archivos. Este paso es opcional."
+      Icon={HardDrive} title="Carpeta de Google Drive"
+      desc="Conecta la carpeta donde se guardan las incapacidades. Este paso es opcional."
       paletaId={paletaId}
     >
+      {/* Correo de la cuenta de servicio */}
+      <div style={{
+        padding: '14px 16px', borderRadius: 10, marginBottom: 18,
+        background: `${paleta.primary}10`, border: `1px solid ${paleta.primary}30`,
+      }}>
+        <p style={{ margin: '0 0 6px', fontSize: 11, fontWeight: 700,
+          color: paleta.primary, textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+          Paso 1 — Comparte tu carpeta con este correo
+        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <code style={{
+            flex: 1, fontSize: 12, color: 'rgba(255,255,255,0.85)',
+            background: 'rgba(0,0,0,0.3)', padding: '7px 10px',
+            borderRadius: 7, wordBreak: 'break-all',
+          }}>
+            {serviceAccountEmail || 'Cargando...'}
+          </code>
+          <button type="button" onClick={copyEmail}
+            title="Copiar correo"
+            style={{
+              background: copied ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.07)',
+              border: `1px solid ${copied ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.12)'}`,
+              borderRadius: 7, padding: '7px 10px', cursor: 'pointer',
+              color: copied ? '#6ee7b7' : 'rgba(255,255,255,0.6)', fontSize: 12,
+              transition: 'all 0.2s', whiteSpace: 'nowrap',
+            }}>
+            {copied ? '✓ Copiado' : 'Copiar'}
+          </button>
+        </div>
+        <p style={{ margin: '8px 0 0', fontSize: 11, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5 }}>
+          En Google Drive → tu carpeta → Clic derecho → Compartir → pega este correo → rol <strong style={{ color: 'rgba(255,255,255,0.6)' }}>Editor</strong> → Enviar
+        </p>
+      </div>
+
+      {/* Input de URL o ID */}
       <Field
-        label="ID de la carpeta de Google Drive"
-        hint="Encuéntralo en la URL: drive.google.com/drive/folders/[ID]"
+        label="Paso 2 — Pega el link de tu carpeta de Drive"
+        hint="Ej: drive.google.com/drive/folders/1aBcDeFgH... — el ID se extrae automáticamente"
       >
         <Input
           value={data.google_workspace_drive_id || ''}
-          onChange={e => onChange({ google_workspace_drive_id: e.target.value })}
-          placeholder="1aBcDeFgHiJkLmNoPqRsTuVwX"
+          onChange={e => handleDriveUrl(e.target.value)}
+          placeholder="https://drive.google.com/drive/folders/ABC123..."
         />
       </Field>
 
-      {/* Instrucciones numeradas */}
-      <div style={{
-        padding: '14px 16px', borderRadius: 10, marginBottom: 16,
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.08)',
-      }}>
-        {[
-          'Abre la carpeta en Google Drive',
-          'Clic derecho → "Compartir"',
-          `Agrega la cuenta de servicio del sistema`,
-          'Otorga rol "Editor" y guarda',
-        ].map((step, i) => (
-          <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: i < 3 ? 8 : 0 }}>
-            <div style={{
-              width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
-              background: `${paleta.primary}25`, border: `1px solid ${paleta.primary}40`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 10, fontWeight: 700, color: paleta.primary,
-            }}>
-              {i + 1}
-            </div>
-            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', lineHeight: 1.5 }}>{step}</span>
-          </div>
-        ))}
-      </div>
+      {/* ID detectado */}
+      {data.google_workspace_drive_id && (
+        <p style={{ margin: '-8px 0 14px', fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
+          ID detectado: <code style={{ color: 'rgba(255,255,255,0.55)' }}>{data.google_workspace_drive_id}</code>
+        </p>
+      )}
 
+      {/* Botón verificar */}
       <button
         type="button"
         onClick={verify}
-        disabled={verifying}
+        disabled={verifying || !data.google_workspace_drive_id}
         style={{
           width: '100%', padding: '12px', borderRadius: 10, cursor: 'pointer',
           background: verifying ? 'rgba(255,255,255,0.06)' : paleta.primary,
           border: 'none', color: '#fff', fontWeight: 600, fontSize: 14,
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-          transition: 'all 0.2s', opacity: verifying ? 0.7 : 1,
+          transition: 'all 0.2s', opacity: (verifying || !data.google_workspace_drive_id) ? 0.5 : 1,
         }}
       >
         {verifying
           ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Verificando acceso...</>
-          : <><RefreshCw size={16} /> Verificar acceso a Drive</>
+          : <><RefreshCw size={16} /> Verificar que el sistema tiene acceso</>
         }
       </button>
 
+      {/* Error */}
       {err && (
         <div role="alert" style={{
           marginTop: 12, padding: '10px 14px', borderRadius: 8,
@@ -987,41 +1022,46 @@ function Step6({ data, onChange, companyId, paletaId }) {
         </div>
       )}
 
+      {/* Éxito */}
       {result?.acceso && (
         <div style={{
           marginTop: 12, padding: '14px 16px', borderRadius: 10,
           background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.25)',
         }}>
           <p style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 600, color: '#6ee7b7' }}>
-            Acceso verificado: "{result.carpeta_nombre}"
+            ✅ Acceso confirmado: "{result.carpeta_nombre}"
           </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-            {result.estructura?.map(f => (
-              <div key={f.name} style={{
-                display: 'flex', alignItems: 'center', gap: 5,
-                padding: '3px 9px', borderRadius: 5,
-                background: 'rgba(255,255,255,0.05)', fontSize: 11, color: 'rgba(255,255,255,0.6)',
-              }}>
-                <FolderOpen size={11} color="#f59e0b" />
-                {f.name}
-              </div>
-            ))}
-          </div>
+          {result.estructura?.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {result.estructura.map(f => (
+                <div key={f.name} style={{
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  padding: '3px 9px', borderRadius: 5,
+                  background: 'rgba(255,255,255,0.05)', fontSize: 11, color: 'rgba(255,255,255,0.6)',
+                }}>
+                  <FolderOpen size={11} color="#f59e0b" />
+                  {f.name}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
+      {/* No acceso */}
       {result && !result.acceso && (
         <div role="alert" style={{
           marginTop: 12, padding: '10px 14px', borderRadius: 8,
           background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
           fontSize: 12, color: '#fca5a5',
         }}>
-          {result.error}
+          ⚠️ Sin acceso aún. Asegúrate de haber compartido la carpeta con el correo de arriba y vuelve a verificar.
         </div>
       )}
     </WizardCard>
   )
 }
+
 
 // ─── Step 7: Resumen ──────────────────────────────────────
 
@@ -1172,6 +1212,12 @@ export default function TenantOnboarding() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [tenant, setTenant] = useState(null)
+  const [serviceAccountEmail, setServiceAccountEmail] = useState('')
+
+  // Cargar email de cuenta de servicio para el paso Drive
+  useEffect(() => {
+    getServiceAccountEmail().then(r => { if (r?.email) setServiceAccountEmail(r.email) }).catch(() => {})
+  }, [])
 
   // ── Cargar VANTA FOG ──────────────────────────────────
   useEffect(() => {
@@ -1262,9 +1308,10 @@ export default function TenantOnboarding() {
     }
   }
 
-  // Paso 5 → salta el 6 (Drive, provisionado automáticamente) → va al 7
-  const handleNext = () => { if (step < 7) saveStep(step === 5 ? 7 : step + 1) }
-  const handleBack = () => { if (step > 1) setStep(step === 7 ? 5 : step - 1) }
+  // Paso 5 → 6 (Drive opcional) → 7 (Activar)
+  const handleNext = () => { if (step < 7) saveStep(step + 1) }
+  const handleBack = () => { if (step > 1) setStep(step - 1) }
+  const handleSkipDrive = () => saveStep(7)
 
   const handleComplete = async () => {
     setSaving(true); setError('')
@@ -1380,7 +1427,7 @@ export default function TenantOnboarding() {
               />
             )}
             {step === 6 && (
-              <Step6 data={data} onChange={mergeData} companyId={companyId} paletaId={paletaId} />
+              <Step6 data={data} onChange={mergeData} companyId={companyId} paletaId={paletaId} serviceAccountEmail={serviceAccountEmail} />
             )}
             {step === 7 && <Step7 data={data} paletaId={paletaId} />}
           </div>
@@ -1446,7 +1493,20 @@ export default function TenantOnboarding() {
             </button>
           </div>
 
-
+          {/* Skip Drive — solo en paso 6 */}
+          {step === 6 && !saving && (
+            <button
+              type="button"
+              onClick={handleSkipDrive}
+              style={{
+                marginTop: 10, background: 'none', border: 'none', cursor: 'pointer',
+                fontSize: 12, color: 'rgba(255,255,255,0.3)',
+                textDecoration: 'underline', textDecorationStyle: 'dotted',
+              }}
+            >
+              Configurar carpeta de Drive después
+            </button>
+          )}
 
         </div>
       )}
