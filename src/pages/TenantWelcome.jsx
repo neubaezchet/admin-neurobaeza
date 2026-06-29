@@ -16,7 +16,36 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   Building2, Palette, Mail, HardDrive, Clock, MapPin,
   CheckCircle2, ArrowRight, Sparkles, Lock, Copy, Check,
+  ExternalLink, Shield, FileText, Upload,
 } from 'lucide-react'
+
+// ─── URLs de los 3 portales ───────────────────────────────
+const PORTALES = [
+  {
+    id: 'admin',
+    label: 'Portal Administración',
+    desc: 'Configuración, usuarios y reportes',
+    url: 'https://admin-neurobaeza.vercel.app',
+    icon: Shield,
+    color: '#6366F1',
+  },
+  {
+    id: 'validacion',
+    label: 'Portal Validación',
+    desc: 'Revisión y gestión de incapacidades',
+    url: 'https://portal-neurobaeza.vercel.app',
+    icon: FileText,
+    color: '#10B981',
+  },
+  {
+    id: 'recepcion',
+    label: 'RopoGemini',
+    desc: 'Recepción y carga de incapacidades',
+    url: 'https://ropogemini.vercel.app',
+    icon: Upload,
+    color: '#F59E0B',
+  },
+]
 
 // ─── Helpers ──────────────────────────────────────────────
 
@@ -235,6 +264,110 @@ function CredentialsCard({ credentials, confirmed, onConfirm, visible }) {
   )
 }
 
+// ─── Portales card ────────────────────────────────────────
+
+function PortalesCard({ visible }) {
+  const [copiedId, setCopiedId] = useState(null)
+
+  const copyUrl = (id, url) => {
+    navigator.clipboard.writeText(url).catch(() => {
+      const el = document.createElement('textarea')
+      el.value = url
+      document.body.appendChild(el)
+      el.select()
+      document.execCommand('copy')
+      document.body.removeChild(el)
+    })
+    setCopiedId(id)
+    setTimeout(() => setCopiedId(null), 2000)
+  }
+
+  return (
+    <div style={{
+      width: '100%', maxWidth: 480, marginBottom: 20,
+      borderRadius: 18,
+      background: 'rgba(255,255,255,0.04)',
+      border: '1px solid rgba(255,255,255,0.1)',
+      padding: '20px 22px',
+      opacity: visible ? 1 : 0,
+      transform: visible ? 'translateY(0)' : 'translateY(24px)',
+      transition: 'opacity 0.6s 3900ms ease, transform 0.6s 3900ms ease',
+    }}>
+      <p style={{
+        margin: '0 0 14px', fontSize: 11, fontWeight: 700,
+        color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em',
+      }}>
+        Tus 3 portales de acceso
+      </p>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {PORTALES.map(p => (
+          <div key={p.id} style={{
+            display: 'flex', alignItems: 'center', gap: 12,
+            padding: '10px 12px', borderRadius: 11,
+            background: 'rgba(0,0,0,0.2)',
+            border: `1px solid ${p.color}22`,
+          }}>
+            <div style={{
+              width: 34, height: 34, borderRadius: 9, flexShrink: 0,
+              background: `${p.color}18`, border: `1px solid ${p.color}35`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <p.icon size={15} color={p.color} />
+            </div>
+
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>
+                {p.label}
+              </p>
+              <p style={{
+                margin: '1px 0 0', fontSize: 10, color: 'rgba(255,255,255,0.35)',
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}>
+                {p.url}
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: 5, flexShrink: 0 }}>
+              <button
+                onClick={() => copyUrl(p.id, p.url)}
+                title="Copiar URL"
+                style={{
+                  padding: '5px 8px', borderRadius: 7, cursor: 'pointer', border: 'none',
+                  background: copiedId === p.id ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.06)',
+                  color: copiedId === p.id ? '#10B981' : 'rgba(255,255,255,0.4)',
+                  fontSize: 10, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 3,
+                }}
+              >
+                {copiedId === p.id ? <><Check size={10} /> OK</> : <><Copy size={10} /> Copiar</>}
+              </button>
+              <a
+                href={p.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  padding: '5px 8px', borderRadius: 7, cursor: 'pointer',
+                  background: `${p.color}15`, border: `1px solid ${p.color}30`,
+                  color: p.color, fontSize: 10, fontWeight: 600,
+                  display: 'flex', alignItems: 'center', gap: 3, textDecoration: 'none',
+                }}
+              >
+                <ExternalLink size={10} /> Abrir
+              </a>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <p style={{
+        margin: '12px 0 0', fontSize: 11, color: 'rgba(255,255,255,0.25)', lineHeight: 1.5,
+      }}>
+        Usa las credenciales de arriba para ingresar a los 3 portales. Compártelos con tu equipo.
+      </p>
+    </div>
+  )
+}
+
 // ─── Main component ───────────────────────────────────────
 
 export default function TenantWelcome() {
@@ -397,6 +530,9 @@ export default function TenantWelcome() {
           visible={phase.button}
         />
       )}
+
+      {/* ── Phase 4: Los 3 portales ── */}
+      <PortalesCard visible={phase.button} />
 
       {/* ── Phase 4: CTA ── */}
       <div style={{

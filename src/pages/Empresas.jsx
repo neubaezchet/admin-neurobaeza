@@ -201,7 +201,7 @@ export default function Empresas() {
 
   // Modal nueva empresa
   const [showModal, setShowModal] = useState(false)
-  const [form, setForm] = useState({ empresa_nombre: '', nit: '', contacto_email: '', contacto_telefono: '' })
+  const [form, setForm] = useState({ empresa_nombre: '', nit: '', contacto_telefono: '' })
   const [creando, setCreando] = useState(false)
   const [resultado, setResultado] = useState(null)
   const [copiado, setCopiado] = useState(false)
@@ -213,13 +213,12 @@ export default function Empresas() {
   }
 
   const handleCrear = async () => {
-    if (!form.empresa_nombre.trim() || !form.contacto_email.trim()) return
+    if (!form.empresa_nombre.trim()) return
     setCreando(true)
     try {
       const res = await crearEmpresaDirecta({
         empresa_nombre: form.empresa_nombre.trim(),
         nit: form.nit.trim() || undefined,
-        contacto_email: form.contacto_email.trim(),
         contacto_telefono: form.contacto_telefono.trim() || undefined,
       })
       setResultado(res)
@@ -268,7 +267,7 @@ export default function Empresas() {
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button
-              onClick={() => { setShowModal(true); setResultado(null); setForm({ empresa_nombre: '', nit: '', contacto_email: '', contacto_telefono: '' }) }}
+              onClick={() => { setShowModal(true); setResultado(null); setForm({ empresa_nombre: '', nit: '', contacto_telefono: '' }) }}
               style={{
                 padding: '8px 16px', borderRadius: 10, cursor: 'pointer',
                 background: 'var(--accent-primary)', border: 'none',
@@ -382,7 +381,6 @@ export default function Empresas() {
                 {[
                   { key: 'empresa_nombre', label: 'Nombre de la empresa *', placeholder: 'Empresa XYZ S.A.S.' },
                   { key: 'nit', label: 'NIT', placeholder: '900.123.456-7' },
-                  { key: 'contacto_email', label: 'Email del contacto *', placeholder: 'admin@empresa.com', type: 'email' },
                   { key: 'contacto_telefono', label: 'Teléfono', placeholder: '+57 300 000 0000' },
                 ].map(({ key, label, placeholder, type }) => (
                   <div key={key} style={{ marginBottom: 14 }}>
@@ -409,11 +407,11 @@ export default function Empresas() {
                   </button>
                   <button
                     onClick={handleCrear}
-                    disabled={!form.empresa_nombre.trim() || !form.contacto_email.trim() || creando}
+                    disabled={!form.empresa_nombre.trim() || creando}
                     style={{
                       flex: 1, padding: '10px', borderRadius: 10, cursor: 'pointer', fontSize: 13, fontWeight: 600,
-                      background: (!form.empresa_nombre.trim() || !form.contacto_email.trim() || creando) ? 'rgba(255,255,255,0.05)' : 'var(--accent-primary)',
-                      color: (!form.empresa_nombre.trim() || !form.contacto_email.trim() || creando) ? 'var(--text-muted)' : 'white',
+                      background: (!form.empresa_nombre.trim() || creando) ? 'rgba(255,255,255,0.05)' : 'var(--accent-primary)',
+                      color: (!form.empresa_nombre.trim() || creando) ? 'var(--text-muted)' : 'white',
                       border: 'none',
                     }}
                   >

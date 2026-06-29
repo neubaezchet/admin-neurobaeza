@@ -12,6 +12,7 @@ import RadicacionMonitoreo from './pages/RadicacionMonitoreo'
 import TenantOnboarding from './pages/TenantOnboarding'
 import TenantWelcome from './pages/TenantWelcome'
 import RegistroEmpresa from './pages/RegistroEmpresa'
+import SolicitarDemo from './pages/SolicitarDemo'
 import Leads from './pages/Leads'
 import Empresas from './pages/Empresas'
 
@@ -30,6 +31,9 @@ export default function App() {
 
       {/* Registro self-service — público, sin JWT, usa token de invitación */}
       <Route path="/registro" element={<RegistroEmpresa />} />
+
+      {/* Formulario público de solicitud de demo */}
+      <Route path="/solicitar-demo" element={<SolicitarDemo />} />
 
       {/* Onboarding wizard — full screen, sin Layout */}
       <Route

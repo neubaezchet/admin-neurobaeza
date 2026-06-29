@@ -82,7 +82,13 @@ export function logout() {
   window.location.href = '/login';
 }
 
-export { getToken, getStoredUser };
+export { getToken, getStoredUser }
+
+// Guarda sesión completa (usado después del registro para auto-login)
+export function saveSession(token, user) {
+  setToken(token)
+  setStoredUser(user)
+};
 
 // ─── Correos Notificación ───────────────────────────────
 export function getCorreos(area = 'all', empresa = 'all') {
@@ -318,6 +324,31 @@ export function rechazarLead(id, data = {}) {
     method: 'POST',
     body: JSON.stringify(data),
   })
+}
+
+export function aprobarLeadComoDemo(id, data = {}) {
+  return apiFetch(`/admin/leads/${id}/aprobar-demo`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export function activarEmpresaDesdeDemo(leadId) {
+  return apiFetch(`/admin/leads/${leadId}/activar-empresa`, { method: 'POST' })
+}
+
+export function limpiarDemosExpirados() {
+  return apiFetch('/admin/leads/demos/limpiar', { method: 'DELETE' })
+}
+
+// ─── Demo público ─────────────────────────────────────────
+
+export function checkDemoStatus(companyId) {
+  return apiFetch(`/demo/status/${companyId}`)
+}
+
+export function enviarDemoFeedback(data) {
+  return apiFetch('/demo/feedback', { method: 'POST', body: JSON.stringify(data) })
 }
 
 // Service account email (para mostrar al usuario qué correo usar al compartir Drive)

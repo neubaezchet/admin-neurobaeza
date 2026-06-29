@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import {
   Building2, Check, X, Copy, CheckCircle2, Clock,
   ExternalLink, Loader2, AlertCircle, ChevronRight,
-  Users, RefreshCw, Filter,
+  Users, RefreshCw, Filter, Timer, Zap,
 } from 'lucide-react'
-import { getLeads, aprobarLead, rechazarLead } from '../api'
+import { getLeads, aprobarLead, rechazarLead, aprobarLeadComoDemo, activarEmpresaDesdeDemo } from '../api'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -317,6 +317,331 @@ function ModalRechazar({ lead, onClose, onSuccess }) {
   )
 }
 
+// ─── Modal Aprobar Demo ───────────────────────────────────────────────────────
+
+const HORAS_OPCIONES = [
+  { value: 2, label: '2 horas', desc: 'Demo rápido — ideal para presentaciones' },
+  { value: 4, label: '4 horas', desc: 'Demo estándar — tiempo suficiente para explorar' },
+  { value: 8, label: '8 horas', desc: 'Demo completo — un día de trabajo' },
+]
+
+function ModalAprobarDemo({ lead, onClose, onSuccess }) {
+  const [horas, setHoras] = useState(4)
+  const [notas, setNotas] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [resultado, setResultado] = useState(null)
+  const [copied, setCopied] = useState(false)
+
+  const handleAprobar = async () => {
+    setLoading(true); setError('')
+    try {
+      const res = await aprobarLeadComoDemo(lead.id, { horas, notas_internas: notas || undefined })
+      setResultado(res)
+      onSuccess()
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(resultado.link_registro)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 50,
+      background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
+    }} onClick={e => e.target === e.currentTarget && !resultado && onClose()}>
+      <div style={{
+        background: 'var(--bg-sidebar)', border: '1px solid var(--border-primary)',
+        borderRadius: 20, padding: 32, maxWidth: 500, width: '100%',
+        boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+      }}>
+        {!resultado ? (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+              <div style={{
+                width: 44, height: 44, borderRadius: 12,
+                background: 'rgba(14,165,233,0.12)', border: '1px solid rgba(14,165,233,0.25)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+                <Timer size={20} color="#38BDF8" />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: 'var(--text-primary)' }}>
+                  Aprobar como Demo
+                </h3>
+                <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--text-muted)' }}>
+                  {lead.empresa_nombre}
+                </p>
+              </div>
+            </div>
+
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 18, lineHeight: 1.6 }}>
+              La empresa tendrá acceso temporal al sistema. Al vencer el tiempo,
+              todos los datos del demo se <strong style={{ color: '#F87171' }}>eliminarán automáticamente</strong>.
+            </p>
+
+            {/* Selector de horas */}
+            <div style={{ marginBottom: 18 }}>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 10, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+                Duración del demo
+              </label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {HORAS_OPCIONES.map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setHoras(opt.value)}
+                    style={{
+                      flex: 1, padding: '12px 8px', borderRadius: 10, cursor: 'pointer', textAlign: 'center',
+                      border: horas === opt.value ? '2px solid #38BDF8' : '1px solid var(--border-primary)',
+                      background: horas === opt.value ? 'rgba(14,165,233,0.12)' : 'rgba(255,255,255,0.03)',
+                      color: horas === opt.value ? '#38BDF8' : 'var(--text-muted)',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    <p style={{ margin: '0 0 2px', fontWeight: 800, fontSize: 16 }}>{opt.value}h</p>
+                    <p style={{ margin: 0, fontSize: 10, opacity: 0.7 }}>{opt.desc.split('—')[0].trim()}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+                Notas internas (opcional)
+              </label>
+              <textarea
+                value={notas}
+                onChange={e => setNotas(e.target.value)}
+                rows={2}
+                placeholder="Ej: Cliente grande, darle seguimiento posterior..."
+                style={{
+                  width: '100%', boxSizing: 'border-box', padding: '10px 12px',
+                  background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-primary)',
+                  borderRadius: 10, fontSize: 13, color: 'var(--text-primary)',
+                  resize: 'none', outline: 'none', fontFamily: 'inherit',
+                }}
+              />
+            </div>
+
+            {error && (
+              <div style={{
+                display: 'flex', gap: 8, padding: '10px 12px', borderRadius: 8, marginBottom: 16,
+                background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
+                fontSize: 12, color: '#FCA5A5', alignItems: 'center',
+              }}>
+                <AlertCircle size={14} color="#F87171" />{error}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={onClose} style={{
+                flex: 1, padding: '11px', borderRadius: 10, cursor: 'pointer',
+                background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-primary)',
+                color: 'var(--text-muted)', fontWeight: 600, fontSize: 14,
+              }}>Cancelar</button>
+              <button onClick={handleAprobar} disabled={loading} style={{
+                flex: 2, padding: '11px', borderRadius: 10, cursor: loading ? 'not-allowed' : 'pointer',
+                background: loading ? 'rgba(14,165,233,0.3)' : 'linear-gradient(135deg,#0EA5E9,#0284C7)',
+                border: 'none', color: '#fff', fontWeight: 700, fontSize: 14,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              }}>
+                {loading
+                  ? <><Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> Procesando...</>
+                  : <><Timer size={15} /> Activar Demo {horas}h</>
+                }
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div style={{ textAlign: 'center', marginBottom: 24 }}>
+              <div style={{
+                width: 64, height: 64, borderRadius: '50%', margin: '0 auto 16px',
+                background: 'rgba(14,165,233,0.15)', border: '2px solid #38BDF8',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <Zap size={32} color="#38BDF8" />
+              </div>
+              <h3 style={{ margin: '0 0 6px', fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>
+                ¡Demo activado!
+              </h3>
+              <p style={{ margin: 0, fontSize: 13, color: 'var(--text-muted)' }}>
+                {resultado.horas}h de acceso para {lead.empresa_nombre}
+              </p>
+            </div>
+
+            <div style={{
+              padding: '14px 16px', borderRadius: 12, marginBottom: 16,
+              background: 'rgba(14,165,233,0.08)', border: '1px solid rgba(14,165,233,0.2)',
+            }}>
+              <p style={{ margin: '0 0 6px', fontSize: 11, fontWeight: 700, color: '#38BDF8', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                Link de acceso al demo
+              </p>
+              <p style={{
+                margin: '0 0 10px', fontSize: 12, color: 'var(--text-muted)',
+                wordBreak: 'break-all', fontFamily: 'monospace',
+              }}>
+                {resultado.link_registro}
+              </p>
+              <button onClick={copyLink} style={{
+                padding: '7px 14px', borderRadius: 8, border: '1px solid rgba(14,165,233,0.3)',
+                background: copied ? 'rgba(16,185,129,0.15)' : 'rgba(14,165,233,0.12)',
+                color: copied ? '#34D399' : '#38BDF8',
+                cursor: 'pointer', fontSize: 12, fontWeight: 600,
+                display: 'flex', alignItems: 'center', gap: 6,
+              }}>
+                {copied ? <><CheckCircle2 size={13} /> Copiado</> : <><Copy size={13} /> Copiar link</>}
+              </button>
+            </div>
+
+            <p style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'center', marginBottom: 20 }}>
+              Expira aprox: {resultado.expires_label}
+            </p>
+
+            <button onClick={onClose} style={{
+              width: '100%', padding: '11px', borderRadius: 10, cursor: 'pointer',
+              background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-primary)',
+              color: 'var(--text-primary)', fontWeight: 600, fontSize: 14,
+            }}>
+              Cerrar
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ─── Modal Activar Empresa desde Demo ────────────────────────────────────────
+
+function ModalActivarEmpresa({ lead, onClose, onSuccess }) {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [activada, setActivada] = useState(false)
+
+  const handleActivar = async () => {
+    setLoading(true); setError('')
+    try {
+      await activarEmpresaDesdeDemo(lead.id)
+      setActivada(true)
+      onSuccess()
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 50,
+      background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
+    }} onClick={e => e.target === e.currentTarget && !activada && onClose()}>
+      <div style={{
+        background: 'var(--bg-sidebar)', border: '1px solid var(--border-primary)',
+        borderRadius: 20, padding: 32, maxWidth: 480, width: '100%',
+        boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+      }}>
+        {activada ? (
+          <div style={{ textAlign: 'center' }}>
+            <div style={{
+              width: 64, height: 64, borderRadius: '50%', margin: '0 auto 20px',
+              background: 'rgba(16,185,129,0.15)', border: '2px solid #10B981',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <CheckCircle2 size={30} color="#10B981" />
+            </div>
+            <h3 style={{ margin: '0 0 10px', fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>
+              ¡Empresa activada!
+            </h3>
+            <p style={{ margin: '0 0 24px', fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.7 }}>
+              <strong style={{ color: 'var(--text-primary)' }}>{lead.empresa_nombre}</strong> ya es una empresa activa.
+              <br />Toda la configuración del demo quedó conservada — no necesitan registrarse de nuevo.
+            </p>
+            <button onClick={onClose} style={{
+              width: '100%', padding: '11px', borderRadius: 10, cursor: 'pointer',
+              background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-primary)',
+              color: 'var(--text-primary)', fontWeight: 600, fontSize: 14,
+            }}>Cerrar</button>
+          </div>
+        ) : (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+              <div style={{
+                width: 44, height: 44, borderRadius: 12,
+                background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+                <Zap size={20} color="#34D399" />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: 'var(--text-primary)' }}>
+                  Activar empresa real
+                </h3>
+                <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--text-muted)' }}>
+                  {lead.empresa_nombre}
+                </p>
+              </div>
+            </div>
+
+            <div style={{
+              padding: '14px 16px', borderRadius: 12, marginBottom: 20,
+              background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(16,185,129,0.2)',
+              fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6,
+            }}>
+              <p style={{ margin: '0 0 8px', fontWeight: 700, color: '#34D399' }}>¿Qué ocurre al activar?</p>
+              <p style={{ margin: 0 }}>
+                ✅ La empresa queda como <strong style={{ color: 'var(--text-primary)' }}>cliente activo permanente</strong>.<br />
+                ✅ Toda la configuración del demo <strong style={{ color: 'var(--text-primary)' }}>se conserva</strong> — portal, estructura, usuarios.<br />
+                ✅ Sin necesidad de registro adicional.<br />
+                🗑️ Solo se elimina el temporizador de demo.
+              </p>
+            </div>
+
+            {error && (
+              <div style={{
+                display: 'flex', gap: 8, padding: '10px 12px', borderRadius: 8, marginBottom: 16,
+                background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
+                fontSize: 12, color: '#FCA5A5', alignItems: 'center',
+              }}>
+                <AlertCircle size={14} color="#F87171" />{error}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={onClose} style={{
+                flex: 1, padding: '11px', borderRadius: 10, cursor: 'pointer',
+                background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-primary)',
+                color: 'var(--text-muted)', fontWeight: 600, fontSize: 14,
+              }}>Cancelar</button>
+              <button onClick={handleActivar} disabled={loading} style={{
+                flex: 2, padding: '11px', borderRadius: 10, cursor: loading ? 'not-allowed' : 'pointer',
+                background: loading ? 'rgba(16,185,129,0.3)' : '#10B981',
+                border: 'none', color: '#fff', fontWeight: 700, fontSize: 14,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              }}>
+                {loading
+                  ? <><Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> Activando...</>
+                  : <><Zap size={15} /> Activar empresa real</>
+                }
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ─── Componente principal ─────────────────────────────────────────────────────
 
 export default function Leads() {
@@ -327,6 +652,8 @@ export default function Leads() {
   const [filtroEstado, setFiltroEstado] = useState('') // '' = todos
   const [modalAprobar, setModalAprobar] = useState(null)
   const [modalRechazar, setModalRechazar] = useState(null)
+  const [modalDemo, setModalDemo] = useState(null)
+  const [modalActivar, setModalActivar] = useState(null)
   const [copiedLink, setCopiedLink] = useState(null)
 
   const cargar = useCallback(async () => {
@@ -522,6 +849,16 @@ export default function Leads() {
                         <Check size={11} /> Aprobar
                       </button>
                       <button
+                        onClick={() => setModalDemo(lead)}
+                        style={{
+                          padding: '5px 10px', borderRadius: 7, cursor: 'pointer', fontSize: 11, fontWeight: 700,
+                          background: 'rgba(14,165,233,0.1)', border: '1px solid rgba(14,165,233,0.25)',
+                          color: '#38BDF8', display: 'flex', alignItems: 'center', gap: 4,
+                        }}
+                      >
+                        <Timer size={11} /> Demo
+                      </button>
+                      <button
                         onClick={() => setModalRechazar(lead)}
                         style={{
                           padding: '5px 10px', borderRadius: 7, cursor: 'pointer', fontSize: 11, fontWeight: 700,
@@ -534,9 +871,23 @@ export default function Leads() {
                     </>
                   )}
                   {lead.estado === 'aprobado' && (
-                    <span style={{ fontSize: 11, color: '#34D399', display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <CheckCircle2 size={12} /> Aprobado por {lead.aprobado_por}
-                    </span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                      <span style={{ fontSize: 11, color: '#34D399', display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <CheckCircle2 size={12} /> Aprobado por {lead.aprobado_por}
+                      </span>
+                      {lead.company_id && (
+                        <button
+                          onClick={() => setModalActivar(lead)}
+                          style={{
+                            padding: '5px 10px', borderRadius: 7, cursor: 'pointer', fontSize: 11, fontWeight: 700,
+                            background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)',
+                            color: '#34D399', display: 'flex', alignItems: 'center', gap: 4,
+                          }}
+                        >
+                          <Zap size={11} /> Activar empresa
+                        </button>
+                      )}
+                    </div>
                   )}
                   {lead.estado === 'rechazado' && (
                     <span style={{ fontSize: 11, color: '#F87171', display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -563,6 +914,20 @@ export default function Leads() {
           lead={modalRechazar}
           onClose={() => setModalRechazar(null)}
           onSuccess={cargar}
+        />
+      )}
+      {modalDemo && (
+        <ModalAprobarDemo
+          lead={modalDemo}
+          onClose={() => setModalDemo(null)}
+          onSuccess={() => { cargar(); setModalDemo(null) }}
+        />
+      )}
+      {modalActivar && (
+        <ModalActivarEmpresa
+          lead={modalActivar}
+          onClose={() => setModalActivar(null)}
+          onSuccess={() => { cargar(); setModalActivar(null) }}
         />
       )}
     </div>

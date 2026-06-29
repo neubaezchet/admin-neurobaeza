@@ -4,7 +4,7 @@ import {
   ShieldCheck, Building2, RefreshCw, AlertCircle, Eye, EyeOff,
   UserCircle, Key, ToggleLeft, ToggleRight
 } from 'lucide-react'
-import { getUsers, createUser, updateUser, deleteUser, getEmpresas } from '../api'
+import { getUsers, createUser, updateUser, deleteUser, getEmpresas, getStoredUser } from '../api'
 
 const ROLES = [
   { value: 'superadmin', label: 'Super Admin',    color: 'text-red-400',    bg: 'rgba(239,68,68,0.1)',     desc: 'Acceso total al sistema' },
@@ -47,6 +47,10 @@ function RoleBadge({ rol }) {
 }
 
 export default function UsersPermissions() {
+  const currentUser = getStoredUser()
+  const isTenantAdmin = !!currentUser?.es_tenant_admin
+  const myCompanyId = currentUser?.company_id
+
   const [users, setUsers] = useState([])
   const [empresas, setEmpresas] = useState([])
   const [loading, setLoading] = useState(true)
@@ -72,6 +76,8 @@ export default function UsersPermissions() {
   useEffect(() => { load() }, [load])
 
   const filtered = users.filter(u => {
+    // Tenant admin: solo ve usuarios de su empresa
+    if (isTenantAdmin && u.company_id !== myCompanyId) return false
     if (!search) return true
     const q = search.toLowerCase()
     return (
