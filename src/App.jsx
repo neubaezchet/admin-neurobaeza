@@ -32,6 +32,9 @@ export default function App() {
       {/* Registro self-service — público, sin JWT, usa token de invitación */}
       <Route path="/registro" element={<RegistroEmpresa />} />
 
+      {/* Onboarding público completo — wizard "Hola" con token de invitación */}
+      <Route path="/onboarding" element={<TenantOnboarding />} />
+
       {/* Formulario público de solicitud de demo */}
       <Route path="/solicitar-demo" element={<SolicitarDemo />} />
 

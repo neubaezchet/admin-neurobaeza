@@ -8,16 +8,17 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   Building2, Palette, Mail, HardDrive, CheckSquare,
   ChevronRight, ChevronLeft, Check, Loader2, AlertCircle,
   Upload, RefreshCw, FolderOpen, MapPin, Clock, Network,
-  Plus, X, Lock,
+  Plus, X, Lock, Eye, EyeOff,
 } from 'lucide-react'
 import {
   getTenant, saveTenantOnboardingStep, completeTenantOnboarding,
   verifyTenantDrive, getOnboardingProgress, getServiceAccountEmail,
+  validarTokenRegistro, completarRegistro, saveSession,
 } from '../api'
 
 // ─── Paletas ──────────────────────────────────────────────
@@ -50,6 +51,17 @@ const STEPS_CONFIG = [
   { id: 5, Icon: Palette,     label: 'Visual',       shortLabel: 'Visual' },
   { id: 6, Icon: HardDrive,   label: 'Drive',        shortLabel: 'Drive' },
   { id: 7, Icon: CheckSquare, label: 'Activar',      shortLabel: 'Activar' },
+]
+
+const STEPS_CONFIG_PUBLIC = [
+  { id: 1, Icon: Building2,   label: 'Empresa',      shortLabel: 'Empresa' },
+  { id: 2, Icon: Network,     label: 'Estructura',   shortLabel: 'Estructura' },
+  { id: 3, Icon: Clock,       label: 'Ciclo',        shortLabel: 'Ciclo' },
+  { id: 4, Icon: Mail,        label: 'Contacto',     shortLabel: 'Contacto' },
+  { id: 5, Icon: Palette,     label: 'Visual',       shortLabel: 'Visual' },
+  { id: 6, Icon: HardDrive,   label: 'Drive',        shortLabel: 'Drive' },
+  { id: 7, Icon: Lock,        label: 'Acceso',       shortLabel: 'Acceso' },
+  { id: 8, Icon: CheckSquare, label: 'Activar',      shortLabel: 'Activar' },
 ]
 
 // ─── Helpers ──────────────────────────────────────────────
@@ -159,14 +171,14 @@ function Field({ label, hint, children }) {
 
 // ─── Indicador de pasos ───────────────────────────────────
 
-function StepIndicator({ current, paletaId }) {
+function StepIndicator({ current, paletaId, steps = STEPS_CONFIG }) {
   const paleta = getPaleta(paletaId)
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 0,
       overflowX: 'auto', padding: '0 4px',
     }}>
-      {STEPS_CONFIG.map((s, i) => {
+      {steps.map((s, i) => {
         const done = s.id < current
         const active = s.id === current
         const { Icon } = s
@@ -195,7 +207,7 @@ function StepIndicator({ current, paletaId }) {
                 {s.shortLabel}
               </span>
             </div>
-            {i < STEPS_CONFIG.length - 1 && (
+            {i < steps.length - 1 && (
               <div style={{
                 width: 28, height: 2,
                 marginBottom: 20, flexShrink: 0,
@@ -991,24 +1003,30 @@ function Step6({ data, onChange, companyId, paletaId, serviceAccountEmail }) {
         </p>
       )}
 
-      {/* Botón verificar */}
-      <button
-        type="button"
-        onClick={verify}
-        disabled={verifying || !data.google_workspace_drive_id}
-        style={{
-          width: '100%', padding: '12px', borderRadius: 10, cursor: 'pointer',
-          background: verifying ? 'rgba(255,255,255,0.06)' : paleta.primary,
-          border: 'none', color: '#fff', fontWeight: 600, fontSize: 14,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-          transition: 'all 0.2s', opacity: (verifying || !data.google_workspace_drive_id) ? 0.5 : 1,
-        }}
-      >
-        {verifying
-          ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Verificando acceso...</>
-          : <><RefreshCw size={16} /> Verificar que el sistema tiene acceso</>
-        }
-      </button>
+      {/* Botón verificar — solo disponible con sesión activa */}
+      {companyId ? (
+        <button
+          type="button"
+          onClick={verify}
+          disabled={verifying || !data.google_workspace_drive_id}
+          style={{
+            width: '100%', padding: '12px', borderRadius: 10, cursor: 'pointer',
+            background: verifying ? 'rgba(255,255,255,0.06)' : paleta.primary,
+            border: 'none', color: '#fff', fontWeight: 600, fontSize: 14,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            transition: 'all 0.2s', opacity: (verifying || !data.google_workspace_drive_id) ? 0.5 : 1,
+          }}
+        >
+          {verifying
+            ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Verificando acceso...</>
+            : <><RefreshCw size={16} /> Verificar que el sistema tiene acceso</>
+          }
+        </button>
+      ) : (
+        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', textAlign: 'center', margin: 0 }}>
+          La verificación de acceso estará disponible después de activar tu empresa.
+        </p>
+      )}
 
       {/* Error */}
       {err && (
@@ -1195,14 +1213,97 @@ function WelcomeScreen({ onStart }) {
   )
 }
 
+// ─── Step 7 público: Acceso ───────────────────────────────
+
+function StepAcceso({ data, onChange, paletaId }) {
+  const paleta = getPaleta(paletaId)
+  const [showPass, setShowPass]       = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+
+  const passwordMismatch =
+    data.admin_password_confirm && data.admin_password !== data.admin_password_confirm
+
+  return (
+    <WizardCard
+      Icon={Lock}
+      title="Acceso al sistema"
+      desc="Crea la contraseña que usarás para entrar al portal de administración."
+      paletaId={paletaId}
+    >
+      <div style={{
+        padding: '12px 14px', borderRadius: 10, marginBottom: 22,
+        background: `${paleta.primary}10`, border: `1px solid ${paleta.primary}25`,
+        fontSize: 12, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6,
+      }}>
+        Tu nombre de usuario se genera automáticamente a partir de tu correo electrónico.
+        La contraseña que elijas aquí es la que usarás para ingresar al sistema.
+      </div>
+
+      <Field label="Contraseña *" hint="Mínimo 8 caracteres">
+        <div style={{ position: 'relative' }}>
+          <Input
+            type={showPass ? 'text' : 'password'}
+            value={data.admin_password || ''}
+            onChange={e => onChange({ admin_password: e.target.value })}
+            placeholder="Tu contraseña"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPass(v => !v)}
+            style={{
+              position: 'absolute', right: 10, top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'none', border: 'none', cursor: 'pointer', padding: 4,
+              color: 'rgba(255,255,255,0.4)',
+            }}
+          >
+            {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
+        </div>
+      </Field>
+
+      <Field label="Confirmar contraseña *">
+        <div style={{ position: 'relative' }}>
+          <Input
+            type={showConfirm ? 'text' : 'password'}
+            value={data.admin_password_confirm || ''}
+            onChange={e => onChange({ admin_password_confirm: e.target.value })}
+            placeholder="Repite tu contraseña"
+            error={passwordMismatch ? 'Las contraseñas no coinciden' : undefined}
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirm(v => !v)}
+            style={{
+              position: 'absolute', right: 10, top: passwordMismatch ? '35%' : '50%',
+              transform: 'translateY(-50%)',
+              background: 'none', border: 'none', cursor: 'pointer', padding: 4,
+              color: 'rgba(255,255,255,0.4)',
+            }}
+          >
+            {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
+        </div>
+      </Field>
+    </WizardCard>
+  )
+}
+
 // ─── Main wizard ──────────────────────────────────────────
 
 export default function TenantOnboarding() {
-  const { companyId } = useParams()
+  const { companyId: companyIdParam } = useParams()
+  const [searchParams] = useSearchParams()
+  const token = searchParams.get('token')
+  const isPublicMode = !!token
   const navigate = useNavigate()
 
   const vantaRef = useRef(null)
   const vantaEffect = useRef(null)
+
+  const MAX_STEP = isPublicMode ? 8 : 7
+  const steps    = isPublicMode ? STEPS_CONFIG_PUBLIC : STEPS_CONFIG
+  const companyId = isPublicMode ? null : companyIdParam
 
   // Estados
   const [showWelcome, setShowWelcome] = useState(true)
@@ -1266,22 +1367,32 @@ export default function TenantOnboarding() {
     }
   }, [])
 
-  // ── Cargar progreso guardado ──────────────────────────
+  // ── Cargar datos iniciales ────────────────────────────
   useEffect(() => {
     const load = async () => {
       try {
-        const [t, prog] = await Promise.all([
-          getTenant(companyId),
-          getOnboardingProgress(companyId),
-        ])
-        setTenant(t)
-        const acumulado = prog.data_acumulada || {}
-        if (Object.keys(acumulado).length > 0) {
-          setData({ ...acumulado, nombre: acumulado.nombre || t.nombre, nit: acumulado.nit || t.nit })
-          setStep(Math.min(prog.step_actual || 1, 7))
-          if (prog.step_actual > 1) setShowWelcome(false)
+        if (isPublicMode) {
+          const res = await validarTokenRegistro(token)
+          setTenant(res.company)
+          setData({
+            nombre: res.company.nombre,
+            nit: res.company.nit,
+            contacto_email: res.company.contacto_email || '',
+          })
         } else {
-          setData({ nombre: t.nombre, nit: t.nit })
+          const [t, prog] = await Promise.all([
+            getTenant(companyIdParam),
+            getOnboardingProgress(companyIdParam),
+          ])
+          setTenant(t)
+          const acumulado = prog.data_acumulada || {}
+          if (Object.keys(acumulado).length > 0) {
+            setData({ ...acumulado, nombre: acumulado.nombre || t.nombre, nit: acumulado.nit || t.nit })
+            setStep(Math.min(prog.step_actual || 1, 7))
+            if (prog.step_actual > 1) setShowWelcome(false)
+          } else {
+            setData({ nombre: t.nombre, nit: t.nit })
+          }
         }
       } catch (e) {
         setError(e.message)
@@ -1290,7 +1401,7 @@ export default function TenantOnboarding() {
       }
     }
     load()
-  }, [companyId])
+  }, [isPublicMode ? token : companyIdParam])
 
   const mergeData = useCallback((patch) => {
     setData(prev => ({ ...prev, ...patch }))
@@ -1299,7 +1410,9 @@ export default function TenantOnboarding() {
   const saveStep = async (targetStep) => {
     setSaving(true); setError('')
     try {
-      await saveTenantOnboardingStep(companyId, { step, data })
+      if (!isPublicMode) {
+        await saveTenantOnboardingStep(companyIdParam, { step, data })
+      }
       setStep(targetStep)
     } catch (e) {
       setError(e.message)
@@ -1308,23 +1421,65 @@ export default function TenantOnboarding() {
     }
   }
 
-  // Paso 5 → 6 (Drive opcional) → 7 (Activar)
-  const handleNext = () => { if (step < 7) saveStep(step + 1) }
+  const handleNext = () => { if (step < MAX_STEP) saveStep(step + 1) }
   const handleBack = () => { if (step > 1) setStep(step - 1) }
-  const handleSkipDrive = () => saveStep(7)
+  const handleSkipDrive = () => saveStep(step + 1)
 
+  // Modo admin: guarda pasos y llama completeTenantOnboarding
   const handleComplete = async () => {
     setSaving(true); setError('')
     try {
-      await saveTenantOnboardingStep(companyId, { step: 7, data })
-      const result = await completeTenantOnboarding(companyId)
-      navigate(`/tenants/${companyId}/welcome`, {
+      await saveTenantOnboardingStep(companyIdParam, { step: 7, data })
+      const result = await completeTenantOnboarding(companyIdParam)
+      navigate(`/tenants/${companyIdParam}/welcome`, {
         state: {
           tenant: { ...tenant, ...data, ...result.company },
           credentials: {
             username: result.tenant_admin_username,
             password: result.tenant_admin_password_temporal,
           },
+        },
+      })
+    } catch (e) {
+      setError(e.message)
+      setSaving(false)
+    }
+  }
+
+  // Modo público: llama completarRegistro con todo el wizard de una sola vez
+  const handleCompletePublico = async () => {
+    if (!data.admin_password || data.admin_password.length < 8) {
+      setError('La contraseña debe tener al menos 8 caracteres.')
+      return
+    }
+    if (data.admin_password !== data.admin_password_confirm) {
+      setError('Las contraseñas no coinciden.')
+      return
+    }
+    setSaving(true); setError('')
+    try {
+      const result = await completarRegistro({
+        token,
+        nit:                        data.nit,
+        nombre:                     data.nombre,
+        tipo_estructura:            data.tipo_estructura            || 'unica',
+        sub_empresas:               data.sub_empresas               || [],
+        ciclo_reporte:              data.ciclo_reporte              || 'mensual',
+        zona_horaria:               data.zona_horaria               || 'America/Bogota',
+        contacto_email:             data.contacto_email,
+        correo_drive:               data.correo_drive,
+        admin_password:             data.admin_password,
+        paleta_id:                  data.paleta_id                  || 'ocean',
+        paleta_colores:             data.paleta_colores             || {},
+        estilo_ui:                  data.estilo_ui                  || 'default',
+        logo_url:                   data.logo_url                   || null,
+        google_workspace_drive_id:  data.google_workspace_drive_id  || null,
+      })
+      saveSession(result.token, result.user)
+      navigate(`/tenants/${result.company.id}/welcome`, {
+        state: {
+          tenant: { ...tenant, ...data, ...result.company },
+          credentials: { username: result.admin_username },
         },
       })
     } catch (e) {
@@ -1401,13 +1556,13 @@ export default function TenantOnboarding() {
               margin: 0, fontSize: 'clamp(20px,4vw,28px)', fontWeight: 800,
               color: 'rgba(255,255,255,0.95)', letterSpacing: '-0.02em',
             }}>
-              {tenant?.nombre || 'Nueva Empresa'}
+              {data.nombre || tenant?.nombre || 'Tu empresa'}
             </h1>
           </div>
 
           {/* Step indicator */}
           <div style={{ marginBottom: 32 }}>
-            <StepIndicator current={step} paletaId={paletaId} />
+            <StepIndicator current={step} paletaId={paletaId} steps={steps} />
           </div>
 
           {/* Step cards con transición */}
@@ -1427,9 +1582,17 @@ export default function TenantOnboarding() {
               />
             )}
             {step === 6 && (
-              <Step6 data={data} onChange={mergeData} companyId={companyId} paletaId={paletaId} serviceAccountEmail={serviceAccountEmail} />
+              <Step6
+                data={data} onChange={mergeData}
+                companyId={isPublicMode ? null : companyIdParam}
+                paletaId={paletaId}
+                serviceAccountEmail={serviceAccountEmail}
+              />
             )}
-            {step === 7 && <Step7 data={data} paletaId={paletaId} />}
+            {step === 7 && isPublicMode && (
+              <StepAcceso data={data} onChange={mergeData} paletaId={paletaId} />
+            )}
+            {step === (isPublicMode ? 8 : 7) && <Step7 data={data} paletaId={paletaId} />}
           </div>
 
           {/* Error */}
@@ -1471,7 +1634,11 @@ export default function TenantOnboarding() {
 
             <button
               type="button"
-              onClick={step === 7 ? handleComplete : handleNext}
+              onClick={
+                step === MAX_STEP
+                  ? (isPublicMode ? handleCompletePublico : handleComplete)
+                  : handleNext
+              }
               disabled={saving}
               style={{
                 flex: 1, padding: '13px', borderRadius: 12, cursor: saving ? 'not-allowed' : 'pointer',
@@ -1484,8 +1651,8 @@ export default function TenantOnboarding() {
               }}
             >
               {saving ? (
-                <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Guardando...</>
-              ) : step === 7 ? (
+                <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> {isPublicMode ? 'Activando...' : 'Guardando...'}</>
+              ) : step === MAX_STEP ? (
                 <><Lock size={16} /> Activar empresa</>
               ) : (
                 <>Continuar <ChevronRight size={16} /></>
