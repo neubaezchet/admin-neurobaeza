@@ -795,12 +795,12 @@ export default function Leads() {
             {/* Cabecera tabla */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: '1.5fr 1fr 1.2fr 1.5fr 0.8fr 0.8fr 0.9fr 1.2fr',
+              gridTemplateColumns: '1.5fr 1fr 1.2fr 1.5fr 0.8fr 0.7fr 0.7fr 0.9fr 1.2fr',
               padding: '10px 20px', gap: 12,
               background: 'rgba(255,255,255,0.02)',
               borderBottom: '1px solid var(--border-primary)',
             }}>
-              {['Empresa', 'NIT', 'Contacto', 'Correo', 'Teléfono', 'Cómo nos conoció', 'Fecha', 'Acciones'].map(h => (
+              {['Empresa', 'NIT', 'Contacto', 'Correo', 'Teléfono', 'N° empleados', 'Cómo nos conoció', 'Fecha', 'Acciones'].map(h => (
                 <span key={h} style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                   {h}
                 </span>
@@ -813,7 +813,7 @@ export default function Leads() {
                 key={lead.id}
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '1.5fr 1fr 1.2fr 1.5fr 0.8fr 0.8fr 0.9fr 1.2fr',
+                  gridTemplateColumns: '1.5fr 1fr 1.2fr 1.5fr 0.8fr 0.7fr 0.7fr 0.9fr 1.2fr',
                   padding: '14px 20px', gap: 12, alignItems: 'center',
                   borderBottom: i < leads.length - 1 ? '1px solid var(--border-primary)' : 'none',
                   transition: 'background 0.15s',
@@ -831,6 +831,9 @@ export default function Leads() {
                 <span style={{ fontSize: 12, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.contacto_nombre}</span>
                 <span style={{ fontSize: 12, color: '#38BDF8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.contacto_email}</span>
                 <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{lead.contacto_telefono || '—'}</span>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: lead.mensaje ? 600 : 400 }}>
+                  {lead.mensaje ? <><Users size={11} style={{ marginRight: 3, verticalAlign: 'middle' }} />{lead.mensaje}</> : '—'}
+                </span>
                 <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{lead.como_conocio || '—'}</span>
                 <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{fmtFecha(lead.created_at)}</span>
 

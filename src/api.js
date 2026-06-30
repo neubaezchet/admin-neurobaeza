@@ -281,8 +281,15 @@ export function getTenantAuditLog(companyId, { limit = 50, offset = 0 } = {}) {
 // ─── Demo / Solicitudes de acceso (públicos — sin token JWT) ─────────────────
 
 export function solicitarDemo(data) {
-  // Público: cualquiera puede solicitar acceso
   return apiFetch('/demo/solicitar', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export function solicitarDemoAuto(data) {
+  // Demo auto-servicio: crea Company + token + DemoSession sin intervención del admin
+  return apiFetch('/demo/solicitar-auto', {
     method: 'POST',
     body: JSON.stringify(data),
   })
