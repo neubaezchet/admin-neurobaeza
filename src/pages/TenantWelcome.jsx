@@ -41,7 +41,7 @@ const PORTALES = [
     id: 'recepcion',
     label: 'RopoGemini',
     desc: 'Recepción y carga de incapacidades',
-    url: 'https://ropogemini.vercel.app',
+    url: 'https://repogemin.vercel.app',
     icon: Upload,
     color: '#F59E0B',
   },

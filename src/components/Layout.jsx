@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { Mail, Users, Monitor, LogOut, ShieldCheck, ChevronRight, Cpu, Bot, Settings, Building2, LayoutList, Activity, ClipboardList } from 'lucide-react'
 import { logout } from '../api'
+import { useTenantTheme, clearTenantThemeCache } from '../hooks/useTenantTheme'
 
 const NAV_FULL = [
   { to: '/bots',                   icon: Bot,           label: 'Configuración de Bots',   desc: 'Bots de radicación' },
@@ -25,7 +26,11 @@ export default function Layout({ user, children }) {
       ]
     : NAV_FULL
 
+  // Tema del tenant: paleta + logo elegidos en el onboarding (solo tenant admins)
+  const { theme } = useTenantTheme(null, { enabled: isTenantAdmin })
+
   const handleLogout = () => {
+    clearTenantThemeCache()
     logout()
     navigate('/login')
   }
@@ -62,18 +67,30 @@ export default function Layout({ user, children }) {
           style={{ borderBottom: '1px solid var(--border-primary)' }}
         >
           <div className="flex items-center gap-3">
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{
-                background: 'linear-gradient(135deg, #0EA5E9, #0284C7)',
-                boxShadow: '0 4px 12px rgba(14,165,233,0.35)',
-              }}
-            >
-              <ShieldCheck className="w-5 h-5 text-white" strokeWidth={1.75} />
-            </div>
+            {theme?.logo_url ? (
+              <img
+                src={theme.logo_url}
+                alt={theme.empresa || 'Logo'}
+                className="w-9 h-9 rounded-xl flex-shrink-0 object-contain"
+                style={{
+                  background: 'rgba(255,255,255,0.06)',
+                  boxShadow: '0 4px 12px var(--accent-glow, rgba(14,165,233,0.35))',
+                }}
+              />
+            ) : (
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{
+                  background: 'linear-gradient(135deg, var(--accent-primary, #0EA5E9), var(--accent-primary-hover, #0284C7))',
+                  boxShadow: '0 4px 12px var(--accent-glow, rgba(14,165,233,0.35))',
+                }}
+              >
+                <ShieldCheck className="w-5 h-5 text-white" strokeWidth={1.75} />
+              </div>
+            )}
             <div className="min-w-0">
               <h1 className="text-sm font-bold leading-tight tracking-tight gradient-text">
-                NeuroBareza
+                {(isTenantAdmin && theme?.empresa) || 'NeuroBareza'}
               </h1>
               <p className="text-[10px] font-medium mt-0.5" style={{ color: 'var(--text-muted)' }}>
                 {isTenantAdmin ? 'Portal Empresa' : 'Admin Portal'}

@@ -39,21 +39,37 @@ function writeCache(theme) {
   } catch { /* storage full o privado */ }
 }
 
+function hexToRgba(hex, alpha) {
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || '')
+  if (!m) return `rgba(14, 165, 233, ${alpha})`
+  return `rgba(${parseInt(m[1], 16)}, ${parseInt(m[2], 16)}, ${parseInt(m[3], 16)}, ${alpha})`
+}
+
 function applyCSSVars(paleta, logoUrl) {
   const root = document.documentElement
-  if (!paleta) return
+  if (!paleta || !paleta.primary) return
   root.style.setProperty('--tenant-primary',   paleta.primary   || '#3B82F6')
   root.style.setProperty('--tenant-secondary',  paleta.secondary || '#6366F1')
   root.style.setProperty('--tenant-accent',     paleta.accent    || '#EC4899')
   root.style.setProperty('--tenant-logo',       logoUrl ? `url(${logoUrl})` : '')
+
+  // Sobrescribir las variables reales del design system para que TODO el
+  // portal adopte la paleta del tenant (botones, focos, links, glows).
+  root.style.setProperty('--accent-primary',       paleta.primary)
+  root.style.setProperty('--accent-primary-hover', paleta.secondary || paleta.primary)
+  root.style.setProperty('--accent-primary-dark',  paleta.accent    || paleta.primary)
+  root.style.setProperty('--accent-primary-soft',  hexToRgba(paleta.primary, 0.12))
+  root.style.setProperty('--accent-glow',          hexToRgba(paleta.primary, 0.35))
 }
 
-export function useTenantTheme(companyId = null) {
-  const [theme, setTheme] = useState(readCache())
-  const [loading, setLoading] = useState(!readCache())
+export function useTenantTheme(companyId = null, { enabled = true } = {}) {
+  const [theme, setTheme] = useState(enabled ? readCache() : null)
+  const [loading, setLoading] = useState(enabled && !readCache())
   const [error, setError] = useState(null)
 
   useEffect(() => {
+    if (!enabled) return
+
     const cached = readCache()
     if (cached) {
       applyCSSVars(cached.paleta_colores, cached.logo_url)
@@ -84,7 +100,7 @@ export function useTenantTheme(companyId = null) {
 
     load()
     return () => { cancelled = true }
-  }, [companyId])
+  }, [companyId, enabled])
 
   const invalidate = () => {
     localStorage.removeItem(CACHE_KEY)
@@ -101,7 +117,11 @@ export function useTenantTheme(companyId = null) {
 export function clearTenantThemeCache() {
   localStorage.removeItem(CACHE_KEY)
   const root = document.documentElement
-  for (const prop of ['--tenant-primary', '--tenant-secondary', '--tenant-accent', '--tenant-logo']) {
+  for (const prop of [
+    '--tenant-primary', '--tenant-secondary', '--tenant-accent', '--tenant-logo',
+    '--accent-primary', '--accent-primary-hover', '--accent-primary-dark',
+    '--accent-primary-soft', '--accent-glow',
+  ]) {
     root.style.removeProperty(prop)
   }
 }
