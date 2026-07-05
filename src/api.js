@@ -242,10 +242,17 @@ export function deactivateTenant(companyId) {
   return apiFetch(`/tenants/${companyId}`, { method: 'DELETE' })
 }
 
-// Tema visual del tenant
-export function getTenantTheme(companyIdOrMe) {
-  if (companyIdOrMe === 'me') return apiFetch('/tenants/me/theme')
-  return apiFetch(`/tenants/${companyIdOrMe}/theme`)
+// Tema visual del tenant (portal: 'admin' | 'portal' | 'repogemin' — paleta específica de ese portal)
+export function getTenantTheme(companyIdOrMe, portal = 'admin') {
+  const q = portal ? `?portal=${portal}` : ''
+  if (companyIdOrMe === 'me') return apiFetch(`/tenants/me/theme${q}`)
+  return apiFetch(`/tenants/${companyIdOrMe}/theme${q}`)
+}
+
+// Branding público por slug (pre-login: NO requiere token)
+export function getPublicBranding(slug, portal = 'admin') {
+  return fetch(`${API_BASE}/public/portal/${encodeURIComponent(slug)}?portal=${portal}`)
+    .then(r => { if (!r.ok) throw new Error('Empresa no encontrada'); return r.json() })
 }
 
 // Invitación de onboarding (genera link de un solo uso)

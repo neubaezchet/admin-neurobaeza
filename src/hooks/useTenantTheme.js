@@ -16,7 +16,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { getTenantTheme } from '../api'
+import { getTenantTheme, getPublicBranding } from '../api'
 
 const CACHE_KEY = 'tenant_theme_cache'
 const TTL_MS = 60 * 60 * 1000  // 1 hora
@@ -84,8 +84,8 @@ export function useTenantTheme(companyId = null, { enabled = true } = {}) {
     const load = async () => {
       try {
         const data = companyId
-          ? await getTenantTheme(companyId)
-          : await getTenantTheme('me')
+          ? await getTenantTheme(companyId, 'admin')
+          : await getTenantTheme('me', 'admin')
 
         if (cancelled) return
         writeCache(data)
@@ -109,6 +109,30 @@ export function useTenantTheme(companyId = null, { enabled = true } = {}) {
   }
 
   return { theme, loading, error, invalidate }
+}
+
+/**
+ * useSlugBranding — theming PRE-LOGIN por slug en la URL (?empresa=mi-empresa).
+ * Pinta la pantalla de login con la paleta y logo de la empresa antes de autenticar.
+ */
+export function useSlugBranding(portal = 'admin') {
+  const [branding, setBranding] = useState(null)
+
+  useEffect(() => {
+    const slug = new URLSearchParams(window.location.search).get('empresa')
+    if (!slug) return
+    let cancelled = false
+    getPublicBranding(slug, portal)
+      .then(data => {
+        if (cancelled || !data?.ok) return
+        applyCSSVars(data.paleta_colores, data.logo_url)
+        setBranding(data)
+      })
+      .catch(() => { /* slug inválido → branding por defecto */ })
+    return () => { cancelled = true }
+  }, [portal])
+
+  return branding
 }
 
 /**

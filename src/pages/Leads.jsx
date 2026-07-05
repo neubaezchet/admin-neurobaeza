@@ -21,6 +21,7 @@ function EstadoChip({ estado }) {
     pendiente: { label: 'Pendiente', bg: 'rgba(251,191,36,0.12)', color: '#FCD34D', border: 'rgba(251,191,36,0.25)' },
     aprobado:  { label: 'Aprobado',  bg: 'rgba(16,185,129,0.12)', color: '#34D399', border: 'rgba(16,185,129,0.25)' },
     rechazado: { label: 'Rechazado', bg: 'rgba(239,68,68,0.12)',  color: '#F87171', border: 'rgba(239,68,68,0.25)' },
+    expirado:  { label: 'Demo expirado', bg: 'rgba(148,163,184,0.12)', color: '#94A3B8', border: 'rgba(148,163,184,0.25)' },
   }
   const s = map[estado] || map.pendiente
   return (
@@ -526,11 +527,13 @@ function ModalActivarEmpresa({ lead, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [activada, setActivada] = useState(false)
+  const [resultado, setResultado] = useState(null)
 
   const handleActivar = async () => {
     setLoading(true); setError('')
     try {
-      await activarEmpresaDesdeDemo(lead.id)
+      const res = await activarEmpresaDesdeDemo(lead.id)
+      setResultado(res)
       setActivada(true)
       onSuccess()
     } catch (e) {
@@ -561,12 +564,31 @@ function ModalActivarEmpresa({ lead, onClose, onSuccess }) {
               <CheckCircle2 size={30} color="#10B981" />
             </div>
             <h3 style={{ margin: '0 0 10px', fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>
-              ¡Empresa activada!
+              {resultado?.recreada ? '¡Empresa recreada!' : '¡Empresa activada!'}
             </h3>
-            <p style={{ margin: '0 0 24px', fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.7 }}>
-              <strong style={{ color: 'var(--text-primary)' }}>{lead.empresa_nombre}</strong> ya es una empresa activa.
-              <br />Toda la configuración del demo quedó conservada — no necesitan registrarse de nuevo.
+            <p style={{ margin: '0 0 16px', fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.7 }}>
+              {resultado?.mensaje || (
+                <>
+                  <strong style={{ color: 'var(--text-primary)' }}>{lead.empresa_nombre}</strong> ya es una empresa activa.
+                  <br />Toda la configuración del demo quedó conservada — no necesitan registrarse de nuevo.
+                </>
+              )}
             </p>
+            {resultado?.links && (
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 20, flexWrap: 'wrap' }}>
+                {[['admin', '🔵 Admin'], ['portal', '🟢 Validación'], ['repogemin', '🟡 Recepción']].map(([key, label]) => resultado.links[key] && (
+                  <a key={key} href={resultado.links[key]} target="_blank" rel="noopener noreferrer" style={{
+                    fontSize: 12, fontWeight: 600, padding: '6px 12px', borderRadius: 8, textDecoration: 'none',
+                    background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-primary)', color: 'var(--text-primary)',
+                  }}>{label}</a>
+                ))}
+              </div>
+            )}
+            {resultado?.recreada && resultado?.link_registro && (
+              <p style={{ margin: '0 0 20px', fontSize: 12, color: '#FCD34D', lineHeight: 1.6 }}>
+                📧 Se envió una nueva invitación de registro al contacto (el demo anterior ya había sido eliminado).
+              </p>
+            )}
             <button onClick={onClose} style={{
               width: '100%', padding: '11px', borderRadius: 10, cursor: 'pointer',
               background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-primary)',
@@ -683,6 +705,7 @@ export default function Leads() {
     { value: 'pendiente', label: 'Pendientes' },
     { value: 'aprobado', label: 'Aprobados' },
     { value: 'rechazado', label: 'Rechazados' },
+    { value: 'expirado', label: 'Demos expirados' },
   ]
 
   return (
@@ -873,22 +896,40 @@ export default function Leads() {
                       </button>
                     </>
                   )}
-                  {lead.estado === 'aprobado' && (
+                  {(lead.estado === 'aprobado' || lead.estado === 'expirado') && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                      <span style={{ fontSize: 11, color: '#34D399', display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <CheckCircle2 size={12} /> Aprobado por {lead.aprobado_por}
-                      </span>
-                      {lead.company_id && (
-                        <button
-                          onClick={() => setModalActivar(lead)}
-                          style={{
-                            padding: '5px 10px', borderRadius: 7, cursor: 'pointer', fontSize: 11, fontWeight: 700,
-                            background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)',
-                            color: '#34D399', display: 'flex', alignItems: 'center', gap: 4,
-                          }}
-                        >
-                          <Zap size={11} /> Activar empresa
-                        </button>
+                      {lead.estado === 'aprobado' ? (
+                        <span style={{ fontSize: 11, color: '#34D399', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <CheckCircle2 size={12} /> Aprobado por {lead.aprobado_por}
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: 11, color: '#94A3B8', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <Timer size={12} /> {lead.demo_estado === 'eliminada' ? 'Datos eliminados — activar la recrea' : 'Expirado — aún puedes activarla'}
+                        </span>
+                      )}
+                      <button
+                        onClick={() => setModalActivar(lead)}
+                        style={{
+                          padding: '5px 10px', borderRadius: 7, cursor: 'pointer', fontSize: 11, fontWeight: 700,
+                          background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)',
+                          color: '#34D399', display: 'flex', alignItems: 'center', gap: 4,
+                        }}
+                      >
+                        <Zap size={11} /> Activar empresa
+                      </button>
+                      {lead.links && (
+                        <div style={{ display: 'flex', gap: 4 }}>
+                          {[['admin', '🔵'], ['portal', '🟢'], ['repogemin', '🟡']].map(([key, icon]) => lead.links[key] && (
+                            <a
+                              key={key}
+                              href={lead.links[key]} target="_blank" rel="noopener noreferrer"
+                              title={`Portal ${key} de ${lead.empresa_nombre}`}
+                              style={{ fontSize: 12, textDecoration: 'none', padding: '2px 4px', borderRadius: 5, background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-primary)' }}
+                            >
+                              {icon}
+                            </a>
+                          ))}
+                        </div>
                       )}
                     </div>
                   )}
@@ -930,7 +971,7 @@ export default function Leads() {
         <ModalActivarEmpresa
           lead={modalActivar}
           onClose={() => setModalActivar(null)}
-          onSuccess={() => { cargar(); setModalActivar(null) }}
+          onSuccess={cargar}
         />
       )}
     </div>

@@ -2,8 +2,11 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ShieldCheck, Eye, EyeOff, AlertCircle, Loader2, Sparkles, Lock } from 'lucide-react'
 import { login, setupSuperadmin } from '../api'
+import { useSlugBranding } from '../hooks/useTenantTheme'
 
 export default function Login({ onLogin }) {
+  // Branding pre-login: /login?empresa={slug} pinta paleta + logo de la empresa
+  const branding = useSlugBranding('admin')
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -126,28 +129,39 @@ export default function Login({ onLogin }) {
 
           {/* Header */}
           <div className="px-8 pt-10 pb-6 text-center">
-            {/* Logo Icon */}
+            {/* Logo Icon — logo de la empresa si viene por slug */}
             <div className="inline-flex items-center justify-center mb-6 animate-float">
-              <div
-                className="relative w-16 h-16 rounded-2xl flex items-center justify-center"
-                style={{
-                  background: 'linear-gradient(135deg, #0EA5E9 0%, #0284C7 50%, #0369A1 100%)',
-                  boxShadow: '0 8px 32px rgba(14,165,233,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
-                }}
-              >
-                <ShieldCheck className="w-8 h-8 text-white" strokeWidth={1.75} />
-                {/* Corner sparkle */}
+              {branding?.logo_url ? (
+                <img
+                  src={branding.logo_url}
+                  alt={branding.empresa}
+                  className="w-16 h-16 rounded-2xl object-contain"
+                  style={{ background: 'rgba(255,255,255,0.06)', boxShadow: '0 8px 32px var(--accent-glow, rgba(14,165,233,0.4))' }}
+                />
+              ) : (
                 <div
-                  className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center"
-                  style={{ background: 'linear-gradient(135deg, #F59E0B, #FCD34D)', boxShadow: '0 2px 8px rgba(245,158,11,0.5)' }}
+                  className="relative w-16 h-16 rounded-2xl flex items-center justify-center"
+                  style={{
+                    background: branding?.paleta_colores?.primary
+                      ? `linear-gradient(135deg, ${branding.paleta_colores.primary} 0%, ${branding.paleta_colores.secondary || branding.paleta_colores.primary} 100%)`
+                      : 'linear-gradient(135deg, #0EA5E9 0%, #0284C7 50%, #0369A1 100%)',
+                    boxShadow: '0 8px 32px var(--accent-glow, rgba(14,165,233,0.4)), inset 0 1px 0 rgba(255,255,255,0.2)',
+                  }}
                 >
-                  <Sparkles className="w-2.5 h-2.5 text-yellow-900" />
+                  <ShieldCheck className="w-8 h-8 text-white" strokeWidth={1.75} />
+                  {/* Corner sparkle */}
+                  <div
+                    className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center"
+                    style={{ background: 'linear-gradient(135deg, #F59E0B, #FCD34D)', boxShadow: '0 2px 8px rgba(245,158,11,0.5)' }}
+                  >
+                    <Sparkles className="w-2.5 h-2.5 text-yellow-900" />
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <h1 className="text-2xl font-bold tracking-tight mb-1" style={{ color: 'var(--text-primary)' }}>
-              <span className="gradient-text">NeuroBareza</span>
+              <span className="gradient-text">{branding?.empresa || 'NeuroBareza'}</span>
             </h1>
             <p className="text-sm font-medium" style={{ color: 'var(--text-tertiary)' }}>
               {setupMode ? 'Configuración Inicial' : 'Portal Administrativo'}

@@ -18,6 +18,7 @@ import {
   CheckCircle2, ArrowRight, Sparkles, Lock, Copy, Check,
   ExternalLink, Shield, FileText, Upload,
 } from 'lucide-react'
+import { getTenantTheme } from '../api'
 
 // ─── URLs de los 3 portales ───────────────────────────────
 const PORTALES = [
@@ -266,8 +267,12 @@ function CredentialsCard({ credentials, confirmed, onConfirm, visible }) {
 
 // ─── Portales card ────────────────────────────────────────
 
-function PortalesCard({ visible }) {
+// Mapea el id visual de PORTALES a la clave del objeto `links` del backend
+const LINK_KEY = { admin: 'admin', validacion: 'portal', recepcion: 'repogemin' }
+
+function PortalesCard({ visible, links }) {
   const [copiedId, setCopiedId] = useState(null)
+  const urlDe = (p) => (links && links[LINK_KEY[p.id]]) || p.url
 
   const copyUrl = (id, url) => {
     navigator.clipboard.writeText(url).catch(() => {
@@ -324,13 +329,13 @@ function PortalesCard({ visible }) {
                 margin: '1px 0 0', fontSize: 10, color: 'rgba(255,255,255,0.35)',
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
               }}>
-                {p.url}
+                {urlDe(p)}
               </p>
             </div>
 
             <div style={{ display: 'flex', gap: 5, flexShrink: 0 }}>
               <button
-                onClick={() => copyUrl(p.id, p.url)}
+                onClick={() => copyUrl(p.id, urlDe(p))}
                 title="Copiar URL"
                 style={{
                   padding: '5px 8px', borderRadius: 7, cursor: 'pointer', border: 'none',
@@ -342,7 +347,7 @@ function PortalesCard({ visible }) {
                 {copiedId === p.id ? <><Check size={10} /> OK</> : <><Copy size={10} /> Copiar</>}
               </button>
               <a
-                href={p.url}
+                href={urlDe(p)}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
@@ -388,6 +393,17 @@ export default function TenantWelcome() {
     ring: false, logo: false, name: false, cards: false, button: false,
   })
   const [credConfirmed, setCredConfirmed] = useState(false)
+
+  // Links por slug de la empresa (si falla, PortalesCard usa los genéricos)
+  const [tenantLinks, setTenantLinks] = useState(null)
+  useEffect(() => {
+    if (!companyId) return
+    let cancelled = false
+    getTenantTheme(companyId)
+      .then(d => { if (!cancelled && d?.links) setTenantLinks(d.links) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [companyId])
 
   useEffect(() => {
     const timers = Object.entries(PHASE_DELAYS).map(([key, delay]) =>
@@ -532,7 +548,7 @@ export default function TenantWelcome() {
       )}
 
       {/* ── Phase 4: Los 3 portales ── */}
-      <PortalesCard visible={phase.button} />
+      <PortalesCard visible={phase.button} links={tenantLinks} />
 
       {/* ── Phase 4: CTA ── */}
       <div style={{

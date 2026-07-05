@@ -23,6 +23,51 @@ function Chip({ label, color, bg, border }) {
 
 // ─── Tarjeta de empresa ───────────────────────────────────────────────────────
 
+const PORTAL_LINKS_DEF = [
+  { key: 'admin', label: '🔵 Admin', color: '#38BDF8', bg: 'rgba(14,165,233,0.1)', border: 'rgba(14,165,233,0.2)' },
+  { key: 'portal', label: '🟢 Validación', color: '#34D399', bg: 'rgba(16,185,129,0.1)', border: 'rgba(16,185,129,0.2)' },
+  { key: 'repogemin', label: '🟡 Recepción', color: '#FCD34D', bg: 'rgba(251,191,36,0.1)', border: 'rgba(251,191,36,0.2)' },
+]
+
+function LinksPortales({ links }) {
+  const [copiadoKey, setCopiadoKey] = useState(null)
+  if (!links) return null
+  const copiar = (key, url) => {
+    navigator.clipboard.writeText(url)
+    setCopiadoKey(key)
+    setTimeout(() => setCopiadoKey(null), 1500)
+  }
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <p style={{ margin: '0 0 6px', fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        Links de la empresa (compártelos con el cliente)
+      </p>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {PORTAL_LINKS_DEF.map(({ key, label, color, bg, border }) => links[key] && (
+          <div key={key} style={{
+            display: 'flex', alignItems: 'center', gap: 0, borderRadius: 8,
+            background: bg, border: `1px solid ${border}`, overflow: 'hidden',
+          }}>
+            <a
+              href={links[key]} target="_blank" rel="noopener noreferrer"
+              style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 10px', color, fontSize: 12, fontWeight: 600, textDecoration: 'none' }}
+            >
+              <ExternalLink size={12} /> {label}
+            </a>
+            <button
+              onClick={() => copiar(key, links[key])}
+              title="Copiar link"
+              style={{ padding: '6px 8px', background: 'transparent', border: 'none', borderLeft: `1px solid ${border}`, color, cursor: 'pointer', display: 'flex' }}
+            >
+              {copiadoKey === key ? <Check size={12} /> : <Copy size={12} />}
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function EmpresaCard({ empresa }) {
   const navigate = useNavigate()
   const [config, setConfig] = useState(null)
@@ -34,7 +79,7 @@ function EmpresaCard({ empresa }) {
     setLoadingConfig(true)
     try {
       const res = await getTenant(empresa.id)
-      setConfig(res.tenant_config || {})
+      setConfig({ ...(res.tenant_config || {}), _links: res.links, _slug: res.slug })
     } catch {
       setConfig({})
     } finally {
@@ -157,6 +202,9 @@ function EmpresaCard({ empresa }) {
               </div>
             ))}
           </div>
+
+          {/* Links de los 3 portales de esta empresa */}
+          <LinksPortales links={config._links} />
 
           {/* Links */}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
