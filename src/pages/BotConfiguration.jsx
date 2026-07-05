@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Bot, Check, AlertCircle, Globe, Mail,
-  ChevronDown, Eye, EyeOff, Save, Lock, Building2, Layers, Loader
+  ChevronDown, Eye, EyeOff, Save, Lock, Building2, Layers, Loader,
+  Paperclip, Trash2, Upload,
 } from 'lucide-react'
-import { getEmpresas, getBotsEmpresa, createBotEmpresa, updateBotEmpresa, getRadicacionSkills } from '../api'
+import { getEmpresas, getBotsEmpresa, createBotEmpresa, updateBotEmpresa, getRadicacionSkills, subirSoporteEps, quitarSoporteEps } from '../api'
 
 // ─────────────────────────────────────────────────────────────
 // CATÁLOGO COMPLETO DE EPS / ARL
@@ -252,13 +253,15 @@ function EpsLogo({ cat, dot }) {
   )
 }
 
-function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave }) {
+function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave, onSoporteChange }) {
   const estadoKey = apiBot?.estado || 'sin_configurar'
   const est = ESTADOS[estadoKey] || ESTADOS.sin_configurar
   const [medio, setMedio] = useState(apiBot?.bot_tipo_medio || cat.medio || 'portal')
   const [cred, setCred] = useState({ ...(apiBot?.credenciales || {}) })
   const [show, setShow] = useState({})
   const [guardando, setGuardando] = useState(false)
+  const [subiendoSoporte, setSubiendoSoporte] = useState(false)
+  const fileInputRef = useRef(null)
 
   // Sync when apiBot changes (company switch)
   useEffect(() => {
@@ -266,6 +269,33 @@ function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave }) {
     setCred({ ...(apiBot?.credenciales || {}) })
     setShow({})
   }, [apiBot, catKey])
+
+  const handleSubirSoporte = async (file) => {
+    if (!apiBot) return
+    setSubiendoSoporte(true)
+    try {
+      await subirSoporteEps(apiBot.nombre_empresa, catKey, file)
+      onSoporteChange?.()
+    } catch (e) {
+      alert('Error al subir soporte: ' + e.message)
+    } finally {
+      setSubiendoSoporte(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  const handleQuitarSoporte = async () => {
+    if (!apiBot || !window.confirm(`¿Quitar el soporte de ${cat.nombre}?`)) return
+    setSubiendoSoporte(true)
+    try {
+      await quitarSoporteEps(apiBot.nombre_empresa, catKey)
+      onSoporteChange?.()
+    } catch (e) {
+      alert('Error al quitar soporte: ' + e.message)
+    } finally {
+      setSubiendoSoporte(false)
+    }
+  }
 
   // Usa campos descubiertos por el bot si existen, si no usa los del catálogo
   const campos = skillCampos || cat.campos || []
@@ -403,6 +433,64 @@ function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave }) {
               </div>
             ))}
           </div>
+
+          {/* Soporte adjunto */}
+          {apiBot && (
+            <div style={{ marginTop: 20, padding: '14px 16px', borderRadius: 13, background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-primary)' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Paperclip size={12} /> Soporte adjunto · se envía automáticamente con cada radicación
+              </div>
+              {apiBot.tiene_soporte ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, flex: 1, minWidth: 0 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#34D399', flexShrink: 0 }} />
+                    <span style={{ fontSize: 12.5, color: 'var(--text-primary)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {apiBot.soporte_nombre}
+                    </span>
+                    {apiBot.soporte_actualizado_en && (
+                      <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>
+                        · {new Date(apiBot.soporte_actualizado_en).toLocaleDateString('es-CO')}
+                      </span>
+                    )}
+                    {apiBot.soporte_drive_url && (
+                      <a href={apiBot.soporte_drive_url} target="_blank" rel="noopener noreferrer"
+                        style={{ fontSize: 11, color: '#38BDF8', textDecoration: 'none', flexShrink: 0 }}
+                        onClick={e => e.stopPropagation()}>
+                        Ver
+                      </a>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', gap: 7, flexShrink: 0 }}>
+                    <input type="file" accept=".pdf,.jpg,.jpeg,.png" ref={fileInputRef} style={{ display: 'none' }}
+                      onChange={e => { const f = e.target.files?.[0]; if (f) handleSubirSoporte(f) }} />
+                    <button disabled={subiendoSoporte} onClick={() => fileInputRef.current?.click()}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 9, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid rgba(56,189,248,0.3)', background: 'rgba(14,165,233,0.08)', color: '#38BDF8', opacity: subiendoSoporte ? 0.5 : 1 }}>
+                      {subiendoSoporte ? <Loader size={12} className="animate-spin" /> : <Upload size={12} />}
+                      Reemplazar
+                    </button>
+                    <button disabled={subiendoSoporte} onClick={handleQuitarSoporte}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 9, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)', color: '#F87171', opacity: subiendoSoporte ? 0.5 : 1 }}>
+                      <Trash2 size={12} /> Quitar
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, flex: 1 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--text-muted)', flexShrink: 0 }} />
+                    <span style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>Sin soporte configurado</span>
+                  </div>
+                  <input type="file" accept=".pdf,.jpg,.jpeg,.png" ref={fileInputRef} style={{ display: 'none' }}
+                    onChange={e => { const f = e.target.files?.[0]; if (f) handleSubirSoporte(f) }} />
+                  <button disabled={subiendoSoporte} onClick={() => fileInputRef.current?.click()}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 9, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid rgba(56,189,248,0.3)', background: 'rgba(14,165,233,0.08)', color: '#38BDF8', opacity: subiendoSoporte ? 0.5 : 1, flexShrink: 0 }}>
+                    {subiendoSoporte ? <Loader size={12} className="animate-spin" /> : <Upload size={12} />}
+                    Adjuntar soporte
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Footer */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 18 }}>
@@ -645,6 +733,7 @@ export default function BotConfiguration() {
                     open={openBot === key}
                     onToggle={() => setOpenBot(openBot === key ? null : key)}
                     onSave={handleSave}
+                    onSoporteChange={cargarBots}
                   />
                 ))}
               </div>
@@ -668,6 +757,7 @@ export default function BotConfiguration() {
                     open={openBot === key}
                     onToggle={() => setOpenBot(openBot === key ? null : key)}
                     onSave={handleSave}
+                    onSoporteChange={cargarBots}
                   />
                 ))}
               </div>

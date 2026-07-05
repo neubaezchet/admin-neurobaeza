@@ -199,6 +199,26 @@ export function syncRadicacionBots() {
   return apiFetch('/admin/bots/sync-radicacion', { method: 'POST' });
 }
 
+export async function subirSoporteEps(nombreEmpresa, botNombre, file) {
+  const token = getToken();
+  const fd = new FormData();
+  fd.append('archivo', file);
+  const res = await fetch(
+    `${API_BASE}/admin/empresas/${encodeURIComponent(nombreEmpresa)}/bots/${encodeURIComponent(botNombre)}/soporte`,
+    { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd }
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || `Error ${res.status}`);
+  return data;
+}
+
+export function quitarSoporteEps(nombreEmpresa, botNombre) {
+  return apiFetch(
+    `/admin/empresas/${encodeURIComponent(nombreEmpresa)}/bots/${encodeURIComponent(botNombre)}/soporte`,
+    { method: 'DELETE' }
+  );
+}
+
 // ─── Radicación — Skills ─────────────────────────────────
 export function getRadicacionSkills() {
   return apiFetch('/admin/radicacion/skills');
