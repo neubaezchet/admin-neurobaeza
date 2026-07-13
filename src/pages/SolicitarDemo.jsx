@@ -88,7 +88,7 @@ function FeatureCard({ icon: Icon, title, desc, color }) {
 }
 
 // ─── Pantalla éxito (después de enviar) ──────────────────
-function PantallaExito({ nombre }) {
+function PantallaExito({ nombre, email }) {
   return (
     <div style={{ textAlign: 'center', padding: '8px 0' }}>
       <div style={{
@@ -99,18 +99,13 @@ function PantallaExito({ nombre }) {
         <CheckCircle2 size={30} color="#10B981" />
       </div>
       <h2 style={{ margin: '0 0 8px', fontSize: 20, fontWeight: 800, color: '#fff' }}>
-        ¡Redirigiendo al registro!
+        📬 ¡Revisa tu correo!
       </h2>
       <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7 }}>
-        Hola <strong style={{ color: '#fff' }}>{nombre}</strong>, estamos preparando tu acceso…
+        Hola <strong style={{ color: '#fff' }}>{nombre}</strong>, enviamos el enlace de
+        registro a <strong style={{ color: '#34D399' }}>{email}</strong>.
+        <br />Expira en 24 horas. Si no llega, revisa la carpeta de spam.
       </p>
-      <div style={{
-        marginTop: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-        fontSize: 12, color: 'rgba(255,255,255,0.35)',
-      }}>
-        <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
-        Conectando con el sistema de registro
-      </div>
     </div>
   )
 }
@@ -167,11 +162,8 @@ export default function SolicitarDemo() {
         }
         return
       }
+      // ✅ El link de registro llega SOLO por correo (seguridad)
       setEnviado(true)
-      // Redirigir al wizard "Hola" después de 1.5s
-      setTimeout(() => {
-        window.location.href = res.link_registro
-      }, 1500)
     } catch (e) {
       setErrorGlobal(e.message || 'No se pudo enviar la solicitud. Intenta de nuevo.')
     } finally {
@@ -373,7 +365,7 @@ export default function SolicitarDemo() {
                 boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
               }}>
                 {enviado ? (
-                  <PantallaExito nombre={form.contacto_nombre} />
+                  <PantallaExito nombre={form.contacto_nombre} email={form.contacto_email} />
                 ) : (
                   <form onSubmit={handleSubmit}>
                     <h3 style={{ margin: '0 0 24px', fontSize: 17, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>

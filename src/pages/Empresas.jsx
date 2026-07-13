@@ -5,7 +5,7 @@ import {
   ChevronRight, Loader2, AlertCircle, RefreshCw, ExternalLink,
   FileSpreadsheet, Users, Plus, Copy, Check,
 } from 'lucide-react'
-import { getEmpresas, getTenant, crearEmpresaDirecta } from '../api'
+import { getEmpresas, getTenant, crearEmpresaDirecta, reprovisionarTenant } from '../api'
 
 // ─── Chip de estado ───────────────────────────────────────────────────────────
 
@@ -95,6 +95,29 @@ function EmpresaCard({ empresa }) {
   const tieneSheet = config?.google_sheets_id
   const onboardingOk = config?.onboarding_completado
   const ciclo = config?.ciclo_reporte
+  const provisionError = config?.sheet_status === 'error' || config?.drive_status === 'error'
+  const provisionPendiente = !provisionError && (config?.sheet_status === 'pendiente' || config?.drive_status === 'pendiente')
+
+  const [reprovisionando, setReprovisionando] = useState(false)
+  const [reprovMsg, setReprovMsg] = useState('')
+  const handleReprovisionar = async () => {
+    setReprovisionando(true); setReprovMsg('')
+    try {
+      const res = await reprovisionarTenant(empresa.id)
+      setReprovMsg(res.mensaje || 'Reaprovisionamiento lanzado')
+      // Refrescar el estado en unos segundos
+      setTimeout(async () => {
+        try {
+          const r = await getTenant(empresa.id)
+          setConfig({ ...(r.tenant_config || {}), _links: r.links, _slug: r.slug })
+        } catch { /* se refresca al expandir de nuevo */ }
+      }, 6000)
+    } catch (e) {
+      setReprovMsg(e.message || 'Error al reaprovisionar')
+    } finally {
+      setReprovisionando(false)
+    }
+  }
 
   return (
     <div style={{
@@ -176,6 +199,12 @@ function EmpresaCard({ empresa }) {
               color="#38BDF8" bg="rgba(14,165,233,0.1)" border="rgba(14,165,233,0.2)"
             />
           )}
+          {provisionError && (
+            <Chip label="⚠ Aprovisionamiento falló" color="#F87171" bg="rgba(239,68,68,0.1)" border="rgba(239,68,68,0.25)" />
+          )}
+          {provisionPendiente && (
+            <Chip label="Aprovisionando…" color="#FCD34D" bg="rgba(251,191,36,0.1)" border="rgba(251,191,36,0.2)" />
+          )}
         </div>
       )}
 
@@ -202,6 +231,41 @@ function EmpresaCard({ empresa }) {
               </div>
             ))}
           </div>
+
+          {/* Aprovisionamiento con error → detalle + botón de reintento */}
+          {(provisionError || reprovMsg) && (
+            <div style={{
+              marginBottom: 14, padding: '10px 12px', borderRadius: 10,
+              background: provisionError ? 'rgba(239,68,68,0.07)' : 'rgba(16,185,129,0.07)',
+              border: `1px solid ${provisionError ? 'rgba(239,68,68,0.2)' : 'rgba(16,185,129,0.2)'}`,
+            }}>
+              {provisionError && (
+                <p style={{ margin: '0 0 8px', fontSize: 11.5, color: '#FCA5A5', lineHeight: 1.5 }}>
+                  {config.sheet_status === 'error' && <>❌ Sheet: falló la creación.<br /></>}
+                  {config.drive_status === 'error' && <>❌ Drive: falló la estructura de carpetas.<br /></>}
+                  {config.provision_error && <span style={{ opacity: 0.7 }}>Detalle: {config.provision_error}</span>}
+                </p>
+              )}
+              {reprovMsg && (
+                <p style={{ margin: '0 0 8px', fontSize: 11.5, color: '#34D399' }}>{reprovMsg}</p>
+              )}
+              <button
+                onClick={handleReprovisionar}
+                disabled={reprovisionando}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px',
+                  borderRadius: 8, background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)',
+                  color: '#FCA5A5', fontSize: 12, fontWeight: 700,
+                  cursor: reprovisionando ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {reprovisionando
+                  ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} />
+                  : <RefreshCw size={12} />
+                } Reaprovisionar
+              </button>
+            </div>
+          )}
 
           {/* Links de los 3 portales de esta empresa */}
           <LinksPortales links={config._links} />

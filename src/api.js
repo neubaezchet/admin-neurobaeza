@@ -255,6 +255,11 @@ export function getPublicBranding(slug, portal = 'admin') {
     .then(r => { if (!r.ok) throw new Error('Empresa no encontrada'); return r.json() })
 }
 
+// Reintentar aprovisionamiento (Sheet/estructura Drive) cuando falló en background
+export function reprovisionarTenant(companyId) {
+  return apiFetch(`/tenants/${companyId}/reprovisionar`, { method: 'POST' })
+}
+
 // Invitación de onboarding (genera link de un solo uso)
 export function generateTenantInvite(companyId) {
   return apiFetch(`/tenants/${companyId}/invite`, { method: 'POST' })
