@@ -6,7 +6,7 @@ import { useTenantTheme, clearTenantThemeCache } from '../hooks/useTenantTheme'
 const NAV_FULL = [
   { to: '/bots',                   icon: Bot,           label: 'Configuración de Bots',   desc: 'Bots de radicación' },
   { to: '/radicacion/campos',      icon: LayoutList,    label: 'Campos EPS / ARL',        desc: 'Manifests y OCR' },
-  { to: '/radicacion/monitoreo',   icon: Activity,      label: 'Estado de Radicación',    desc: 'Sesiones en vivo' },
+  { to: '/radicacion/monitoreo',   icon: Activity,      label: 'Estado de Radicación',    desc: 'Bots en la nube · Browserbase' },
   { to: '/correos',                icon: Mail,          label: 'Directorio de Correos',   desc: 'Gestión de contactos' },
   { to: '/usuarios',               icon: Users,         label: 'Usuarios y Permisos',     desc: 'Control de acceso' },
   { to: '/leads',                  icon: ClipboardList, label: 'Solicitudes Demo',        desc: 'Empresas que solicitan acceso' },

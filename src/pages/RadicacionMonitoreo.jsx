@@ -1,8 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
-  Activity, CheckCircle, AlertCircle, Clock, Loader,
-  Globe, Mail, Layers, RefreshCw, WifiOff, Zap
+  Activity, CheckCircle, AlertCircle, Loader, StopCircle,
+  Globe, Layers, RefreshCw, WifiOff, Eye, ExternalLink, ListOrdered, X, Cloud
 } from 'lucide-react'
+import {
+  getBrowserbaseRuns, getBrowserbaseRunLive, getBrowserbaseRunMessages,
+  stopBrowserbaseRun,
+} from '../api'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://web-production-95ed.up.railway.app'
 
@@ -21,14 +25,22 @@ async function fetchSafe(path) {
   }
 }
 
-// ── Badge de estado de sesión ──
+// ── Mapeo de estados Browserbase → estilo visual ──
+const STATUS_MAP = {
+  PENDING:   { label: 'En cola',   estado: 'esperando' },
+  RUNNING:   { label: 'En curso',  estado: 'en_curso' },
+  COMPLETED: { label: 'Completado', estado: 'exitosa' },
+  FAILED:    { label: 'Falló',     estado: 'fallida' },
+  STOPPED:   { label: 'Detenido',  estado: 'error' },
+  TIMED_OUT: { label: 'Timeout',   estado: 'fallida' },
+}
+
 const ESTADO_COLORS = {
-  exitosa:  { bg: 'rgba(16,185,129,0.06)',  border: '#1D9E75', badge: { bg: 'rgba(16,185,129,0.12)',  color: '#34D399'  }, dot: '#10B981' },
-  en_curso: { bg: 'rgba(245,158,11,0.06)',  border: '#EF9F27', badge: { bg: 'rgba(245,158,11,0.12)',  color: '#FBBF24'  }, dot: '#F59E0B' },
-  fallida:  { bg: 'rgba(226,75,74,0.06)',   border: '#E24B4A', badge: { bg: 'rgba(239,68,68,0.12)',   color: '#F87171'  }, dot: '#EF4444' },
-  esperando:{ bg: 'rgba(255,255,255,0.02)', border: '#374151', badge: { bg: 'rgba(255,255,255,0.06)', color: 'var(--text-muted)' }, dot: '#374151' },
-  enviado:  { bg: 'rgba(16,185,129,0.06)',  border: '#1D9E75', badge: { bg: 'rgba(16,185,129,0.12)',  color: '#34D399'  }, dot: '#10B981' },
-  error:    { bg: 'rgba(226,75,74,0.06)',   border: '#E24B4A', badge: { bg: 'rgba(239,68,68,0.12)',   color: '#F87171'  }, dot: '#EF4444' },
+  exitosa:  { bg: 'rgba(16,185,129,0.06)',  border: '#1D9E75', badge: { bg: 'rgba(16,185,129,0.12)',  color: '#34D399'  } },
+  en_curso: { bg: 'rgba(245,158,11,0.06)',  border: '#EF9F27', badge: { bg: 'rgba(245,158,11,0.12)',  color: '#FBBF24'  } },
+  fallida:  { bg: 'rgba(226,75,74,0.06)',   border: '#E24B4A', badge: { bg: 'rgba(239,68,68,0.12)',   color: '#F87171'  } },
+  esperando:{ bg: 'rgba(255,255,255,0.02)', border: '#374151', badge: { bg: 'rgba(255,255,255,0.06)', color: 'var(--text-muted)' } },
+  error:    { bg: 'rgba(226,75,74,0.06)',   border: '#E24B4A', badge: { bg: 'rgba(239,68,68,0.12)',   color: '#F87171'  } },
 }
 
 function Spinner() {
@@ -37,9 +49,29 @@ function Spinner() {
   )
 }
 
-function SesionCard({ sesion }) {
-  const col = ESTADO_COLORS[sesion.estado] || ESTADO_COLORS.esperando
-  const isEmail = sesion.medio === 'email'
+function fmtFecha(iso) {
+  if (!iso) return ''
+  try {
+    return new Date(iso).toLocaleString('es-CO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+  } catch { return iso }
+}
+
+function duracion(run) {
+  const ini = run.startedAt ? new Date(run.startedAt) : null
+  const fin = run.endedAt ? new Date(run.endedAt) : null
+  if (!ini) return null
+  const ms = (fin ? fin : new Date()) - ini
+  const s = Math.round(ms / 1000)
+  if (s < 60) return `${s}s`
+  return `${Math.floor(s / 60)}m ${s % 60}s`
+}
+
+// ── Card de un run de Browserbase ──
+function RunCard({ run, onVerVivo, onVerPasos, onDetener, deteniendo }) {
+  const meta = STATUS_MAP[run.status] || STATUS_MAP.PENDING
+  const col = ESTADO_COLORS[meta.estado]
+  const activo = run.status === 'RUNNING' || run.status === 'PENDING'
+  const dur = duracion(run)
 
   return (
     <div style={{
@@ -47,97 +79,77 @@ function SesionCard({ sesion }) {
       background: col.bg, borderLeft: `3px solid ${col.border}`,
       border: `1px solid ${col.border}20`,
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{sesion.eps}</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 9, padding: '1px 6px', borderRadius: 20,
-              background: isEmail ? 'rgba(16,185,129,0.10)' : 'rgba(99,102,241,0.10)',
-              color: isEmail ? '#34D399' : '#818CF8' }}>
-              {isEmail ? <Mail size={8} /> : <Globe size={8} />}
-              {isEmail ? 'Email' : 'Portal'}
-            </span>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10, marginBottom: 6 }}>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+            {run.task}
           </div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-            {sesion.empresa} · {sesion.documento}
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 3, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <span>{fmtFecha(run.createdAt)}</span>
+            {dur && <span>· {dur}</span>}
+            <span style={{ opacity: 0.6 }}>· {run.runId?.slice(0, 8)}</span>
           </div>
         </div>
         <span style={{
-          fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 999,
+          fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 999, flexShrink: 0,
           background: col.badge.bg, color: col.badge.color,
           display: 'inline-flex', alignItems: 'center', gap: 4,
         }}>
-          {sesion.estado === 'en_curso' && <Spinner />}
-          {sesion.estado === 'exitosa' && '✓ '}
-          {sesion.estado === 'enviado' && '✓ '}
-          {sesion.estado === 'fallida' && '✗ '}
-          {sesion.estado === 'error' && '✗ '}
-          {{ exitosa: 'Radicada', en_curso: 'En curso', fallida: 'Falló', esperando: 'En espera', enviado: 'Enviado', error: 'Error' }[sesion.estado] || sesion.estado}
+          {run.status === 'RUNNING' && <Spinner />}
+          {run.status === 'COMPLETED' && '✓ '}
+          {(run.status === 'FAILED' || run.status === 'TIMED_OUT') && '✗ '}
+          {meta.label}
         </span>
       </div>
 
-      {/* Contenido según estado */}
-      {sesion.estado === 'en_curso' && (
-        <>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#38BDF8', marginBottom: 6 }}>
-            <Activity size={12} /> Vista en vivo activa
-          </div>
-          {sesion.logs?.map((log, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 11, color: 'var(--text-muted)', marginBottom: 2 }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: i === sesion.logs.length - 1 ? '#38BDF8' : '#10B981', marginTop: 3, flexShrink: 0 }} />
-              {log}
-            </div>
-          ))}
-          {typeof sesion.progreso === 'number' && (
-            <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 4, height: 3, marginTop: 8, overflow: 'hidden' }}>
-              <div style={{ width: `${sesion.progreso}%`, height: '100%', background: '#38BDF8', borderRadius: 4, transition: 'width .5s' }} />
-            </div>
-          )}
-        </>
-      )}
-
-      {(sesion.estado === 'exitosa' || sesion.estado === 'enviado') && (
-        <>
-          {sesion.radicado && (
-            <div style={{ fontSize: 11, color: '#34D399', fontWeight: 600, marginBottom: 4 }}>
-              <CheckCircle size={11} style={{ display: 'inline', marginRight: 4 }} />
-              {sesion.estado === 'enviado' ? 'Correo enviado correctamente' : `Radicado: ${sesion.radicado}`}
-            </div>
-          )}
-          {sesion.cached && (
-            <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-              <Zap size={10} style={{ display: 'inline', marginRight: 3, color: '#34D399' }} />
-              Skill cacheada · $0 tokens
-            </div>
-          )}
-        </>
-      )}
-
-      {(sesion.estado === 'fallida' || sesion.estado === 'error') && (
-        <div style={{ fontSize: 11, color: '#F87171', marginTop: 4 }}>
-          <AlertCircle size={11} style={{ display: 'inline', marginRight: 4 }} />
-          {sesion.error || 'Error en la radicación — WhatsApp enviado'}
+      {/* Resultado si completó */}
+      {run.status === 'COMPLETED' && run.result && (
+        <div style={{ fontSize: 11, color: '#34D399', marginBottom: 6 }}>
+          <CheckCircle size={11} style={{ display: 'inline', marginRight: 4 }} />
+          {run.result.summary || JSON.stringify(run.result).slice(0, 140)}
         </div>
       )}
+
+      {/* Causa exacta si falló */}
+      {(run.status === 'FAILED' || run.status === 'TIMED_OUT' || run.status === 'STOPPED') && run.cause && (
+        <div style={{ fontSize: 11, color: '#F87171', marginBottom: 6 }}>
+          <AlertCircle size={11} style={{ display: 'inline', marginRight: 4 }} />
+          <b>{run.cause.code}</b>{run.cause.message ? ` — ${run.cause.message}` : ''}
+        </div>
+      )}
+
+      {/* Acciones */}
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
+        {activo && (
+          <>
+            <button onClick={() => onVerVivo(run)} style={btnStyle('#38BDF8', 'rgba(14,165,233,0.10)', 'rgba(14,165,233,0.2)')}>
+              <Eye size={11} /> Ver en vivo
+            </button>
+            <button onClick={() => onDetener(run)} disabled={deteniendo === run.runId} style={btnStyle('#F87171', 'rgba(239,68,68,0.08)', 'rgba(239,68,68,0.2)')}>
+              <StopCircle size={11} /> {deteniendo === run.runId ? 'Deteniendo…' : 'Detener'}
+            </button>
+          </>
+        )}
+        <button onClick={() => onVerPasos(run)} style={btnStyle('var(--text-secondary)', 'rgba(255,255,255,0.04)', 'var(--border-primary)')}>
+          <ListOrdered size={11} /> Paso a paso
+        </button>
+        {run.sessionId && (
+          <a href={`https://browserbase.com/sessions/${run.sessionId}`} target="_blank" rel="noreferrer"
+            style={{ ...btnStyle('var(--text-muted)', 'transparent', 'var(--border-primary)'), textDecoration: 'none' }}>
+            <ExternalLink size={11} /> Browserbase
+          </a>
+        )}
+      </div>
     </div>
   )
 }
 
-function SkillBar({ nombre, costo, estado }) {
-  const pct = estado === 'activa' ? 100 : estado === 'explorando' ? 60 : estado === 'fallo' ? 20 : 0
-  const barColor = estado === 'activa' ? '#10B981' : estado === 'explorando' ? '#F59E0B' : '#EF4444'
-  const costoColor = estado === 'activa' ? '#34D399' : estado === 'explorando' ? '#FBBF24' : '#F87171'
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, fontSize: 12 }}>
-      <span style={{ color: 'var(--text-secondary)', flex: 1 }}>{nombre}</span>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ width: 80, background: 'var(--bg-secondary)', borderRadius: 3, height: 4 }}>
-          <div style={{ width: `${pct}%`, height: '100%', background: barColor, borderRadius: 3 }} />
-        </div>
-        <span style={{ fontSize: 11, color: costoColor, minWidth: 40, textAlign: 'right' }}>{costo}</span>
-      </div>
-    </div>
-  )
+function btnStyle(color, bg, border) {
+  return {
+    display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px',
+    borderRadius: 8, fontSize: 10, fontWeight: 600, cursor: 'pointer',
+    color, background: bg, border: `1px solid ${border}`,
+  }
 }
 
 function MetricCard({ label, value, color }) {
@@ -153,31 +165,64 @@ function MetricCard({ label, value, color }) {
   )
 }
 
+// ── Modal genérico ──
+function Modal({ title, onClose, children, wide }) {
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+      onClick={onClose}>
+      <div style={{ background: 'var(--bg-card-solid, #111827)', border: '1px solid var(--border-primary)', borderRadius: 18, width: wide ? 'min(1100px, 96vw)' : 'min(640px, 96vw)', maxHeight: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+        onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderBottom: '1px solid var(--border-primary)' }}>
+          <h4 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>{title}</h4>
+          <button onClick={onClose} style={{ color: 'var(--text-muted)', cursor: 'pointer', background: 'none', border: 'none' }}><X size={18} /></button>
+        </div>
+        <div style={{ flex: 1, overflow: 'auto' }}>{children}</div>
+      </div>
+    </div>
+  )
+}
+
+// ── Extrae texto legible de un mensaje (formato AI SDK UIMessage) ──
+function extraerTexto(item) {
+  const msg = item.message || item
+  const content = msg.content
+  if (typeof content === 'string') return content
+  if (Array.isArray(content)) {
+    return content.map(p => {
+      if (typeof p === 'string') return p
+      if (p.type === 'text') return p.text
+      if (p.type === 'tool-call' || p.type === 'tool_call') return `🔧 ${p.toolName || p.name || 'acción'}`
+      if (p.type === 'reasoning') return null
+      return null
+    }).filter(Boolean).join(' ')
+  }
+  return null
+}
+
 export default function RadicacionMonitoreo() {
-  const [stats, setStats] = useState({ total: 0, exitosas: 0, en_curso: 0, fallidas: 0 })
-  const [sesiones, setSesiones] = useState([])
+  const [runs, setRuns] = useState([])
   const [cola, setCola] = useState([])
-  const [skills, setSkills] = useState([])
   const [sinConexion, setSinConexion] = useState(false)
   const [cargando, setCargando] = useState(true)
   const [ultimaAct, setUltimaAct] = useState(null)
+  const [deteniendo, setDeteniendo] = useState(null)
+
+  // Modales
+  const [liveRun, setLiveRun] = useState(null)      // { run, url, cargando }
+  const [pasosRun, setPasosRun] = useState(null)    // { run, mensajes, cargando }
 
   const cargar = useCallback(async () => {
-    const [statsData, sesData, colaData, skillsData] = await Promise.all([
-      fetchSafe('/admin/radicacion/stats'),
-      fetchSafe('/admin/radicacion/sesiones'),
-      fetchSafe('/admin/radicacion/cola'),
-      fetchSafe('/admin/radicacion/skills'),
-    ])
-
-    const hayDatos = statsData || sesData || colaData || skillsData
-    setSinConexion(!hayDatos)
-
-    if (statsData) setStats(statsData)
-    if (sesData) setSesiones(sesData.sesiones || [])
-    if (colaData) setCola(colaData.items || [])
-    if (skillsData) setSkills(skillsData.skills || [])
-
+    try {
+      const [runsData, colaData] = await Promise.all([
+        getBrowserbaseRuns({ limit: 50 }).catch(() => null),
+        fetchSafe('/admin/radicacion/cola'),
+      ])
+      setSinConexion(!runsData)
+      if (runsData) setRuns(runsData.data || runsData.runs || [])
+      if (colaData) setCola(colaData.items || [])
+    } catch {
+      setSinConexion(true)
+    }
     setCargando(false)
     setUltimaAct(new Date())
   }, [])
@@ -188,9 +233,47 @@ export default function RadicacionMonitoreo() {
     return () => clearInterval(interval)
   }, [cargar])
 
-  const hayFallas = sesiones.some(s => s.estado === 'fallida' || s.estado === 'error')
-  const sesActivas = sesiones.filter(s => s.estado === 'en_curso')
-  const sesHistorial = sesiones.filter(s => s.estado !== 'en_curso')
+  const abrirLive = async (run) => {
+    setLiveRun({ run, url: null, cargando: true })
+    try {
+      const data = await getBrowserbaseRunLive(run.runId)
+      setLiveRun({ run, url: data.liveViewUrl, cargando: false })
+    } catch (e) {
+      setLiveRun({ run, url: null, cargando: false, error: e.message })
+    }
+  }
+
+  const abrirPasos = async (run) => {
+    setPasosRun({ run, mensajes: [], cargando: true })
+    try {
+      const data = await getBrowserbaseRunMessages(run.runId)
+      setPasosRun({ run, mensajes: data.data || [], cargando: false })
+    } catch (e) {
+      setPasosRun({ run, mensajes: [], cargando: false, error: e.message })
+    }
+  }
+
+  const detener = async (run) => {
+    if (!window.confirm('¿Detener este bot?')) return
+    setDeteniendo(run.runId)
+    try {
+      await stopBrowserbaseRun(run.runId)
+      await cargar()
+    } catch (e) {
+      alert('No se pudo detener: ' + e.message)
+    }
+    setDeteniendo(null)
+  }
+
+  const activos = runs.filter(r => r.status === 'RUNNING' || r.status === 'PENDING')
+  const historial = runs.filter(r => r.status !== 'RUNNING' && r.status !== 'PENDING')
+  const stats = {
+    total: runs.length,
+    exitosas: runs.filter(r => r.status === 'COMPLETED').length,
+    en_curso: activos.length,
+    fallidas: runs.filter(r => r.status === 'FAILED' || r.status === 'TIMED_OUT').length,
+  }
+  const hayFallas = stats.fallidas > 0
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 40px 64px' }}>
@@ -199,11 +282,14 @@ export default function RadicacionMonitoreo() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4, flexWrap: 'wrap', gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{ width: 44, height: 44, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(14,165,233,0.12)', border: '1px solid rgba(14,165,233,0.25)', color: '#38BDF8' }}>
-            <Activity size={24} />
+            <Cloud size={24} />
           </div>
           <h2 style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
             Estado de Radicación
           </h2>
+          <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 999, background: 'rgba(99,102,241,0.12)', color: '#818CF8', border: '1px solid rgba(99,102,241,0.25)' }}>
+            ☁️ Browserbase
+          </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {ultimaAct && (
@@ -211,48 +297,52 @@ export default function RadicacionMonitoreo() {
               Actualizado {ultimaAct.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
             </span>
           )}
+          <a href="https://browserbase.com/overview" target="_blank" rel="noreferrer"
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 13px', borderRadius: 10, fontSize: 12, fontWeight: 600, color: '#818CF8', background: 'rgba(99,102,241,0.10)', border: '1px solid rgba(99,102,241,0.2)', textDecoration: 'none' }}>
+            <ExternalLink size={13} /> Dashboard Browserbase
+          </a>
           <button onClick={cargar} disabled={cargando} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 13px', borderRadius: 10, fontSize: 12, fontWeight: 600, color: '#38BDF8', background: 'rgba(14,165,233,0.10)', border: '1px solid rgba(14,165,233,0.2)', cursor: 'pointer' }}>
             <RefreshCw size={13} style={{ animation: cargando ? 'spin .8s linear infinite' : 'none' }} /> Actualizar
           </button>
         </div>
       </div>
       <p style={{ color: 'var(--text-tertiary)', fontSize: 14, marginBottom: 24 }}>
-        Monitoreo en vivo · Sesiones activas · Cola de trabajo · Estado de skills
+        Bots corriendo en la nube de Browserbase · Vista en vivo · Paso a paso · Causa exacta de fallos
       </p>
 
       {/* Alerta si hay fallas */}
       {hayFallas && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 12, background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)', color: '#FBBF24', fontSize: 12, fontWeight: 600, marginBottom: 20 }}>
           <AlertCircle size={15} />
-          Hay radicaciones fallidas — se enviaron alertas por WhatsApp para intervención manual.
+          Hay bots fallidos — revisa la causa exacta en cada tarjeta o el paso a paso para ver dónde se detuvo.
         </div>
       )}
 
-      {/* Sin conexión con backend de radicación */}
+      {/* Sin conexión */}
       {sinConexion && !cargando && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-primary)', color: 'var(--text-muted)', fontSize: 12, marginBottom: 20 }}>
-          <WifiOff size={14} /> El módulo de monitoreo de radicación aún no está activo en el backend. Los datos aparecerán aquí cuando se activen los endpoints <code style={{ fontSize: 11, background: 'rgba(255,255,255,0.06)', padding: '1px 5px', borderRadius: 4 }}>/admin/radicacion/*</code>.
+          <WifiOff size={14} /> No se pudo conectar con Browserbase. Verifica que <code style={{ fontSize: 11, background: 'rgba(255,255,255,0.06)', padding: '1px 5px', borderRadius: 4 }}>BROWSERBASE_API_KEY</code> esté configurada en el backend (Railway).
         </div>
       )}
 
       {/* Métricas */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
-        <MetricCard label="Lote actual" value={stats.total ?? 0} />
-        <MetricCard label="Exitosas" value={stats.exitosas ?? 0} color="#34D399" />
-        <MetricCard label="En curso" value={stats.en_curso ?? 0} color="#FBBF24" />
-        <MetricCard label="Fallidas" value={stats.fallidas ?? 0} color="#F87171" />
+        <MetricCard label="Runs recientes" value={stats.total} />
+        <MetricCard label="Completados" value={stats.exitosas} color="#34D399" />
+        <MetricCard label="En curso" value={stats.en_curso} color="#FBBF24" />
+        <MetricCard label="Fallidos" value={stats.fallidas} color="#F87171" />
       </div>
 
       {/* Grid principal */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
 
-        {/* Columna izquierda — Sesiones */}
+        {/* Columna izquierda — Bots activos */}
         <div style={{ background: 'var(--bg-card-solid)', border: '1px solid var(--border-primary)', borderRadius: 18, padding: '16px 18px' }}>
           <h4 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 7, marginBottom: 14 }}>
-            <Activity size={13} /> Sesiones activas
-            {sesActivas.length > 0 && (
+            <Activity size={13} /> Bots activos
+            {activos.length > 0 && (
               <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: 'rgba(245,158,11,0.15)', color: '#FBBF24' }}>
-                {sesActivas.length} en curso
+                {activos.length} en curso
               </span>
             )}
           </h4>
@@ -261,28 +351,32 @@ export default function RadicacionMonitoreo() {
             <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
               <Loader size={28} className="animate-spin" style={{ color: 'var(--accent-primary)' }} />
             </div>
-          ) : sesiones.length === 0 ? (
+          ) : activos.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)', fontSize: 13 }}>
-              <Activity size={32} style={{ marginBottom: 10, opacity: 0.3 }} />
-              <p>No hay sesiones activas en este momento.</p>
-              <p style={{ fontSize: 11, marginTop: 6 }}>Las radicaciones aparecerán aquí cuando se procesen.</p>
+              <Globe size={32} style={{ marginBottom: 10, opacity: 0.3 }} />
+              <p>No hay bots corriendo en este momento.</p>
+              <p style={{ fontSize: 11, marginTop: 6 }}>Cuando el backend lance una radicación aparecerá aquí con vista en vivo.</p>
             </div>
           ) : (
+            activos.map(r => (
+              <RunCard key={r.runId} run={r} onVerVivo={abrirLive} onVerPasos={abrirPasos} onDetener={detener} deteniendo={deteniendo} />
+            ))
+          )}
+
+          {/* Historial */}
+          {historial.length > 0 && (
             <>
-              {sesActivas.map((s, i) => <SesionCard key={i} sesion={s} />)}
-              {sesHistorial.length > 0 && (
-                <>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '14px 0 8px', fontWeight: 700 }}>Historial reciente</div>
-                  {sesHistorial.map((s, i) => <SesionCard key={i} sesion={s} />)}
-                </>
-              )}
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '14px 0 8px', fontWeight: 700 }}>Historial reciente</div>
+              {historial.slice(0, 15).map(r => (
+                <RunCard key={r.runId} run={r} onVerVivo={abrirLive} onVerPasos={abrirPasos} onDetener={detener} deteniendo={deteniendo} />
+              ))}
             </>
           )}
         </div>
 
-        {/* Columna derecha — Cola + Skills */}
+        {/* Columna derecha — Cola + Info */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {/* Cola pendiente */}
+          {/* Cola pendiente (backend) */}
           <div style={{ background: 'var(--bg-card-solid)', border: '1px solid var(--border-primary)', borderRadius: 18, padding: '16px 18px', flex: '0 0 auto' }}>
             <h4 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 7, marginBottom: 12 }}>
               <Layers size={13} /> Cola pendiente
@@ -309,34 +403,81 @@ export default function RadicacionMonitoreo() {
             )}
           </div>
 
-          {/* Skills activas */}
+          {/* Panel informativo Browserbase */}
           <div style={{ background: 'var(--bg-card-solid)', border: '1px solid var(--border-primary)', borderRadius: 18, padding: '16px 18px', flex: 1 }}>
             <h4 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 7, marginBottom: 14 }}>
-              <Zap size={13} /> Skills de radicación
+              <Cloud size={13} /> Navegador en la nube
             </h4>
-            {skills.length === 0 ? (
-              <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Sin datos de skills aún.</p>
-            ) : (
-              skills.map((s, i) => (
-                <SkillBar key={i} nombre={s.nombre} costo={s.costo} estado={s.estado} />
-              ))
-            )}
-            {/* Leyenda de costo */}
-            <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {[
-                { color: '#10B981', label: 'Skill cacheada — $0 tokens (replay)' },
-                { color: '#F59E0B', label: 'Explorando — LLM activo (~$0.08)' },
-                { color: '#EF4444', label: 'Falló — requiere re-entrenamiento' },
-              ].map(({ color, label }) => (
-                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--text-muted)' }}>
-                  <div style={{ width: 8, height: 8, borderRadius: 2, background: color }} />
-                  {label}
+                { icon: <Eye size={13} style={{ color: '#38BDF8' }} />, txt: 'Ver en vivo: mira el navegador del bot en tiempo real (y toma control si se atasca).' },
+                { icon: <ListOrdered size={13} style={{ color: '#818CF8' }} />, txt: 'Paso a paso: transcript de cada acción del bot — si falla, ves exactamente dónde.' },
+                { icon: <ExternalLink size={13} style={{ color: '#34D399' }} />, txt: 'Browserbase: grabación completa (replay) de cada sesión terminada.' },
+                { icon: <AlertCircle size={13} style={{ color: '#FBBF24' }} />, txt: 'CAPTCHAs y proxies se resuelven automáticamente en la nube.' },
+              ].map((f, i) => (
+                <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 11.5, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                  <span style={{ marginTop: 2, flexShrink: 0 }}>{f.icon}</span>
+                  {f.txt}
                 </div>
               ))}
             </div>
           </div>
         </div>
       </div>
+
+      {/* ── Modal: Vista en vivo ── */}
+      {liveRun && (
+        <Modal wide title={<><Eye size={15} style={{ color: '#38BDF8' }} /> Vista en vivo — {liveRun.run.task?.slice(0, 60)}…</>} onClose={() => setLiveRun(null)}>
+          {liveRun.cargando ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
+              <Loader size={30} className="animate-spin" style={{ color: '#38BDF8' }} />
+            </div>
+          ) : liveRun.url ? (
+            <iframe
+              src={liveRun.url}
+              title="Browserbase Live View"
+              style={{ width: '100%', height: '70vh', border: 'none', background: '#000' }}
+              sandbox="allow-same-origin allow-scripts allow-forms allow-pointer-lock"
+              allow="clipboard-read; clipboard-write"
+            />
+          ) : (
+            <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
+              <WifiOff size={28} style={{ marginBottom: 10, opacity: 0.4 }} />
+              <p>{liveRun.error || 'El bot aún no tiene navegador asignado (puede estar en cola o resolver la tarea sin navegador).'}</p>
+            </div>
+          )}
+        </Modal>
+      )}
+
+      {/* ── Modal: Paso a paso ── */}
+      {pasosRun && (
+        <Modal title={<><ListOrdered size={15} style={{ color: '#818CF8' }} /> Paso a paso del bot</>} onClose={() => setPasosRun(null)}>
+          <div style={{ padding: '14px 18px' }}>
+            <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 12, lineHeight: 1.5 }}>{pasosRun.run.task}</p>
+            {pasosRun.cargando ? (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}>
+                <Loader size={26} className="animate-spin" style={{ color: '#818CF8' }} />
+              </div>
+            ) : pasosRun.error ? (
+              <p style={{ fontSize: 12, color: '#F87171' }}>{pasosRun.error}</p>
+            ) : pasosRun.mensajes.length === 0 ? (
+              <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Sin mensajes todavía.</p>
+            ) : (
+              pasosRun.mensajes.map((m, i) => {
+                const texto = extraerTexto(m)
+                if (!texto) return null
+                const esBot = (m.message?.role || m.role) === 'assistant'
+                return (
+                  <div key={m.id || i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 8, fontSize: 12 }}>
+                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: esBot ? '#818CF8' : '#38BDF8', marginTop: 5, flexShrink: 0 }} />
+                    <span style={{ color: 'var(--text-secondary)', lineHeight: 1.5, wordBreak: 'break-word' }}>{texto}</span>
+                  </div>
+                )
+              })
+            )}
+          </div>
+        </Modal>
+      )}
 
       <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
     </div>

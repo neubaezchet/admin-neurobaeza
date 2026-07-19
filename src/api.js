@@ -224,6 +224,31 @@ export function getRadicacionSkills() {
   return apiFetch('/admin/radicacion/skills');
 }
 
+// ─── Browserbase — Bots cloud (navegador en la nube) ─────
+export function getBrowserbaseRuns(params = {}) {
+  const q = new URLSearchParams(params).toString();
+  return apiFetch(`/api/browserbase/runs${q ? `?${q}` : ''}`);
+}
+export function getBrowserbaseRun(runId) {
+  return apiFetch(`/api/browserbase/runs/${runId}`);
+}
+export function getBrowserbaseRunLive(runId) {
+  return apiFetch(`/api/browserbase/runs/${runId}/live`);
+}
+export function getBrowserbaseRunMessages(runId, since = null) {
+  const q = since ? `?since=${encodeURIComponent(since)}` : '';
+  return apiFetch(`/api/browserbase/runs/${runId}/messages${q}`);
+}
+export function stopBrowserbaseRun(runId) {
+  return apiFetch(`/api/browserbase/runs/${runId}/stop`, { method: 'POST' });
+}
+export function createBrowserbaseRun(data) {
+  return apiFetch('/api/browserbase/runs', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
 // ─── Multi-tenant ────────────────────────────────────────
 export function getTenants(params = {}) {
   const q = new URLSearchParams(params).toString()
