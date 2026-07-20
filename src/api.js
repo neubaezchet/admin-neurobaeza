@@ -249,6 +249,27 @@ export function createBrowserbaseRun(data) {
   });
 }
 
+// ─── Browserbase — Sesión guardada por bot (context/login persistente) ───
+export function getBotSesion(botId) {
+  return apiFetch(`/api/browserbase/bots/${botId}/sesion`);
+}
+export function iniciarLoginBot(botId) {
+  return apiFetch(`/api/browserbase/bots/${botId}/sesion/login`, { method: 'POST' });
+}
+export function finalizarLoginBot(botId) {
+  return apiFetch(`/api/browserbase/bots/${botId}/sesion/login/finalizar`, { method: 'POST' });
+}
+export function eliminarSesionBot(botId) {
+  return apiFetch(`/api/browserbase/bots/${botId}/sesion`, { method: 'DELETE' });
+}
+// Lanza una radicación robusta (context + credenciales como variables + proxy)
+export function radicarConBot(data) {
+  return apiFetch('/api/browserbase/radicar', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
 // ─── Multi-tenant ────────────────────────────────────────
 export function getTenants(params = {}) {
   const q = new URLSearchParams(params).toString()

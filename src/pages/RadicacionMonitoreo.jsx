@@ -72,6 +72,7 @@ function RunCard({ run, onVerVivo, onVerPasos, onDetener, deteniendo }) {
   const col = ESTADO_COLORS[meta.estado]
   const activo = run.status === 'RUNNING' || run.status === 'PENDING'
   const dur = duracion(run)
+  const ses = run.sesion  // datos de radicación (empresa/eps/documento) si el run vino de la cola
 
   return (
     <div style={{
@@ -81,7 +82,15 @@ function RunCard({ run, onVerVivo, onVerPasos, onDetener, deteniendo }) {
     }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10, marginBottom: 6 }}>
         <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+          {ses && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--text-primary)' }}>{ses.eps?.replace(/_/g, ' ').toUpperCase()}</span>
+              <span style={{ fontSize: 10, padding: '1px 7px', borderRadius: 999, background: 'rgba(14,165,233,0.10)', color: '#38BDF8' }}>{ses.empresa}</span>
+              {ses.documento && <span style={{ fontSize: 10.5, color: 'var(--text-muted)' }}>CC {ses.documento}</span>}
+              {ses.cached && <span style={{ fontSize: 9.5, padding: '1px 6px', borderRadius: 999, background: 'rgba(16,185,129,0.10)', color: '#34D399' }}>🔑 sesión guardada</span>}
+            </div>
+          )}
+          <div style={{ fontSize: ses ? 11 : 13, fontWeight: ses ? 400 : 600, color: ses ? 'var(--text-muted)' : 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
             {run.task}
           </div>
           <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 3, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -202,10 +211,15 @@ function extraerTexto(item) {
 export default function RadicacionMonitoreo() {
   const [runs, setRuns] = useState([])
   const [cola, setCola] = useState([])
+  const [sesiones, setSesiones] = useState([])
   const [sinConexion, setSinConexion] = useState(false)
   const [cargando, setCargando] = useState(true)
   const [ultimaAct, setUltimaAct] = useState(null)
   const [deteniendo, setDeteniendo] = useState(null)
+
+  // Filtros por empresa y EPS
+  const [filtroEmpresa, setFiltroEmpresa] = useState('todas')
+  const [filtroEps, setFiltroEps] = useState('todas')
 
   // Modales
   const [liveRun, setLiveRun] = useState(null)      // { run, url, cargando }
@@ -213,13 +227,15 @@ export default function RadicacionMonitoreo() {
 
   const cargar = useCallback(async () => {
     try {
-      const [runsData, colaData] = await Promise.all([
+      const [runsData, colaData, sesData] = await Promise.all([
         getBrowserbaseRuns({ limit: 50 }).catch(() => null),
         fetchSafe('/admin/radicacion/cola'),
+        fetchSafe('/admin/radicacion/sesiones?limit=100'),
       ])
       setSinConexion(!runsData)
       if (runsData) setRuns(runsData.data || runsData.runs || [])
       if (colaData) setCola(colaData.items || [])
+      if (sesData) setSesiones(sesData.sesiones || [])
     } catch {
       setSinConexion(true)
     }
@@ -265,13 +281,29 @@ export default function RadicacionMonitoreo() {
     setDeteniendo(null)
   }
 
-  const activos = runs.filter(r => r.status === 'RUNNING' || r.status === 'PENDING')
-  const historial = runs.filter(r => r.status !== 'RUNNING' && r.status !== 'PENDING')
+  // Cruce runs ↔ sesiones de radicación (sesion_id === runId → empresa/eps/documento)
+  const sesionPorRun = {}
+  sesiones.forEach(s => { if (s.sesion_id) sesionPorRun[s.sesion_id] = s })
+  const runsEnriquecidos = runs.map(r => ({ ...r, sesion: sesionPorRun[r.runId] || null }))
+
+  // Opciones de filtros (a partir de las sesiones de radicación)
+  const empresas = [...new Set(sesiones.map(s => s.empresa).filter(Boolean))].sort()
+  const epsList = [...new Set(sesiones.map(s => s.eps).filter(Boolean))].sort()
+
+  // Aplicar filtros: un run sin sesión (ej. pruebas) solo se muestra con filtros en "todas"
+  const runsFiltrados = runsEnriquecidos.filter(r => {
+    if (filtroEmpresa !== 'todas' && r.sesion?.empresa !== filtroEmpresa) return false
+    if (filtroEps !== 'todas' && r.sesion?.eps !== filtroEps) return false
+    return true
+  })
+
+  const activos = runsFiltrados.filter(r => r.status === 'RUNNING' || r.status === 'PENDING')
+  const historial = runsFiltrados.filter(r => r.status !== 'RUNNING' && r.status !== 'PENDING')
   const stats = {
-    total: runs.length,
-    exitosas: runs.filter(r => r.status === 'COMPLETED').length,
+    total: runsFiltrados.length,
+    exitosas: runsFiltrados.filter(r => r.status === 'COMPLETED').length,
     en_curso: activos.length,
-    fallidas: runs.filter(r => r.status === 'FAILED' || r.status === 'TIMED_OUT').length,
+    fallidas: runsFiltrados.filter(r => r.status === 'FAILED' || r.status === 'TIMED_OUT').length,
   }
   const hayFallas = stats.fallidas > 0
 
@@ -324,6 +356,27 @@ export default function RadicacionMonitoreo() {
           <WifiOff size={14} /> No se pudo conectar con Browserbase. Verifica que <code style={{ fontSize: 11, background: 'rgba(255,255,255,0.06)', padding: '1px 5px', borderRadius: 4 }}>BROWSERBASE_API_KEY</code> esté configurada en el backend (Railway).
         </div>
       )}
+
+      {/* Filtros por empresa y EPS */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)' }}>Filtrar:</span>
+        <select value={filtroEmpresa} onChange={e => setFiltroEmpresa(e.target.value)}
+          style={{ padding: '7px 12px', borderRadius: 10, fontSize: 12.5, fontWeight: 600, color: 'var(--text-primary)', background: 'var(--bg-input)', border: '1px solid var(--border-input)', outline: 'none', cursor: 'pointer' }}>
+          <option value="todas">Todas las empresas</option>
+          {empresas.map(e => <option key={e} value={e}>{e}</option>)}
+        </select>
+        <select value={filtroEps} onChange={e => setFiltroEps(e.target.value)}
+          style={{ padding: '7px 12px', borderRadius: 10, fontSize: 12.5, fontWeight: 600, color: 'var(--text-primary)', background: 'var(--bg-input)', border: '1px solid var(--border-input)', outline: 'none', cursor: 'pointer' }}>
+          <option value="todas">Todas las EPS/ARL</option>
+          {epsList.map(e => <option key={e} value={e}>{e.replace(/_/g, ' ').toUpperCase()}</option>)}
+        </select>
+        {(filtroEmpresa !== 'todas' || filtroEps !== 'todas') && (
+          <button onClick={() => { setFiltroEmpresa('todas'); setFiltroEps('todas') }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 11px', borderRadius: 9, fontSize: 11.5, fontWeight: 600, color: 'var(--text-muted)', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-primary)', cursor: 'pointer' }}>
+            <X size={11} /> Limpiar
+          </button>
+        )}
+      </div>
 
       {/* Métricas */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>

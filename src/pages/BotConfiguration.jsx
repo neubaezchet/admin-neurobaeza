@@ -2,9 +2,13 @@ import { useState, useEffect, useRef } from 'react'
 import {
   Bot, Check, AlertCircle, Globe, Mail,
   ChevronDown, Eye, EyeOff, Save, Lock, Building2, Layers, Loader,
-  Paperclip, Trash2, Upload,
+  Paperclip, Trash2, Upload, KeyRound, X, CheckCircle,
 } from 'lucide-react'
-import { getEmpresas, getBotsEmpresa, createBotEmpresa, updateBotEmpresa, getRadicacionSkills, subirSoporteEps, quitarSoporteEps } from '../api'
+import {
+  getEmpresas, getBotsEmpresa, createBotEmpresa, updateBotEmpresa, getRadicacionSkills,
+  subirSoporteEps, quitarSoporteEps,
+  iniciarLoginBot, finalizarLoginBot, eliminarSesionBot,
+} from '../api'
 
 // ─────────────────────────────────────────────────────────────
 // CATÁLOGO COMPLETO DE EPS / ARL
@@ -253,6 +257,142 @@ function EpsLogo({ cat, dot }) {
   )
 }
 
+// ─────────────────────────────────────────────────────────────
+// SESIÓN DEL PORTAL (Browserbase context) — login persistente
+// El admin inicia sesión UNA vez en el navegador cloud; las cookies
+// quedan guardadas cifradas y todos los bots entran ya logueados.
+// ─────────────────────────────────────────────────────────────
+function SesionNavegador({ apiBot, onRefresh }) {
+  const [loginModal, setLoginModal] = useState(null)  // { liveViewUrl, cargando, finalizando }
+  const [trabajando, setTrabajando] = useState(false)
+
+  const tieneSesion = apiBot?.tiene_sesion_guardada
+  const ultimoLogin = apiBot?.context_ultimo_login
+
+  const abrirLogin = async () => {
+    setLoginModal({ liveViewUrl: null, cargando: true })
+    try {
+      const data = await iniciarLoginBot(apiBot.id)
+      setLoginModal({ liveViewUrl: data.liveViewUrl, cargando: false })
+    } catch (e) {
+      setLoginModal(null)
+      alert('No se pudo abrir el navegador: ' + e.message)
+    }
+  }
+
+  const confirmarLogin = async () => {
+    setLoginModal(m => ({ ...m, finalizando: true }))
+    try {
+      await finalizarLoginBot(apiBot.id)
+      setLoginModal(null)
+      onRefresh?.()
+    } catch (e) {
+      setLoginModal(m => ({ ...m, finalizando: false }))
+      alert('Error al guardar la sesión: ' + e.message)
+    }
+  }
+
+  const eliminar = async () => {
+    if (!window.confirm('¿Eliminar la sesión guardada? Los bots tendrán que volver a iniciar sesión con usuario y clave.')) return
+    setTrabajando(true)
+    try {
+      await eliminarSesionBot(apiBot.id)
+      onRefresh?.()
+    } catch (e) {
+      alert('Error: ' + e.message)
+    }
+    setTrabajando(false)
+  }
+
+  return (
+    <div style={{ marginTop: 14, padding: '14px 16px', borderRadius: 13, background: 'rgba(99,102,241,0.04)', border: '1px solid rgba(99,102,241,0.15)' }}>
+      <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+        <KeyRound size={12} /> Sesión del portal · login persistente en la nube
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7, flex: 1, minWidth: 200 }}>
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: tieneSesion ? '#34D399' : 'var(--text-muted)', flexShrink: 0 }} />
+          {tieneSesion ? (
+            <span style={{ fontSize: 12.5, color: 'var(--text-primary)', fontWeight: 600 }}>
+              Sesión guardada
+              {ultimoLogin && (
+                <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 400 }}>
+                  {' '}· último login {new Date(ultimoLogin).toLocaleString('es-CO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                </span>
+              )}
+            </span>
+          ) : (
+            <span style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>
+              Sin sesión guardada — el bot iniciará sesión con usuario y clave en cada radicación
+            </span>
+          )}
+        </div>
+        <div style={{ display: 'flex', gap: 7, flexShrink: 0 }}>
+          <button disabled={trabajando} onClick={abrirLogin}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 9, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid rgba(129,140,248,0.3)', background: 'rgba(99,102,241,0.10)', color: '#818CF8', opacity: trabajando ? 0.5 : 1 }}>
+            <Globe size={12} /> {tieneSesion ? 'Renovar login' : 'Iniciar sesión en portal'}
+          </button>
+          {tieneSesion && (
+            <button disabled={trabajando} onClick={eliminar}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 9, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)', color: '#F87171', opacity: trabajando ? 0.5 : 1 }}>
+              {trabajando ? <Loader size={12} className="animate-spin" /> : <Trash2 size={12} />} Eliminar
+            </button>
+          )}
+        </div>
+      </div>
+
+      <p style={{ fontSize: 10.5, color: 'var(--text-muted)', marginTop: 8, lineHeight: 1.5 }}>
+        Inicia sesión una sola vez en el navegador seguro — las cookies quedan cifradas en la nube y
+        todas las radicaciones futuras entran directo, sin repetir el login (más rápido y sin riesgo de bloqueo).
+      </p>
+
+      {/* Modal de login en vivo */}
+      {loginModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div style={{ background: 'var(--bg-card-solid, #111827)', border: '1px solid var(--border-primary)', borderRadius: 18, width: 'min(1100px, 96vw)', maxHeight: '92vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 18px', borderBottom: '1px solid var(--border-primary)' }}>
+              <h4 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <KeyRound size={15} style={{ color: '#818CF8' }} /> Inicia sesión en el portal — el navegador es tuyo, usa el mouse y teclado
+              </h4>
+              <button onClick={() => setLoginModal(null)} style={{ color: 'var(--text-muted)', cursor: 'pointer', background: 'none', border: 'none' }}><X size={18} /></button>
+            </div>
+
+            {loginModal.cargando ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: 70 }}>
+                <Loader size={30} className="animate-spin" style={{ color: '#818CF8' }} />
+                <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Abriendo navegador seguro en la nube…</span>
+              </div>
+            ) : (
+              <iframe
+                src={loginModal.liveViewUrl}
+                title="Login en portal"
+                style={{ width: '100%', height: '65vh', border: 'none', background: '#000' }}
+                sandbox="allow-same-origin allow-scripts allow-forms allow-pointer-lock"
+                allow="clipboard-read; clipboard-write"
+              />
+            )}
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '13px 18px', borderTop: '1px solid var(--border-primary)' }}>
+              <span style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>
+                Cuando veas que ya entraste al portal (página principal de tu cuenta), confirma aquí para guardar la sesión.
+              </span>
+              <button
+                onClick={confirmarLogin}
+                disabled={loginModal.cargando || loginModal.finalizando}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 17px', borderRadius: 11, fontSize: 13, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #10B981, #059669)', boxShadow: '0 2px 12px rgba(16,185,129,0.35)', border: 'none', cursor: 'pointer', opacity: (loginModal.cargando || loginModal.finalizando) ? 0.6 : 1, flexShrink: 0 }}
+              >
+                {loginModal.finalizando ? <Loader size={15} className="animate-spin" /> : <CheckCircle size={15} />}
+                Ya inicié sesión — guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave, onSoporteChange }) {
   const estadoKey = apiBot?.estado || 'sin_configurar'
   const est = ESTADOS[estadoKey] || ESTADOS.sin_configurar
@@ -490,6 +630,11 @@ function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave, onSo
                 </div>
               )}
             </div>
+          )}
+
+          {/* Sesión del portal (Browserbase) — solo bots de portal ya guardados */}
+          {apiBot && medio === 'portal' && (
+            <SesionNavegador apiBot={apiBot} onRefresh={onSoporteChange} />
           )}
 
           {/* Footer */}
