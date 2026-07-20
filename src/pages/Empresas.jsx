@@ -5,7 +5,7 @@ import {
   ChevronRight, Loader2, AlertCircle, RefreshCw, ExternalLink,
   FileSpreadsheet, Users, Plus, Copy, Check,
 } from 'lucide-react'
-import { getEmpresas, getTenant, crearEmpresaDirecta, reprovisionarTenant } from '../api'
+import { getEmpresas, getTenant, crearEmpresaDirecta, reprovisionarTenant, updateEmpresa } from '../api'
 
 // ─── Chip de estado ───────────────────────────────────────────────────────────
 
@@ -71,6 +71,28 @@ function LinksPortales({ links }) {
 function EmpresaCard({ empresa }) {
   const navigate = useNavigate()
   const [config, setConfig] = useState(null)
+  // Renombrar empresa (ej: Eliot → Admin)
+  const [editandoNombre, setEditandoNombre] = useState(false)
+  const [nombreLocal, setNombreLocal] = useState(empresa.nombre)
+  const [nombreDraft, setNombreDraft] = useState(empresa.nombre)
+  const [renombrando, setRenombrando] = useState(false)
+  const [avisoRename, setAvisoRename] = useState('')
+
+  const handleRenombrar = async () => {
+    const nuevo = nombreDraft.trim()
+    if (!nuevo || nuevo === nombreLocal) { setEditandoNombre(false); return }
+    setRenombrando(true)
+    try {
+      const res = await updateEmpresa(empresa.id, { nombre: nuevo })
+      setNombreLocal(nuevo)
+      setAvisoRename(res.aviso || '')
+      setEditandoNombre(false)
+    } catch (e) {
+      setAvisoRename(e.message || 'No se pudo renombrar')
+    } finally {
+      setRenombrando(false)
+    }
+  }
   const [loadingConfig, setLoadingConfig] = useState(false)
   const [expanded, setExpanded] = useState(false)
 
@@ -140,13 +162,40 @@ function EmpresaCard({ empresa }) {
           </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
-            <h3 style={{
-              margin: '0 0 2px', fontSize: 15, fontWeight: 700,
-              color: 'var(--text-primary)', overflow: 'hidden',
-              textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            }}>
-              {empresa.nombre}
-            </h3>
+            {editandoNombre ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                <input
+                  value={nombreDraft}
+                  onChange={e => setNombreDraft(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') handleRenombrar(); if (e.key === 'Escape') setEditandoNombre(false) }}
+                  autoFocus
+                  style={{
+                    flex: 1, minWidth: 0, padding: '4px 8px', borderRadius: 7, fontSize: 14, fontWeight: 700,
+                    background: 'rgba(255,255,255,0.06)', border: '1px solid var(--accent-primary)',
+                    color: 'var(--text-primary)', outline: 'none',
+                  }}
+                />
+                <button onClick={handleRenombrar} disabled={renombrando} title="Guardar"
+                  style={{ padding: '4px 8px', borderRadius: 7, cursor: 'pointer', background: 'var(--accent-primary)', border: 'none', color: '#fff', fontSize: 11, fontWeight: 700 }}>
+                  {renombrando ? '…' : 'OK'}
+                </button>
+              </div>
+            ) : (
+              <h3
+                onDoubleClick={() => { setNombreDraft(nombreLocal); setEditandoNombre(true) }}
+                title="Doble clic para renombrar"
+                style={{
+                  margin: '0 0 2px', fontSize: 15, fontWeight: 700, cursor: 'text',
+                  color: 'var(--text-primary)', overflow: 'hidden',
+                  textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}
+              >
+                {nombreLocal}
+              </h3>
+            )}
+            {avisoRename && (
+              <p style={{ margin: '2px 0', fontSize: 10.5, color: '#FCD34D', lineHeight: 1.4 }}>{avisoRename}</p>
+            )}
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
               {empresa.nit && (
