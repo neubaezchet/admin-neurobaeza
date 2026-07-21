@@ -205,12 +205,12 @@ const TIPOS_LABELS = {
 
 function SkillBadge({ skill }) {
   if (skill === 'activa') return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 999, background: 'rgba(16,185,129,0.10)', color: '#34D399' }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 999, background: 'rgba(16,185,129,0.10)', color: '#059669' }}>
       <CheckCircle size={10} /> Activa
     </span>
   )
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 999, background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)' }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 999, background: 'rgba(15,23,42,0.05)', color: 'var(--text-muted)' }}>
       <Clock size={10} /> Pendiente
     </span>
   )
@@ -218,9 +218,9 @@ function SkillBadge({ skill }) {
 
 function Campo({ tipo, label }) {
   const styles = {
-    ocr: { bg: 'rgba(16,185,129,0.08)', color: '#34D399', border: 'rgba(16,185,129,0.2)' },
-    manual: { bg: 'rgba(245,158,11,0.08)', color: '#FBBF24', border: 'rgba(245,158,11,0.2)' },
-    cred: { bg: 'rgba(255,255,255,0.04)', color: 'var(--text-muted)', border: 'rgba(255,255,255,0.08)' },
+    ocr: { bg: 'rgba(16,185,129,0.08)', color: '#059669', border: 'rgba(16,185,129,0.2)' },
+    manual: { bg: 'rgba(245,158,11,0.08)', color: '#B45309', border: 'rgba(245,158,11,0.2)' },
+    cred: { bg: 'rgba(15,23,42,0.04)', color: 'var(--text-muted)', border: 'rgba(15,23,42,0.08)' },
   }
   const s = styles[tipo] || styles.cred
   return (
@@ -275,7 +275,7 @@ export default function RadicacionCampos() {
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 4 }}>
-        <div style={{ width: 44, height: 44, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(14,165,233,0.12)', border: '1px solid rgba(14,165,233,0.25)', color: '#38BDF8' }}>
+        <div style={{ width: 44, height: 44, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(79,70,229,0.12)', border: '1px solid rgba(79,70,229,0.25)', color: '#4F46E5' }}>
           <LayoutList size={24} />
         </div>
         <h2 style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
@@ -302,9 +302,9 @@ export default function RadicacionCampos() {
           {FILTROS.map(f => (
             <button key={f.key} onClick={() => setFiltro(f.key)} style={{
               fontSize: 11, fontWeight: 600, padding: '5px 12px', borderRadius: 999, cursor: 'pointer', transition: 'all .2s',
-              background: filtro === f.key ? 'rgba(14,165,233,0.12)' : 'transparent',
-              color: filtro === f.key ? '#38BDF8' : 'var(--text-muted)',
-              border: `1px solid ${filtro === f.key ? 'rgba(14,165,233,0.3)' : 'var(--border-primary)'}`,
+              background: filtro === f.key ? 'rgba(79,70,229,0.12)' : 'transparent',
+              color: filtro === f.key ? '#4F46E5' : 'var(--text-muted)',
+              border: `1px solid ${filtro === f.key ? 'rgba(79,70,229,0.3)' : 'var(--border-primary)'}`,
             }}>
               {f.label}
             </button>
@@ -325,7 +325,7 @@ export default function RadicacionCampos() {
             </thead>
             <tbody>
               {filtered.map((m, i) => (
-                <tr key={m.key} style={{ borderBottom: i < filtered.length - 1 ? '1px solid rgba(255,255,255,0.03)' : 'none' }}>
+                <tr key={m.key} style={{ borderBottom: i < filtered.length - 1 ? '1px solid rgba(15,23,42,0.03)' : 'none' }}>
                   <td style={{ padding: '9px 12px', fontWeight: 600, color: 'var(--text-primary)', fontSize: 12.5, whiteSpace: 'nowrap' }}>
                     {m.nombre}
                   </td>
@@ -335,8 +335,8 @@ export default function RadicacionCampos() {
                   <td style={{ padding: '9px 12px' }}>
                     <span style={{
                       display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 999,
-                      background: m.medio === 'email' ? 'rgba(16,185,129,0.10)' : 'rgba(99,102,241,0.10)',
-                      color: m.medio === 'email' ? '#34D399' : '#818CF8',
+                      background: m.medio === 'email' ? 'rgba(16,185,129,0.10)' : 'rgba(124,58,237,0.10)',
+                      color: m.medio === 'email' ? '#059669' : '#7C3AED',
                     }}>
                       {m.medio === 'email' ? <Mail size={10} /> : <Globe size={10} />}
                       {m.medio === 'email' ? 'Email' : 'Portal'}
@@ -392,9 +392,9 @@ export default function RadicacionCampos() {
           {Object.entries(TIPOS_LABELS).map(([key, label]) => (
             <button key={key} onClick={() => setTipo(key)} style={{
               fontSize: 12, fontWeight: 600, padding: '7px 16px', borderRadius: 10, cursor: 'pointer', transition: 'all .2s',
-              background: tipo === key ? 'rgba(14,165,233,0.12)' : 'var(--bg-input)',
-              color: tipo === key ? '#38BDF8' : 'var(--text-tertiary)',
-              border: `1px solid ${tipo === key ? 'rgba(14,165,233,0.3)' : 'var(--border-input)'}`,
+              background: tipo === key ? 'rgba(79,70,229,0.12)' : 'var(--bg-input)',
+              color: tipo === key ? '#4F46E5' : 'var(--text-tertiary)',
+              border: `1px solid ${tipo === key ? 'rgba(79,70,229,0.3)' : 'var(--border-input)'}`,
             }}>
               {label}
             </button>
@@ -415,14 +415,14 @@ export default function RadicacionCampos() {
             <div key={c.campo} style={{
               display: 'grid', gridTemplateColumns: '180px 90px 1fr 120px',
               padding: '10px 16px', alignItems: 'center', gap: 16,
-              borderBottom: i < camposFields.length - 1 ? '1px solid rgba(255,255,255,0.03)' : 'none',
+              borderBottom: i < camposFields.length - 1 ? '1px solid rgba(15,23,42,0.03)' : 'none',
             }}>
               <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{c.campo}</span>
               <div>
                 <span style={{
                   display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 999,
                   background: c.src === 'ocr' ? 'rgba(16,185,129,0.10)' : 'rgba(245,158,11,0.10)',
-                  color: c.src === 'ocr' ? '#34D399' : '#FBBF24',
+                  color: c.src === 'ocr' ? '#059669' : '#B45309',
                 }}>
                   {c.src === 'ocr' ? <ScanLine size={10} /> : <Pencil size={10} />}
                   {c.src === 'ocr' ? 'OCR' : 'Manual'}

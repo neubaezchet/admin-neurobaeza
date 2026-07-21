@@ -122,7 +122,7 @@ export default function UsersPermissions() {
 
       {/* Alerts */}
       {error && (
-        <div className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm animate-fade-in" style={{ background: 'var(--error-soft)', color: '#FCA5A5', border: '1px solid rgba(239,68,68,0.2)' }}>
+        <div className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm animate-fade-in" style={{ background: 'var(--error-soft)', color: '#DC2626', border: '1px solid rgba(239,68,68,0.2)' }}>
           <AlertCircle className="w-4 h-4 flex-shrink-0" /> {error}
           <button onClick={() => setError('')} className="ml-auto opacity-60 hover:opacity-100"><X className="w-4 h-4" /></button>
         </div>
@@ -218,7 +218,7 @@ export default function UsersPermissions() {
                     </div>
                   </td>
                   <td>
-                    <span className="neo-badge" style={u.activo ? { background: 'var(--success-soft)', color: 'var(--success)' } : { background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)' }}>
+                    <span className="neo-badge" style={u.activo ? { background: 'var(--success-soft)', color: 'var(--success)' } : { background: 'rgba(15,23,42,0.05)', color: 'var(--text-muted)' }}>
                       <span className="w-1.5 h-1.5 rounded-full mr-1.5 inline-block" style={{ background: u.activo ? 'var(--success)' : 'var(--text-muted)' }} />
                       {u.activo ? 'Activo' : 'Inactivo'}
                     </span>
@@ -256,7 +256,7 @@ export default function UsersPermissions() {
         </h4>
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
           {ROLES.map(r => (
-            <div key={r.value} className="flex items-start gap-2 p-2.5 rounded-xl transition-colors" style={{ border: '1px solid transparent' }} onMouseEnter={e=>{e.currentTarget.style.background='rgba(255,255,255,0.03)';e.currentTarget.style.borderColor='var(--border-primary)'}} onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.borderColor='transparent'}}>
+            <div key={r.value} className="flex items-start gap-2 p-2.5 rounded-xl transition-colors" style={{ border: '1px solid transparent' }} onMouseEnter={e=>{e.currentTarget.style.background='rgba(15,23,42,0.03)';e.currentTarget.style.borderColor='var(--border-primary)'}} onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.borderColor='transparent'}}>
               <RoleBadge rol={r.value} />
               <span className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{r.desc}</span>
             </div>
@@ -364,7 +364,7 @@ function UserModal({ user, empresas, onClose, onSaved, onError }) {
             </div>
             {isEdit ? 'Editar Usuario' : 'Nuevo Usuario'}
           </h3>
-          <button onClick={onClose} className="p-1.5 rounded-lg transition-colors" style={{ color: 'var(--text-muted)' }} onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+          <button onClick={onClose} className="p-1.5 rounded-lg transition-colors" style={{ color: 'var(--text-muted)' }} onMouseEnter={e=>e.currentTarget.style.background='rgba(15,23,42,0.05)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
             <X className="w-4 h-4" />
           </button>
         </div>

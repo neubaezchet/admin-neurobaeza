@@ -36,9 +36,9 @@ const COMO_CONOCIO = [
 // ─── Estilos compartidos ──────────────────────────────────
 const inputBase = (hasError) => ({
   width: '100%', boxSizing: 'border-box', padding: '11px 14px',
-  background: 'rgba(255,255,255,0.06)',
-  border: `1px solid ${hasError ? 'rgba(248,113,113,0.5)' : 'rgba(255,255,255,0.12)'}`,
-  borderRadius: 10, fontSize: 14, color: '#fff', outline: 'none',
+  background: 'var(--bg-input)',
+  border: `1px solid ${hasError ? 'rgba(220,38,38,0.5)' : 'var(--border-primary)'}`,
+  borderRadius: 10, fontSize: 14, color: 'var(--text-primary)', outline: 'none',
   fontFamily: 'inherit', transition: 'border-color 0.2s',
 })
 
@@ -47,13 +47,13 @@ function Campo({ label, error, children }) {
     <div style={{ marginBottom: 14 }}>
       <label style={{
         display: 'block', fontSize: 10, fontWeight: 700, marginBottom: 5,
-        color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em',
+        color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em',
       }}>
         {label}
       </label>
       {children}
       {error && (
-        <p style={{ margin: '4px 0 0', fontSize: 11, color: '#F87171', display: 'flex', alignItems: 'center', gap: 3 }}>
+        <p style={{ margin: '4px 0 0', fontSize: 11, color: '#DC2626', display: 'flex', alignItems: 'center', gap: 3 }}>
           <AlertCircle size={10} /> {error}
         </p>
       )}
@@ -66,7 +66,7 @@ function FeatureCard({ icon: Icon, title, desc, color }) {
   return (
     <div style={{
       display: 'flex', gap: 14, padding: '14px 16px', borderRadius: 14,
-      background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+      background: 'var(--bg-card-solid)', border: '1px solid var(--border-primary)',
     }}>
       <div style={{
         width: 40, height: 40, borderRadius: 10, flexShrink: 0,
@@ -76,10 +76,10 @@ function FeatureCard({ icon: Icon, title, desc, color }) {
         <Icon size={18} color={color} />
       </div>
       <div>
-        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>
+        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
           {title}
         </p>
-        <p style={{ margin: '2px 0 0', fontSize: 12, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5 }}>
+        <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>
           {desc}
         </p>
       </div>
@@ -98,12 +98,12 @@ function PantallaExito({ nombre, email }) {
       }}>
         <CheckCircle2 size={30} color="#10B981" />
       </div>
-      <h2 style={{ margin: '0 0 8px', fontSize: 20, fontWeight: 800, color: '#fff' }}>
+      <h2 style={{ margin: '0 0 8px', fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>
         📬 ¡Revisa tu correo!
       </h2>
-      <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7 }}>
-        Hola <strong style={{ color: '#fff' }}>{nombre}</strong>, enviamos el enlace de
-        registro a <strong style={{ color: '#34D399' }}>{email}</strong>.
+      <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+        Hola <strong style={{ color: 'var(--text-primary)' }}>{nombre}</strong>, enviamos el enlace de
+        registro a <strong style={{ color: '#059669' }}>{email}</strong>.
         <br />Expira en 24 horas. Si no llega, revisa la carpeta de spam.
       </p>
     </div>
@@ -174,7 +174,7 @@ export default function SolicitarDemo() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #050810 0%, #080d1a 50%, #060913 100%)',
+      background: 'var(--bg-secondary)',
       display: 'flex', alignItems: 'stretch',
       fontFamily: '"Inter", "DM Sans", system-ui, sans-serif',
     }}>
@@ -185,11 +185,11 @@ export default function SolicitarDemo() {
           to   { opacity: 1; transform: translateY(0) }
         }
         * { box-sizing: border-box; }
-        input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.2) !important; }
-        select option { background: #0d1529; color: #fff; }
+        input::placeholder, textarea::placeholder { color: rgba(15,23,42,0.3) !important; }
+        select option { background: #fff; color: #0f172a; }
         input:focus, select:focus {
-          border-color: rgba(14,165,233,0.5) !important;
-          box-shadow: 0 0 0 3px rgba(14,165,233,0.08);
+          border-color: rgba(79,70,229,0.5) !important;
+          box-shadow: 0 0 0 3px rgba(79,70,229,0.08);
         }
       `}</style>
 
@@ -197,14 +197,14 @@ export default function SolicitarDemo() {
       <div style={{
         flex: '0 0 55%', padding: '64px 56px 64px 64px',
         display: 'flex', flexDirection: 'column', justifyContent: 'center',
-        borderRight: '1px solid rgba(255,255,255,0.05)',
+        borderRight: '1px solid var(--border-primary)',
         position: 'relative', overflow: 'hidden',
       }}>
         {/* Glow de fondo */}
         <div style={{
           position: 'absolute', top: '20%', left: '10%',
           width: 320, height: 320, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(14,165,233,0.07) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(79,70,229,0.07) 0%, transparent 70%)',
           pointerEvents: 'none',
         }} />
 
@@ -212,26 +212,26 @@ export default function SolicitarDemo() {
         <div style={{ marginBottom: 40, animation: 'fadeUp 0.6s ease both' }}>
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 8,
-            background: 'rgba(14,165,233,0.1)', border: '1px solid rgba(14,165,233,0.2)',
+            background: 'rgba(79,70,229,0.1)', border: '1px solid rgba(79,70,229,0.2)',
             borderRadius: 999, padding: '5px 14px', marginBottom: 20,
           }}>
             <div style={{
-              width: 6, height: 6, borderRadius: '50%', background: '#0EA5E9',
-              boxShadow: '0 0 6px #0EA5E9', animation: 'spin 3s linear infinite',
+              width: 6, height: 6, borderRadius: '50%', background: '#4F46E5',
+              boxShadow: '0 0 6px #4F46E5', animation: 'spin 3s linear infinite',
             }} />
-            <span style={{ fontSize: 11, color: '#38BDF8', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: 11, color: '#4F46E5', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
               Demo gratuito · 3 horas · Sin tarjeta
             </span>
           </div>
 
           <h1 style={{
             margin: '0 0 14px', fontSize: 'clamp(24px, 2.8vw, 36px)', fontWeight: 800,
-            color: 'rgba(255,255,255,0.97)', letterSpacing: '-0.03em', lineHeight: 1.15,
+            color: 'var(--text-primary)', letterSpacing: '-0.03em', lineHeight: 1.15,
           }}>
             Prueba la gestión de incapacidades médicas en tu empresa
           </h1>
           <p style={{
-            margin: 0, fontSize: 15, color: 'rgba(255,255,255,0.45)', lineHeight: 1.7, maxWidth: 460,
+            margin: 0, fontSize: 15, color: 'var(--text-secondary)', lineHeight: 1.7, maxWidth: 460,
           }}>
             Explora el flujo completo: desde que el empleado sube su incapacidad
             hasta que queda validada y radicada.
@@ -245,7 +245,7 @@ export default function SolicitarDemo() {
         }}>
           <FeatureCard
             icon={LayoutDashboard}
-            color="#0EA5E9"
+            color="#4F46E5"
             title="Portal de administración"
             desc="Configura tu empresa, usuarios y reportes"
           />
@@ -266,22 +266,22 @@ export default function SolicitarDemo() {
         {/* Badge de 3 horas */}
         <div style={{
           display: 'flex', alignItems: 'center', gap: 14, padding: '16px 20px',
-          background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+          background: 'var(--bg-card-solid)', border: '1px solid var(--border-primary)',
           borderRadius: 14, marginBottom: 20,
           animation: 'fadeUp 0.7s 0.2s ease both',
         }}>
           <div style={{
             width: 44, height: 44, borderRadius: 12, flexShrink: 0,
-            background: 'rgba(14,165,233,0.1)', border: '1px solid rgba(14,165,233,0.2)',
+            background: 'rgba(79,70,229,0.1)', border: '1px solid rgba(79,70,229,0.2)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <Clock size={20} color="#38BDF8" />
+            <Clock size={20} color="#4F46E5" />
           </div>
           <div>
-            <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>
+            <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
               3 horas completas
             </p>
-            <p style={{ margin: '2px 0 0', fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
+            <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--text-tertiary)' }}>
               Tiempo suficiente para recorrer todo el flujo
             </p>
           </div>
@@ -289,7 +289,7 @@ export default function SolicitarDemo() {
 
         {/* Disclaimer */}
         <p style={{
-          fontSize: 12, color: 'rgba(255,255,255,0.28)', lineHeight: 1.7, maxWidth: 440,
+          fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7, maxWidth: 440,
           animation: 'fadeUp 0.7s 0.3s ease both',
         }}>
           Los datos del demo se eliminan automáticamente al vencer. Si decides contratar,
@@ -309,17 +309,17 @@ export default function SolicitarDemo() {
             <div style={{ textAlign: 'center', animation: 'fadeUp 0.6s ease both' }}>
               <div style={{
                 width: 64, height: 64, borderRadius: 20, margin: '0 auto 24px',
-                background: 'linear-gradient(135deg, #0EA5E9, #0284C7)',
-                boxShadow: '0 12px 40px rgba(14,165,233,0.35)',
+                background: 'linear-gradient(135deg, #4F46E5, #4338CA)',
+                boxShadow: '0 12px 40px rgba(79,70,229,0.35)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
                 <Zap size={28} color="#fff" />
               </div>
 
-              <h2 style={{ margin: '0 0 10px', fontSize: 22, fontWeight: 800, color: '#fff' }}>
+              <h2 style={{ margin: '0 0 10px', fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>
                 Empieza en minutos
               </h2>
-              <p style={{ margin: '0 0 36px', fontSize: 14, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6 }}>
+              <p style={{ margin: '0 0 36px', fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                 Sin tarjeta de crédito · Sin compromiso
                 <br />Acceso completo durante 3 horas
               </p>
@@ -328,27 +328,27 @@ export default function SolicitarDemo() {
                 onClick={() => setShowForm(true)}
                 style={{
                   width: '100%', padding: '16px 24px', borderRadius: 14,
-                  background: 'linear-gradient(135deg, #0EA5E9, #0284C7)',
+                  background: 'linear-gradient(135deg, #4F46E5, #4338CA)',
                   border: 'none', color: '#fff', fontWeight: 800, fontSize: 16,
                   cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                  boxShadow: '0 8px 32px rgba(14,165,233,0.4)',
+                  boxShadow: '0 8px 32px rgba(79,70,229,0.4)',
                   transition: 'all 0.2s ease',
                   letterSpacing: '-0.01em',
                 }}
                 onMouseEnter={e => {
                   e.currentTarget.style.transform = 'translateY(-2px)'
-                  e.currentTarget.style.boxShadow = '0 12px 40px rgba(14,165,233,0.5)'
+                  e.currentTarget.style.boxShadow = '0 12px 40px rgba(79,70,229,0.5)'
                 }}
                 onMouseLeave={e => {
                   e.currentTarget.style.transform = 'translateY(0)'
-                  e.currentTarget.style.boxShadow = '0 8px 32px rgba(14,165,233,0.4)'
+                  e.currentTarget.style.boxShadow = '0 8px 32px rgba(79,70,229,0.4)'
                 }}
               >
                 Empezar prueba gratuita
                 <ChevronRight size={20} />
               </button>
 
-              <p style={{ marginTop: 16, fontSize: 12, color: 'rgba(255,255,255,0.2)' }}>
+              <p style={{ marginTop: 16, fontSize: 12, color: 'var(--text-muted)' }}>
                 Sin compromiso · Te respondemos en menos de 24h
               </p>
             </div>
@@ -358,17 +358,17 @@ export default function SolicitarDemo() {
           {showForm && (
             <div style={{ animation: 'fadeUp 0.45s ease both' }}>
               <div style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.09)',
+                background: 'var(--bg-card-solid)',
+                border: '1px solid var(--border-primary)',
                 borderRadius: 22, padding: '32px 30px 28px',
                 backdropFilter: 'blur(20px)',
-                boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
+                boxShadow: '0 24px 80px rgba(15,23,42,0.16)',
               }}>
                 {enviado ? (
                   <PantallaExito nombre={form.contacto_nombre} email={form.contacto_email} />
                 ) : (
                   <form onSubmit={handleSubmit}>
-                    <h3 style={{ margin: '0 0 24px', fontSize: 17, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>
+                    <h3 style={{ margin: '0 0 24px', fontSize: 17, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
                       Datos del demo
                     </h3>
 
@@ -378,7 +378,7 @@ export default function SolicitarDemo() {
                       <div style={{ gridColumn: '1 / -1' }}>
                         <Campo label="Nombre de la empresa *" error={errors.empresa_nombre}>
                           <div style={{ position: 'relative' }}>
-                            <Building2 size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.25)', pointerEvents: 'none' }} />
+                            <Building2 size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
                             <input
                               value={form.empresa_nombre}
                               onChange={e => set('empresa_nombre', e.target.value)}
@@ -392,7 +392,7 @@ export default function SolicitarDemo() {
                       {/* NIT */}
                       <Campo label="NIT *" error={errors.nit}>
                         <div style={{ position: 'relative' }}>
-                          <Hash size={13} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.25)', pointerEvents: 'none' }} />
+                          <Hash size={13} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
                           <input
                             value={form.nit}
                             onChange={e => set('nit', e.target.value)}
@@ -402,7 +402,7 @@ export default function SolicitarDemo() {
                           />
                         </div>
                         {form.nit && !errors.nit && validarNIT(form.nit) && (
-                          <p style={{ margin: '3px 0 0', fontSize: 10, color: '#34D399', display: 'flex', alignItems: 'center', gap: 3 }}>
+                          <p style={{ margin: '3px 0 0', fontSize: 10, color: '#059669', display: 'flex', alignItems: 'center', gap: 3 }}>
                             <CheckCircle2 size={9} /> NIT válido
                           </p>
                         )}
@@ -411,7 +411,7 @@ export default function SolicitarDemo() {
                       {/* Empleados */}
                       <Campo label="N.° empleados *" error={errors.cantidad_empleados}>
                         <div style={{ position: 'relative' }}>
-                          <Users size={13} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.25)', pointerEvents: 'none' }} />
+                          <Users size={13} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
                           <select
                             value={form.cantidad_empleados}
                             onChange={e => set('cantidad_empleados', e.target.value)}
@@ -440,7 +440,7 @@ export default function SolicitarDemo() {
                       {/* Email */}
                       <Campo label="Correo *" error={errors.contacto_email}>
                         <div style={{ position: 'relative' }}>
-                          <Mail size={13} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.25)', pointerEvents: 'none' }} />
+                          <Mail size={13} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
                           <input
                             type="email"
                             value={form.contacto_email}
@@ -454,7 +454,7 @@ export default function SolicitarDemo() {
                       {/* Teléfono */}
                       <Campo label="Teléfono" error={errors.contacto_telefono}>
                         <div style={{ position: 'relative' }}>
-                          <Phone size={13} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.25)', pointerEvents: 'none' }} />
+                          <Phone size={13} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
                           <input
                             value={form.contacto_telefono}
                             onChange={e => set('contacto_telefono', e.target.value)}
@@ -485,9 +485,9 @@ export default function SolicitarDemo() {
                       <div style={{
                         display: 'flex', gap: 8, padding: '10px 13px', borderRadius: 10, marginBottom: 14,
                         background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-                        fontSize: 12, color: '#FCA5A5',
+                        fontSize: 12, color: '#DC2626',
                       }}>
-                        <AlertCircle size={14} color="#F87171" style={{ flexShrink: 0 }} />
+                        <AlertCircle size={14} color="#DC2626" style={{ flexShrink: 0 }} />
                         {errorGlobal}
                       </div>
                     )}
@@ -498,10 +498,10 @@ export default function SolicitarDemo() {
                       style={{
                         width: '100%', padding: '13px', borderRadius: 12, marginTop: 6,
                         cursor: loading ? 'not-allowed' : 'pointer',
-                        background: loading ? 'rgba(14,165,233,0.3)' : 'linear-gradient(135deg, #0EA5E9, #0284C7)',
+                        background: loading ? 'rgba(79,70,229,0.3)' : 'linear-gradient(135deg, #4F46E5, #4338CA)',
                         border: 'none', color: '#fff', fontWeight: 700, fontSize: 15,
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                        boxShadow: loading ? 'none' : '0 6px 24px rgba(14,165,233,0.35)',
+                        boxShadow: loading ? 'none' : '0 6px 24px rgba(79,70,229,0.35)',
                         transition: 'all 0.2s ease',
                       }}
                     >
@@ -511,7 +511,7 @@ export default function SolicitarDemo() {
                       }
                     </button>
 
-                    <p style={{ textAlign: 'center', margin: '12px 0 0', fontSize: 11, color: 'rgba(255,255,255,0.18)' }}>
+                    <p style={{ textAlign: 'center', margin: '12px 0 0', fontSize: 11, color: 'var(--text-muted)' }}>
                       Sin tarjeta de crédito · Te contactamos en menos de 24h
                     </p>
                   </form>
@@ -524,7 +524,7 @@ export default function SolicitarDemo() {
                   onClick={() => { setShowForm(false); setErrors({}); setErrorGlobal('') }}
                   style={{
                     display: 'block', margin: '14px auto 0', background: 'none', border: 'none',
-                    cursor: 'pointer', fontSize: 12, color: 'rgba(255,255,255,0.25)',
+                    cursor: 'pointer', fontSize: 12, color: 'var(--text-muted)',
                     textDecoration: 'underline', textDecorationStyle: 'dotted',
                   }}
                 >

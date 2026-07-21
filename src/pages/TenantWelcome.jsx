@@ -1,5 +1,5 @@
 /**
- * TenantWelcome — Pantalla de activación estilo iPhone
+ * TenantWelcome — Pantalla de activación
  * =====================================================
  * Secuencia animada de 4 fases:
  *   1. Logo + ring de luz expandiéndose  (0–1.2s)
@@ -7,7 +7,8 @@
  *   3. Cards de resumen slide-in         (2.2–3.4s)
  *   4. Credenciales + botón aparecen     (3.4s+)
  *
- * Los colores se toman del tenant: paleta_colores.primary/secondary
+ * Tema: Indigo 2026 (fondo claro), acentuado con los colores propios
+ * del tenant (paleta_colores.primary/secondary/accent).
  * Las credenciales se reciben desde TenantOnboarding vía navigate state.
  */
 
@@ -28,7 +29,7 @@ const PORTALES = [
     desc: 'Configuración, usuarios y reportes',
     url: 'https://admin-neurobaeza.vercel.app',
     icon: Shield,
-    color: '#6366F1',
+    color: '#4F46E5',
   },
   {
     id: 'validacion',
@@ -36,7 +37,7 @@ const PORTALES = [
     desc: 'Revisión y gestión de incapacidades',
     url: 'https://portal-neurobaeza.vercel.app',
     icon: FileText,
-    color: '#10B981',
+    color: '#0EA5E9',
   },
   {
     id: 'recepcion',
@@ -70,7 +71,7 @@ function Particles({ color }) {
             key={i}
             cx={`${cx}%`} cy={`${cy}%`} r={r}
             fill={color}
-            opacity={0.15 + (i % 4) * 0.06}
+            opacity={0.10 + (i % 4) * 0.05}
             style={{ animation: `float-particle ${3 + (i % 3)}s ${delay}s ease-in-out infinite alternate` }}
           />
         )
@@ -83,31 +84,27 @@ function Particles({ color }) {
 
 function SummaryCard({ icon: Icon, label, value, color, delay, visible }) {
   return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 12,
-      padding: '14px 18px', borderRadius: 14,
-      background: 'rgba(255,255,255,0.04)',
-      border: `1px solid ${color}30`,
+    <div className="act-sum-card" style={{
       opacity: visible ? 1 : 0,
       transform: visible ? 'translateY(0)' : 'translateY(20px)',
       transition: `opacity 0.5s ${delay}ms ease, transform 0.5s ${delay}ms ease`,
     }}>
       <div style={{
         width: 38, height: 38, borderRadius: 10, flexShrink: 0,
-        background: `${color}18`,
+        background: `${color}16`,
         border: `1px solid ${color}35`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
         <Icon size={16} color={color} />
       </div>
       <div>
-        <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.4)',
+        <p style={{ margin: 0, fontSize: 11, color: '#94A3B8',
           textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>{label}</p>
-        <p style={{ margin: '2px 0 0', fontSize: 14, color: 'rgba(255,255,255,0.88)', fontWeight: 500 }}>
+        <p style={{ margin: '2px 0 0', fontSize: 14, color: '#0F172A', fontWeight: 500 }}>
           {value || '—'}
         </p>
       </div>
-      <CheckCircle2 size={14} color={`${color}80`} style={{ marginLeft: 'auto', flexShrink: 0 }} />
+      <CheckCircle2 size={14} color={`${color}90`} style={{ marginLeft: 'auto', flexShrink: 0 }} />
     </div>
   )
 }
@@ -119,7 +116,6 @@ function CredentialsCard({ credentials, confirmed, onConfirm, visible }) {
 
   function copyToClipboard(text, field) {
     navigator.clipboard.writeText(text).catch(() => {
-      // Fallback para navegadores sin clipboard API
       const el = document.createElement('textarea')
       el.value = text
       document.body.appendChild(el)
@@ -131,115 +127,63 @@ function CredentialsCard({ credentials, confirmed, onConfirm, visible }) {
     setTimeout(() => setCopiedField(null), 2000)
   }
 
-  const fieldStyle = {
-    display: 'flex', alignItems: 'center', gap: 10,
-    padding: '11px 14px', borderRadius: 10,
-    background: 'rgba(0,0,0,0.25)',
-    border: '1px solid rgba(251,191,36,0.2)',
-  }
-
-  const labelStyle = {
-    margin: 0, fontSize: 10, fontWeight: 700,
-    color: 'rgba(251,191,36,0.6)',
-    textTransform: 'uppercase', letterSpacing: '0.07em',
-  }
-
-  const valueStyle = {
-    margin: '3px 0 0', fontSize: 14,
-    color: 'rgba(255,255,255,0.9)', fontWeight: 600,
-    fontFamily: 'ui-monospace, SFMono-Regular, monospace',
-    letterSpacing: '0.03em',
-  }
-
   const copyBtnStyle = (field) => ({
-    marginLeft: 'auto', flexShrink: 0,
-    display: 'flex', alignItems: 'center', gap: 5,
-    padding: '6px 12px', borderRadius: 8, cursor: 'pointer',
-    background: copiedField === field ? 'rgba(16,185,129,0.15)' : 'rgba(251,191,36,0.1)',
-    border: `1px solid ${copiedField === field ? 'rgba(16,185,129,0.35)' : 'rgba(251,191,36,0.25)'}`,
-    color: copiedField === field ? '#10B981' : 'rgba(251,191,36,0.8)',
-    fontSize: 11, fontWeight: 600,
-    transition: 'all 0.2s ease',
+    background: copiedField === field ? 'var(--success-soft)' : 'rgba(245,158,11,0.12)',
+    border: `1px solid ${copiedField === field ? 'rgba(16,185,129,0.35)' : 'rgba(245,158,11,0.28)'}`,
+    color: copiedField === field ? '#047857' : '#B45309',
   })
 
   return (
-    <div style={{
-      width: '100%', maxWidth: 480,
-      borderRadius: 18,
-      background: 'linear-gradient(135deg, rgba(120,53,15,0.35) 0%, rgba(92,30,10,0.25) 100%)',
-      border: '1px solid rgba(251,191,36,0.3)',
-      boxShadow: '0 8px 40px rgba(251,191,36,0.08), inset 0 1px 0 rgba(251,191,36,0.12)',
-      padding: '20px 22px',
+    <div className="cred-card" style={{
       opacity: visible ? 1 : 0,
       transform: visible ? 'translateY(0)' : 'translateY(24px)',
       transition: 'opacity 0.6s 3700ms ease, transform 0.6s 3700ms ease',
-      marginBottom: 20,
     }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 18 }}>
         <div style={{
           width: 38, height: 38, borderRadius: 10, flexShrink: 0,
-          background: 'rgba(251,191,36,0.12)',
-          border: '1px solid rgba(251,191,36,0.3)',
+          background: 'rgba(245,158,11,0.14)',
+          border: '1px solid rgba(245,158,11,0.3)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          <Lock size={17} color="#FBB924" />
+          <Lock size={17} color="#B45309" />
         </div>
         <div>
-          <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>
+          <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#0F172A' }}>
             Guarda estas credenciales
           </p>
-          <p style={{ margin: '3px 0 0', fontSize: 12, color: 'rgba(251,191,36,0.7)', lineHeight: 1.4 }}>
-            Esta contraseña <strong style={{ color: '#FBB924' }}>no se volverá a mostrar.</strong> Cópiala ahora.
+          <p style={{ margin: '3px 0 0', fontSize: 12, color: '#B45309', lineHeight: 1.4 }}>
+            Esta contraseña <strong>no se volverá a mostrar.</strong> Cópiala ahora.
           </p>
         </div>
       </div>
 
       {/* Fields */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
-
-        {/* Username */}
-        <div style={fieldStyle}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={labelStyle}>Usuario</p>
-            <p style={valueStyle}>{credentials.username || '—'}</p>
-          </div>
-          <button
-            style={copyBtnStyle('username')}
-            onClick={() => copyToClipboard(credentials.username, 'username')}
-            title="Copiar usuario"
-          >
-            {copiedField === 'username'
-              ? <><Check size={11} /> Copiado ✓</>
-              : <><Copy size={11} /> Copiar</>
-            }
-          </button>
+      <div className="cred-field">
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p className="cred-label">Usuario</p>
+          <p className="cred-val">{credentials.username || '—'}</p>
         </div>
+        <button className="cred-copy-btn" style={copyBtnStyle('username')}
+          onClick={() => copyToClipboard(credentials.username, 'username')} title="Copiar usuario">
+          {copiedField === 'username' ? <><Check size={11} /> Copiado ✓</> : <><Copy size={11} /> Copiar</>}
+        </button>
+      </div>
 
-        {/* Password */}
-        <div style={fieldStyle}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={labelStyle}>Contraseña temporal</p>
-            <p style={{ ...valueStyle, letterSpacing: '0.12em' }}>{credentials.password || '—'}</p>
-          </div>
-          <button
-            style={copyBtnStyle('password')}
-            onClick={() => copyToClipboard(credentials.password, 'password')}
-            title="Copiar contraseña"
-          >
-            {copiedField === 'password'
-              ? <><Check size={11} /> Copiado ✓</>
-              : <><Copy size={11} /> Copiar</>
-            }
-          </button>
+      <div className="cred-field" style={{ marginBottom: 18 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p className="cred-label">Contraseña temporal</p>
+          <p className="cred-val" style={{ letterSpacing: '0.12em' }}>{credentials.password || '—'}</p>
         </div>
+        <button className="cred-copy-btn" style={copyBtnStyle('password')}
+          onClick={() => copyToClipboard(credentials.password, 'password')} title="Copiar contraseña">
+          {copiedField === 'password' ? <><Check size={11} /> Copiado ✓</> : <><Copy size={11} /> Copiar</>}
+        </button>
       </div>
 
       {/* Confirmation checkbox */}
-      <label style={{
-        display: 'flex', alignItems: 'flex-start', gap: 10,
-        cursor: 'pointer', userSelect: 'none',
-      }}>
+      <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', userSelect: 'none' }}>
         <div style={{ position: 'relative', flexShrink: 0, marginTop: 1 }}>
           <input
             type="checkbox"
@@ -249,15 +193,15 @@ function CredentialsCard({ credentials, confirmed, onConfirm, visible }) {
           />
           <div style={{
             width: 18, height: 18, borderRadius: 5,
-            background: confirmed ? '#10B981' : 'rgba(0,0,0,0.3)',
-            border: `1.5px solid ${confirmed ? '#10B981' : 'rgba(251,191,36,0.35)'}`,
+            background: confirmed ? '#10B981' : '#FFFFFF',
+            border: `1.5px solid ${confirmed ? '#10B981' : 'rgba(245,158,11,0.4)'}`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'all 0.18s ease',
           }}>
             {confirmed && <Check size={11} color="white" strokeWidth={3} />}
           </div>
         </div>
-        <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.45 }}>
+        <span style={{ fontSize: 13, color: '#64748B', lineHeight: 1.45 }}>
           Confirmé que guardé las credenciales en un lugar seguro
         </span>
       </label>
@@ -288,45 +232,31 @@ function PortalesCard({ visible, links }) {
   }
 
   return (
-    <div style={{
-      width: '100%', maxWidth: 480, marginBottom: 20,
-      borderRadius: 18,
-      background: 'rgba(255,255,255,0.04)',
-      border: '1px solid rgba(255,255,255,0.1)',
-      padding: '20px 22px',
+    <div className="portal-card" style={{
       opacity: visible ? 1 : 0,
       transform: visible ? 'translateY(0)' : 'translateY(24px)',
       transition: 'opacity 0.6s 3900ms ease, transform 0.6s 3900ms ease',
     }}>
       <p style={{
         margin: '0 0 14px', fontSize: 11, fontWeight: 700,
-        color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em',
+        color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em',
       }}>
         Tus 3 portales de acceso
       </p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div>
         {PORTALES.map(p => (
-          <div key={p.id} style={{
-            display: 'flex', alignItems: 'center', gap: 12,
-            padding: '10px 12px', borderRadius: 11,
-            background: 'rgba(0,0,0,0.2)',
-            border: `1px solid ${p.color}22`,
-          }}>
-            <div style={{
-              width: 34, height: 34, borderRadius: 9, flexShrink: 0,
-              background: `${p.color}18`, border: `1px solid ${p.color}35`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
+          <div key={p.id} className="portal-item">
+            <div className="portal-icon" style={{ background: `${p.color}16`, border: `1px solid ${p.color}35` }}>
               <p.icon size={15} color={p.color} />
             </div>
 
             <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>
+              <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: '#0F172A' }}>
                 {p.label}
               </p>
               <p style={{
-                margin: '1px 0 0', fontSize: 10, color: 'rgba(255,255,255,0.35)',
+                margin: '1px 0 0', fontSize: 10, color: '#94A3B8',
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
               }}>
                 {urlDe(p)}
@@ -339,8 +269,8 @@ function PortalesCard({ visible, links }) {
                 title="Copiar URL"
                 style={{
                   padding: '5px 8px', borderRadius: 7, cursor: 'pointer', border: 'none',
-                  background: copiedId === p.id ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.06)',
-                  color: copiedId === p.id ? '#10B981' : 'rgba(255,255,255,0.4)',
+                  background: copiedId === p.id ? 'var(--success-soft)' : 'rgba(15,23,42,0.05)',
+                  color: copiedId === p.id ? '#047857' : '#64748B',
                   fontSize: 10, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 3,
                 }}
               >
@@ -352,7 +282,7 @@ function PortalesCard({ visible, links }) {
                 rel="noopener noreferrer"
                 style={{
                   padding: '5px 8px', borderRadius: 7, cursor: 'pointer',
-                  background: `${p.color}15`, border: `1px solid ${p.color}30`,
+                  background: `${p.color}12`, border: `1px solid ${p.color}30`,
                   color: p.color, fontSize: 10, fontWeight: 600,
                   display: 'flex', alignItems: 'center', gap: 3, textDecoration: 'none',
                 }}
@@ -364,9 +294,7 @@ function PortalesCard({ visible, links }) {
         ))}
       </div>
 
-      <p style={{
-        margin: '12px 0 0', fontSize: 11, color: 'rgba(255,255,255,0.25)', lineHeight: 1.5,
-      }}>
+      <p style={{ margin: '12px 0 0', fontSize: 11, color: '#94A3B8', lineHeight: 1.5 }}>
         Usa las credenciales de arriba para ingresar a los 3 portales. Compártelos con tu equipo.
       </p>
     </div>
@@ -385,9 +313,9 @@ export default function TenantWelcome() {
   const hasCredentials = !!(credentials.username && credentials.password)
 
   const paleta    = tenant.paleta_colores || {}
-  const primary   = paleta.primary   || '#C2603C'
-  const secondary = paleta.secondary || '#E8956D'
-  const accent    = paleta.accent    || '#7B4F35'
+  const primary   = paleta.primary   || '#4F46E5'
+  const secondary = paleta.secondary || '#818CF8'
+  const accent    = paleta.accent    || '#7C3AED'
 
   const [phase, setPhase] = useState({
     ring: false, logo: false, name: false, cards: false, button: false,
@@ -424,186 +352,167 @@ export default function TenantWelcome() {
   ].filter(i => i.value)
 
   return (
-    <div style={{
-      minHeight: '100vh', position: 'relative', overflow: 'hidden',
-      background: `radial-gradient(ellipse 120% 80% at 50% -10%, ${primary}22 0%, transparent 55%),
-                   radial-gradient(ellipse 80% 60% at 85% 80%, ${secondary}18 0%, transparent 50%),
-                   oklch(0.09 0.03 275)`,
-      fontFamily: 'Inter, DM Sans, sans-serif',
-      display: 'flex', flexDirection: 'column', alignItems: 'center',
-      justifyContent: 'center', padding: '48px 24px',
-    }}>
-      <Particles color={primary} />
+    <div style={{ minHeight: '100vh', position: 'relative', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
+      <div className="vanta-bg">
+        <div className="orb orb-1" />
+        <div className="orb orb-2" />
+        <div className="orb orb-3" />
+      </div>
 
-      {/* ── Phase 1: Logo con rings ── */}
-      <div style={{ position: 'relative', marginBottom: 48 }}>
+      <div className="activation" style={{ zIndex: 1 }}>
+        <Particles color={primary} />
 
-        {/* Pulse rings */}
-        {[1, 2, 3].map(i => (
-          <div key={i} style={{
-            position: 'absolute',
-            inset: -(i * 24),
-            borderRadius: '50%',
-            border: `1px solid ${primary}`,
-            opacity: phase.ring ? (0.25 / i) : 0,
-            transform: phase.ring ? 'scale(1)' : 'scale(0.3)',
-            transition: `all 0.9s ${i * 200}ms cubic-bezier(0.16, 1, 0.3, 1)`,
-            animation: phase.ring ? `ring-pulse 2.5s ${i * 400}ms ease-in-out infinite` : 'none',
-          }} />
-        ))}
+        {/* ── Phase 1: Logo con rings ── */}
+        <div style={{ position: 'relative', marginBottom: 48 }}>
+          {[1, 2, 3].map(i => (
+            <div key={i} className="act-ring" style={{
+              inset: -(i * 24),
+              borderColor: primary,
+              opacity: phase.ring ? (0.25 / i) : 0,
+              transform: phase.ring ? 'scale(1)' : 'scale(0.3)',
+              transitionDelay: `${i * 200}ms`,
+              animation: phase.ring ? `ring-pulse 2.5s ${i * 400}ms ease-in-out infinite` : 'none',
+            }} />
+          ))}
 
-        {/* Logo circle */}
-        <div style={{
-          width: 120, height: 120, borderRadius: '50%',
-          background: `linear-gradient(135deg, ${primary}, ${secondary})`,
-          boxShadow: `0 0 60px ${primary}50, 0 20px 60px rgba(0,0,0,0.4)`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          opacity: phase.logo ? 1 : 0,
-          transform: phase.logo ? 'scale(1)' : 'scale(0.4)',
-          transition: 'opacity 0.6s 200ms cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s 200ms cubic-bezier(0.16, 1, 0.3, 1)',
-          position: 'relative', zIndex: 1,
-        }}>
-          {tenant.logo_url ? (
-            <img
-              src={tenant.logo_url}
-              alt={tenant.nombre}
-              style={{ width: 72, height: 72, objectFit: 'contain', borderRadius: 8 }}
-            />
-          ) : (
-            <Building2 size={52} color="white" strokeWidth={1.5} />
-          )}
-
-          {/* Check badge */}
-          <div style={{
-            position: 'absolute', bottom: -6, right: -6,
-            width: 32, height: 32, borderRadius: '50%',
-            background: '#10B981',
-            border: '3px solid oklch(0.09 0.03 275)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            opacity: phase.name ? 1 : 0,
-            transform: phase.name ? 'scale(1)' : 'scale(0)',
-            transition: 'all 0.4s 1400ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+          <div className="act-logo" style={{
+            background: `linear-gradient(135deg, ${primary}, ${secondary})`,
+            boxShadow: `0 0 60px ${primary}45, 0 20px 50px rgba(15,23,42,0.18)`,
+            opacity: phase.logo ? 1 : 0,
+            transform: phase.logo ? 'scale(1)' : 'scale(0.4)',
           }}>
-            <CheckCircle2 size={16} color="white" strokeWidth={2.5} />
+            {tenant.logo_url ? (
+              <img
+                src={tenant.logo_url}
+                alt={tenant.nombre}
+                style={{ width: 72, height: 72, objectFit: 'contain', borderRadius: 8 }}
+              />
+            ) : (
+              <Building2 size={52} color="white" strokeWidth={1.5} />
+            )}
+
+            <div style={{
+              position: 'absolute', bottom: -6, right: -6,
+              width: 32, height: 32, borderRadius: '50%',
+              background: '#10B981',
+              border: '3px solid #FFFFFF',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              opacity: phase.name ? 1 : 0,
+              transform: phase.name ? 'scale(1)' : 'scale(0)',
+              transition: 'all 0.4s 1400ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+              boxShadow: '0 2px 10px rgba(16,185,129,0.35)',
+            }}>
+              <CheckCircle2 size={16} color="white" strokeWidth={2.5} />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* ── Phase 2: Nombre ── */}
-      <div style={{
-        textAlign: 'center', marginBottom: 40,
-        opacity: phase.name ? 1 : 0,
-        transform: phase.name ? 'translateY(0)' : 'translateY(24px)',
-        transition: 'opacity 0.7s 1200ms ease, transform 0.7s 1200ms ease',
-      }}>
+        {/* ── Phase 2: Nombre ── */}
         <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 8,
-          background: `${primary}14`, border: `1px solid ${primary}30`,
-          borderRadius: 999, padding: '5px 16px', marginBottom: 16,
+          textAlign: 'center', marginBottom: 40,
+          opacity: phase.name ? 1 : 0,
+          transform: phase.name ? 'translateY(0)' : 'translateY(24px)',
+          transition: 'opacity 0.7s 1200ms ease, transform 0.7s 1200ms ease',
         }}>
-          <Sparkles size={12} color={secondary} />
-          <span style={{ fontSize: 11, color: secondary, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-            Empresa activada
-          </span>
-        </div>
-        <h1 style={{
-          margin: '0 0 8px',
-          fontSize: 'clamp(28px, 5vw, 44px)',
-          fontWeight: 800, letterSpacing: '-0.03em',
-          color: 'rgba(255,255,255,0.96)',
-          lineHeight: 1.1,
-        }}>
-          Bienvenido a<br />
-          <span style={{ color: primary }}>{tenant.nombre || 'tu empresa'}</span>
-        </h1>
-        <p style={{ margin: 0, fontSize: 15, color: 'rgba(255,255,255,0.45)', maxWidth: 420, lineHeight: 1.6 }}>
-          La configuración se completó exitosamente. Tu portal está listo para gestionar incapacidades médicas.
-        </p>
-      </div>
-
-      {/* ── Phase 3: Summary cards ── */}
-      <div style={{
-        width: '100%', maxWidth: 480,
-        display: 'flex', flexDirection: 'column', gap: 10,
-        marginBottom: 28,
-      }}>
-        {summaryItems.map((item, i) => (
-          <SummaryCard
-            key={item.label}
-            {...item}
-            delay={i * 120}
-            visible={phase.cards}
-          />
-        ))}
-      </div>
-
-      {/* ── Phase 4: Credentials card (solo si vienen credenciales) ── */}
-      {hasCredentials && (
-        <CredentialsCard
-          credentials={credentials}
-          confirmed={credConfirmed}
-          onConfirm={setCredConfirmed}
-          visible={phase.button}
-        />
-      )}
-
-      {/* ── Phase 4: Los 3 portales ── */}
-      <PortalesCard visible={phase.button} links={tenantLinks} />
-
-      {/* ── Phase 4: CTA ── */}
-      <div style={{
-        opacity: phase.button ? 1 : 0,
-        transform: phase.button ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.96)',
-        transition: 'opacity 0.5s 3600ms ease, transform 0.5s 3600ms cubic-bezier(0.34, 1.56, 0.64, 1)',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
-      }}>
-        <button
-          onClick={() => canProceed && navigate('/')}
-          disabled={!canProceed}
-          style={{
-            padding: '16px 48px', borderRadius: 16,
-            cursor: canProceed ? 'pointer' : 'not-allowed',
-            background: canProceed
-              ? `linear-gradient(135deg, ${primary}, ${secondary})`
-              : 'rgba(255,255,255,0.08)',
-            border: canProceed ? 'none' : '1px solid rgba(255,255,255,0.12)',
-            color: canProceed ? 'white' : 'rgba(255,255,255,0.3)',
-            fontWeight: 700, fontSize: 16, letterSpacing: '-0.01em',
-            display: 'flex', alignItems: 'center', gap: 10,
-            boxShadow: canProceed ? `0 8px 40px ${primary}50, 0 2px 8px rgba(0,0,0,0.3)` : 'none',
-            transition: 'all 0.2s ease',
-          }}
-          onMouseEnter={e => {
-            if (!canProceed) return
-            e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)'
-            e.currentTarget.style.boxShadow = `0 16px 50px ${primary}60, 0 4px 12px rgba(0,0,0,0.4)`
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.transform = 'translateY(0) scale(1)'
-            e.currentTarget.style.boxShadow = canProceed
-              ? `0 8px 40px ${primary}50, 0 2px 8px rgba(0,0,0,0.3)`
-              : 'none'
-          }}
-        >
-          {hasCredentials ? 'Ir al portal' : 'Comenzar'} <ArrowRight size={18} />
-        </button>
-
-        {hasCredentials && !credConfirmed && (
-          <p style={{ margin: 0, fontSize: 12, color: 'rgba(251,191,36,0.6)', textAlign: 'center' }}>
-            Confirma que guardaste las credenciales para continuar
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            background: `${primary}14`, border: `1px solid ${primary}30`,
+            borderRadius: 999, padding: '5px 16px', marginBottom: 16,
+          }}>
+            <Sparkles size={12} color={accent} />
+            <span style={{ fontSize: 11, color: accent, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              Empresa activada
+            </span>
+          </div>
+          <h1 className="act-h1">
+            Bienvenido a<br />
+            <span style={{ color: primary }}>{tenant.nombre || 'tu empresa'}</span>
+          </h1>
+          <p className="act-sub">
+            La configuración se completó exitosamente. Tu portal está listo para gestionar incapacidades médicas.
           </p>
+        </div>
+
+        {/* ── Phase 3: Summary cards ── */}
+        <div style={{ width: '100%', maxWidth: 480, marginBottom: 20 }}>
+          {summaryItems.map((item, i) => (
+            <SummaryCard
+              key={item.label}
+              {...item}
+              delay={i * 120}
+              visible={phase.cards}
+            />
+          ))}
+        </div>
+
+        {/* ── Phase 4: Credentials card (solo si vienen credenciales) ── */}
+        {hasCredentials && (
+          <CredentialsCard
+            credentials={credentials}
+            confirmed={credConfirmed}
+            onConfirm={setCredConfirmed}
+            visible={phase.button}
+          />
         )}
 
-        <button
-          onClick={() => navigate(`/tenants/${companyId}/users`)}
-          style={{
-            background: 'none', border: 'none', cursor: 'pointer',
-            fontSize: 13, color: 'rgba(255,255,255,0.35)',
-            textDecoration: 'underline', textDecorationStyle: 'dotted',
-          }}
-        >
-          Agregar usuarios al tenant
-        </button>
+        {/* ── Phase 4: Los 3 portales ── */}
+        <PortalesCard visible={phase.button} links={tenantLinks} />
+
+        {/* ── Phase 4: CTA ── */}
+        <div style={{
+          opacity: phase.button ? 1 : 0,
+          transform: phase.button ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.96)',
+          transition: 'opacity 0.5s 3600ms ease, transform 0.5s 3600ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
+        }}>
+          <button
+            onClick={() => canProceed && navigate('/')}
+            disabled={!canProceed}
+            style={{
+              padding: '16px 48px', borderRadius: 16,
+              cursor: canProceed ? 'pointer' : 'not-allowed',
+              background: canProceed
+                ? `linear-gradient(135deg, ${primary}, ${secondary})`
+                : 'rgba(15,23,42,0.06)',
+              border: canProceed ? 'none' : '1px solid rgba(15,23,42,0.10)',
+              color: canProceed ? 'white' : '#94A3B8',
+              fontWeight: 700, fontSize: 16, letterSpacing: '-0.01em',
+              display: 'flex', alignItems: 'center', gap: 10,
+              boxShadow: canProceed ? `0 8px 32px ${primary}40, 0 2px 8px rgba(15,23,42,0.10)` : 'none',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={e => {
+              if (!canProceed) return
+              e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)'
+              e.currentTarget.style.boxShadow = `0 16px 40px ${primary}4D, 0 4px 12px rgba(15,23,42,0.14)`
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = 'translateY(0) scale(1)'
+              e.currentTarget.style.boxShadow = canProceed
+                ? `0 8px 32px ${primary}40, 0 2px 8px rgba(15,23,42,0.10)`
+                : 'none'
+            }}
+          >
+            {hasCredentials ? 'Ir al portal' : 'Comenzar'} <ArrowRight size={18} />
+          </button>
+
+          {hasCredentials && !credConfirmed && (
+            <p style={{ margin: 0, fontSize: 12, color: '#B45309', textAlign: 'center' }}>
+              Confirma que guardaste las credenciales para continuar
+            </p>
+          )}
+
+          <button
+            onClick={() => navigate(`/tenants/${companyId}/users`)}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              fontSize: 13, color: '#94A3B8',
+              textDecoration: 'underline', textDecorationStyle: 'dotted',
+            }}
+          >
+            Agregar usuarios al tenant
+          </button>
+        </div>
       </div>
 
       <style>{`

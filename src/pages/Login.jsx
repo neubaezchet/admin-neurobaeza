@@ -33,8 +33,8 @@ export default function Login({ onLogin }) {
           minWidth: 200,
           scale: 1.0,
           scaleMobile: 1.0,
-          color: 0x0EA5E9,
-          backgroundColor: 0x050507,
+          color: 0x4F46E5,
+          backgroundColor: 0xFFFFFF,
           points: 12.0,
           maxDistance: 22.0,
           spacing: 18.0,
@@ -90,7 +90,7 @@ export default function Login({ onLogin }) {
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(14,165,233,0.08) 0%, transparent 70%)',
+          background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(79,70,229,0.10) 0%, transparent 70%)',
         }}
       />
 
@@ -103,7 +103,7 @@ export default function Login({ onLogin }) {
         <div
           className="absolute inset-0 rounded-3xl pointer-events-none"
           style={{
-            background: 'radial-gradient(ellipse at center, rgba(14,165,233,0.12) 0%, transparent 70%)',
+            background: 'radial-gradient(ellipse at center, rgba(79,70,229,0.14) 0%, transparent 70%)',
             transform: 'scale(1.2)',
             filter: 'blur(20px)',
           }}
@@ -112,18 +112,18 @@ export default function Login({ onLogin }) {
         <div
           className="relative rounded-3xl overflow-hidden animate-scale-in"
           style={{
-            background: 'rgba(14, 20, 30, 0.85)',
+            background: 'rgba(255, 255, 255, 0.85)',
             backdropFilter: 'blur(32px)',
             WebkitBackdropFilter: 'blur(32px)',
-            border: '1px solid rgba(14, 165, 233, 0.18)',
-            boxShadow: '0 32px 80px rgba(0,0,0,0.7), 0 0 40px rgba(14,165,233,0.08), inset 0 1px 0 rgba(255,255,255,0.05)',
+            border: '1px solid rgba(79, 70, 229, 0.18)',
+            boxShadow: '0 32px 80px rgba(15,23,42,0.16), 0 0 40px rgba(79,70,229,0.10), inset 0 1px 0 rgba(255,255,255,0.85)',
           }}
         >
           {/* Top gradient strip */}
           <div
             style={{
               height: '2px',
-              background: 'linear-gradient(90deg, transparent, #0EA5E9 40%, #38BDF8 70%, transparent)',
+              background: 'linear-gradient(90deg, transparent, #4F46E5 40%, #7C3AED 70%, transparent)',
             }}
           />
 
@@ -136,7 +136,7 @@ export default function Login({ onLogin }) {
                   src={branding.logo_url}
                   alt={branding.empresa}
                   className="w-16 h-16 rounded-2xl object-contain"
-                  style={{ background: 'rgba(255,255,255,0.06)', boxShadow: '0 8px 32px var(--accent-glow, rgba(14,165,233,0.4))' }}
+                  style={{ background: 'rgba(15,23,42,0.04)', boxShadow: '0 8px 32px var(--accent-glow, rgba(79,70,229,0.4))' }}
                 />
               ) : (
                 <div
@@ -144,8 +144,8 @@ export default function Login({ onLogin }) {
                   style={{
                     background: branding?.paleta_colores?.primary
                       ? `linear-gradient(135deg, ${branding.paleta_colores.primary} 0%, ${branding.paleta_colores.secondary || branding.paleta_colores.primary} 100%)`
-                      : 'linear-gradient(135deg, #0EA5E9 0%, #0284C7 50%, #0369A1 100%)',
-                    boxShadow: '0 8px 32px var(--accent-glow, rgba(14,165,233,0.4)), inset 0 1px 0 rgba(255,255,255,0.2)',
+                      : 'linear-gradient(135deg, #4F46E5 0%, #4338CA 50%, #3730A3 100%)',
+                    boxShadow: '0 8px 32px var(--accent-glow, rgba(79,70,229,0.4)), inset 0 1px 0 rgba(255,255,255,0.2)',
                   }}
                 >
                   <ShieldCheck className="w-8 h-8 text-white" strokeWidth={1.75} />
@@ -183,7 +183,7 @@ export default function Login({ onLogin }) {
                 className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm animate-fade-in"
                 style={{
                   backgroundColor: 'rgba(239,68,68,0.08)',
-                  color: '#FCA5A5',
+                  color: '#DC2626',
                   border: '1px solid rgba(239,68,68,0.2)',
                 }}
               >

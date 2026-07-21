@@ -306,7 +306,7 @@ export default function EmailDirectory() {
                         {correosEmpresa.length === 0 && (
                           <button
                             onClick={() => { setDefaultArea('empresas'); setEditing(null); setShowModal(true) }}
-                            className="text-xs text-blue-500 hover:underline"
+                            className="text-xs text-indigo-600 hover:underline"
                           >
                             + Agregar
                           </button>
@@ -321,9 +321,9 @@ export default function EmailDirectory() {
                           disabled={isGenerating}
                           className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all"
                           style={{
-                            background: isGenerating ? 'rgba(99,102,241,0.06)' : 'rgba(99,102,241,0.1)',
-                            color: '#818CF8',
-                            border: '1px solid rgba(99,102,241,0.25)',
+                            background: isGenerating ? 'rgba(79,70,229,0.06)' : 'rgba(79,70,229,0.1)',
+                            color: '#4F46E5',
+                            border: '1px solid rgba(79,70,229,0.25)',
                             opacity: isGenerating ? 0.7 : 1,
                           }}
                           onMouseEnter={e => { if (!isGenerating) { e.currentTarget.style.background = 'rgba(99,102,241,0.18)' } }}
@@ -408,27 +408,27 @@ function InviteModal({ link, expiresAt, empresa, onClose }) {
       <div
         className="relative rounded-2xl w-full max-w-md mx-4 overflow-hidden"
         style={{
-          background: 'var(--bg-card-solid, #0f1117)',
-          border: '1px solid var(--border-primary, rgba(255,255,255,0.08))',
-          boxShadow: '0 32px 80px rgba(0,0,0,0.7)',
+          background: 'var(--bg-card-solid)',
+          border: '1px solid var(--border-primary)',
+          boxShadow: '0 32px 80px rgba(15,23,42,0.18)',
         }}
         onClick={e => e.stopPropagation()}
       >
         {/* Top accent line */}
-        <div style={{ height: 2, background: 'linear-gradient(90deg, transparent, #818CF8 40%, #6366F1 70%, transparent)' }} />
+        <div style={{ height: 2, background: 'linear-gradient(90deg, transparent, #4F46E5 40%, #7C3AED 70%, transparent)' }} />
 
         {/* Header */}
-        <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border-primary, rgba(255,255,255,0.08))' }}>
+        <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border-primary)' }}>
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)' }}>
-              <Link2 className="w-4 h-4" style={{ color: '#818CF8' }} />
+              style={{ background: 'rgba(79,70,229,0.1)', border: '1px solid rgba(79,70,229,0.25)' }}>
+              <Link2 className="w-4 h-4" style={{ color: '#4F46E5' }} />
             </div>
             <div>
-              <p className="text-sm font-bold" style={{ color: 'var(--text-primary, #fff)' }}>
+              <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
                 Link de Onboarding
               </p>
-              <p className="text-[11px]" style={{ color: 'var(--text-muted, rgba(255,255,255,0.4))' }}>
+              <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
                 {empresa}
               </p>
             </div>
@@ -436,8 +436,8 @@ function InviteModal({ link, expiresAt, empresa, onClose }) {
           <button
             onClick={onClose}
             className="p-1.5 rounded-lg transition-colors"
-            style={{ color: 'var(--text-muted, rgba(255,255,255,0.4))' }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
+            style={{ color: 'var(--text-muted)' }}
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
           >
             <X className="w-4 h-4" />
@@ -447,11 +447,11 @@ function InviteModal({ link, expiresAt, empresa, onClose }) {
         <div className="p-5 space-y-4">
           {/* Single-use warning */}
           <div className="flex items-start gap-3 px-3.5 py-3 rounded-xl"
-            style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)' }}>
-            <ShieldAlert className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#FBB924' }} />
+            style={{ background: 'rgba(217,119,6,0.08)', border: '1px solid rgba(217,119,6,0.2)' }}>
+            <ShieldAlert className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#B45309' }} />
             <div>
-              <p className="text-xs font-semibold" style={{ color: '#FBB924' }}>Solo puede usarse una vez</p>
-              <p className="text-[11px] mt-0.5" style={{ color: 'rgba(251,191,36,0.65)' }}>
+              <p className="text-xs font-semibold" style={{ color: '#B45309' }}>Solo puede usarse una vez</p>
+              <p className="text-[11px] mt-0.5" style={{ color: '#92400E' }}>
                 El link expira al ser usado o pasado el tiempo límite. Genera uno nuevo si el anterior fue utilizado.
               </p>
             </div>
@@ -460,15 +460,15 @@ function InviteModal({ link, expiresAt, empresa, onClose }) {
           {/* Link field + copy */}
           <div>
             <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5"
-              style={{ color: 'var(--text-muted, rgba(255,255,255,0.4))', letterSpacing: '0.1em' }}>
+              style={{ color: 'var(--text-muted)', letterSpacing: '0.1em' }}>
               URL de invitación
             </label>
             <div className="flex gap-2">
               <div className="flex-1 px-3 py-2.5 rounded-xl text-xs font-mono truncate"
                 style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  color: 'var(--text-secondary, rgba(255,255,255,0.7))',
+                  background: 'var(--bg-input)',
+                  border: '1px solid var(--border-primary)',
+                  color: 'var(--text-secondary)',
                 }}>
                 {link || 'Sin link generado'}
               </div>
@@ -477,13 +477,13 @@ function InviteModal({ link, expiresAt, empresa, onClose }) {
                 disabled={!link}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all flex-shrink-0"
                 style={copied ? {
-                  background: 'rgba(16,185,129,0.15)',
-                  border: '1px solid rgba(16,185,129,0.35)',
-                  color: '#10B981',
+                  background: 'rgba(16,185,129,0.12)',
+                  border: '1px solid rgba(16,185,129,0.3)',
+                  color: '#059669',
                 } : {
-                  background: 'rgba(99,102,241,0.12)',
-                  border: '1px solid rgba(99,102,241,0.3)',
-                  color: '#818CF8',
+                  background: 'rgba(79,70,229,0.1)',
+                  border: '1px solid rgba(79,70,229,0.25)',
+                  color: '#4F46E5',
                 }}
               >
                 {copied ? <><Check className="w-3.5 h-3.5" /> Copiado ✓</> : <><Copy className="w-3.5 h-3.5" /> Copiar</>}
@@ -493,9 +493,9 @@ function InviteModal({ link, expiresAt, empresa, onClose }) {
 
           {/* Expiration */}
           {expiresFormatted && (
-            <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-muted, rgba(255,255,255,0.4))' }}>
+            <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-muted)' }}>
               <CalendarClock className="w-3.5 h-3.5 flex-shrink-0" />
-              <span>Válido hasta: <span style={{ color: 'var(--text-tertiary, rgba(255,255,255,0.6))' }}>{expiresFormatted}</span></span>
+              <span>Válido hasta: <span style={{ color: 'var(--text-tertiary)' }}>{expiresFormatted}</span></span>
             </div>
           )}
 
@@ -504,12 +504,12 @@ function InviteModal({ link, expiresAt, empresa, onClose }) {
             onClick={onClose}
             className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all"
             style={{
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: 'var(--text-secondary, rgba(255,255,255,0.7))',
+              background: 'var(--bg-input)',
+              border: '1px solid var(--border-primary)',
+              color: 'var(--text-secondary)',
             }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-input)'}
           >
             Cerrar
           </button>

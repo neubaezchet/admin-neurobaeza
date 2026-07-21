@@ -24,9 +24,9 @@ function Chip({ label, color, bg, border }) {
 // ─── Tarjeta de empresa ───────────────────────────────────────────────────────
 
 const PORTAL_LINKS_DEF = [
-  { key: 'admin', label: '🔵 Admin', color: '#38BDF8', bg: 'rgba(14,165,233,0.1)', border: 'rgba(14,165,233,0.2)' },
-  { key: 'portal', label: '🟢 Validación', color: '#34D399', bg: 'rgba(16,185,129,0.1)', border: 'rgba(16,185,129,0.2)' },
-  { key: 'repogemin', label: '🟡 Recepción', color: '#FCD34D', bg: 'rgba(251,191,36,0.1)', border: 'rgba(251,191,36,0.2)' },
+  { key: 'admin', label: '🔵 Admin', color: '#4F46E5', bg: 'rgba(79,70,229,0.1)', border: 'rgba(79,70,229,0.2)' },
+  { key: 'portal', label: '🟢 Validación', color: '#059669', bg: 'rgba(16,185,129,0.1)', border: 'rgba(16,185,129,0.2)' },
+  { key: 'repogemin', label: '🟡 Recepción', color: '#B45309', bg: 'rgba(251,191,36,0.1)', border: 'rgba(251,191,36,0.2)' },
 ]
 
 function LinksPortales({ links }) {
@@ -143,10 +143,10 @@ function EmpresaCard({ empresa }) {
 
   return (
     <div style={{
-      background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-primary)',
+      background: 'rgba(15,23,42,0.02)', border: '1px solid var(--border-primary)',
       borderRadius: 16, overflow: 'hidden', transition: 'border-color 0.2s',
     }}
-      onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(14,165,233,0.25)'}
+      onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(79,70,229,0.25)'}
       onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-primary)'}
     >
       {/* Card header */}
@@ -155,10 +155,10 @@ function EmpresaCard({ empresa }) {
           {/* Icono */}
           <div style={{
             width: 44, height: 44, borderRadius: 12, flexShrink: 0,
-            background: 'rgba(14,165,233,0.1)', border: '1px solid rgba(14,165,233,0.2)',
+            background: 'rgba(79,70,229,0.1)', border: '1px solid rgba(79,70,229,0.2)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <Building2 size={20} color="#38BDF8" />
+            <Building2 size={20} color="#4F46E5" />
           </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -171,7 +171,7 @@ function EmpresaCard({ empresa }) {
                   autoFocus
                   style={{
                     flex: 1, minWidth: 0, padding: '4px 8px', borderRadius: 7, fontSize: 14, fontWeight: 700,
-                    background: 'rgba(255,255,255,0.06)', border: '1px solid var(--accent-primary)',
+                    background: 'rgba(15,23,42,0.06)', border: '1px solid var(--accent-primary)',
                     color: 'var(--text-primary)', outline: 'none',
                   }}
                 />
@@ -194,7 +194,7 @@ function EmpresaCard({ empresa }) {
               </h3>
             )}
             {avisoRename && (
-              <p style={{ margin: '2px 0', fontSize: 10.5, color: '#FCD34D', lineHeight: 1.4 }}>{avisoRename}</p>
+              <p style={{ margin: '2px 0', fontSize: 10.5, color: '#B45309', lineHeight: 1.4 }}>{avisoRename}</p>
             )}
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
@@ -218,7 +218,7 @@ function EmpresaCard({ empresa }) {
             onClick={handleExpand}
             style={{
               padding: '6px 10px', borderRadius: 8, cursor: 'pointer', flexShrink: 0,
-              background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-primary)',
+              background: 'rgba(15,23,42,0.04)', border: '1px solid var(--border-primary)',
               color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12,
             }}
           >
@@ -235,24 +235,24 @@ function EmpresaCard({ empresa }) {
       {config && (
         <div style={{ padding: '0 20px 16px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {tieneSheet
-            ? <Chip label="Sheet ✓" color="#34D399" bg="rgba(16,185,129,0.1)" border="rgba(16,185,129,0.2)" />
-            : <Chip label="Sin Sheet" color="#94A3B8" bg="rgba(148,163,184,0.08)" border="rgba(148,163,184,0.15)" />
+            ? <Chip label="Sheet ✓" color="#059669" bg="rgba(16,185,129,0.1)" border="rgba(16,185,129,0.2)" />
+            : <Chip label="Sin Sheet" color="#475569" bg="rgba(148,163,184,0.08)" border="rgba(148,163,184,0.15)" />
           }
           {onboardingOk
-            ? <Chip label="Activa ✓" color="#34D399" bg="rgba(16,185,129,0.1)" border="rgba(16,185,129,0.2)" />
-            : <Chip label="Onboarding pendiente" color="#FCD34D" bg="rgba(251,191,36,0.1)" border="rgba(251,191,36,0.2)" />
+            ? <Chip label="Activa ✓" color="#059669" bg="rgba(16,185,129,0.1)" border="rgba(16,185,129,0.2)" />
+            : <Chip label="Onboarding pendiente" color="#B45309" bg="rgba(251,191,36,0.1)" border="rgba(251,191,36,0.2)" />
           }
           {ciclo && (
             <Chip
               label={ciclo === 'quincenal' ? 'Quincenal' : 'Mensual'}
-              color="#38BDF8" bg="rgba(14,165,233,0.1)" border="rgba(14,165,233,0.2)"
+              color="#4F46E5" bg="rgba(79,70,229,0.1)" border="rgba(79,70,229,0.2)"
             />
           )}
           {provisionError && (
-            <Chip label="⚠ Aprovisionamiento falló" color="#F87171" bg="rgba(239,68,68,0.1)" border="rgba(239,68,68,0.25)" />
+            <Chip label="⚠ Aprovisionamiento falló" color="#DC2626" bg="rgba(239,68,68,0.1)" border="rgba(239,68,68,0.25)" />
           )}
           {provisionPendiente && (
-            <Chip label="Aprovisionando…" color="#FCD34D" bg="rgba(251,191,36,0.1)" border="rgba(251,191,36,0.2)" />
+            <Chip label="Aprovisionando…" color="#B45309" bg="rgba(251,191,36,0.1)" border="rgba(251,191,36,0.2)" />
           )}
         </div>
       )}
@@ -261,7 +261,7 @@ function EmpresaCard({ empresa }) {
       {expanded && config && (
         <div style={{
           padding: '16px 20px', borderTop: '1px solid var(--border-primary)',
-          background: 'rgba(255,255,255,0.015)',
+          background: 'rgba(15,23,42,0.015)',
         }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
             {[
@@ -289,14 +289,14 @@ function EmpresaCard({ empresa }) {
               border: `1px solid ${provisionError ? 'rgba(239,68,68,0.2)' : 'rgba(16,185,129,0.2)'}`,
             }}>
               {provisionError && (
-                <p style={{ margin: '0 0 8px', fontSize: 11.5, color: '#FCA5A5', lineHeight: 1.5 }}>
+                <p style={{ margin: '0 0 8px', fontSize: 11.5, color: '#DC2626', lineHeight: 1.5 }}>
                   {config.sheet_status === 'error' && <>❌ Sheet: falló la creación.<br /></>}
                   {config.drive_status === 'error' && <>❌ Drive: falló la estructura de carpetas.<br /></>}
                   {config.provision_error && <span style={{ opacity: 0.7 }}>Detalle: {config.provision_error}</span>}
                 </p>
               )}
               {reprovMsg && (
-                <p style={{ margin: '0 0 8px', fontSize: 11.5, color: '#34D399' }}>{reprovMsg}</p>
+                <p style={{ margin: '0 0 8px', fontSize: 11.5, color: '#059669' }}>{reprovMsg}</p>
               )}
               <button
                 onClick={handleReprovisionar}
@@ -304,7 +304,7 @@ function EmpresaCard({ empresa }) {
                 style={{
                   display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px',
                   borderRadius: 8, background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)',
-                  color: '#FCA5A5', fontSize: 12, fontWeight: 700,
+                  color: '#DC2626', fontSize: 12, fontWeight: 700,
                   cursor: reprovisionando ? 'not-allowed' : 'pointer',
                 }}
               >
@@ -329,7 +329,7 @@ function EmpresaCard({ empresa }) {
                 style={{
                   display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px',
                   borderRadius: 8, background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)',
-                  color: '#34D399', fontSize: 12, fontWeight: 600, textDecoration: 'none',
+                  color: '#059669', fontSize: 12, fontWeight: 600, textDecoration: 'none',
                 }}
               >
                 <FileSpreadsheet size={13} /> Ver Sheet
@@ -339,8 +339,8 @@ function EmpresaCard({ empresa }) {
               onClick={() => navigate(`/tenants/${empresa.id}/onboarding`)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px',
-                borderRadius: 8, background: 'rgba(14,165,233,0.1)', border: '1px solid rgba(14,165,233,0.2)',
-                color: '#38BDF8', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                borderRadius: 8, background: 'rgba(79,70,229,0.1)', border: '1px solid rgba(79,70,229,0.2)',
+                color: '#4F46E5', fontSize: 12, fontWeight: 600, cursor: 'pointer',
               }}
             >
               <ExternalLink size={13} /> Configuración
@@ -441,7 +441,7 @@ export default function Empresas() {
               onClick={cargar}
               style={{
                 padding: '8px 14px', borderRadius: 10, cursor: 'pointer',
-                background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-primary)',
+                background: 'rgba(15,23,42,0.05)', border: '1px solid var(--border-primary)',
                 color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13,
               }}
             >
@@ -463,7 +463,7 @@ export default function Empresas() {
             placeholder="Buscar por nombre, NIT o correo..."
             style={{
               width: '100%', boxSizing: 'border-box', padding: '9px 12px 9px 36px',
-              background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-primary)',
+              background: 'rgba(15,23,42,0.04)', border: '1px solid var(--border-primary)',
               borderRadius: 10, fontSize: 13, color: 'var(--text-primary)', outline: 'none',
               fontFamily: 'inherit',
             }}
@@ -476,9 +476,9 @@ export default function Empresas() {
         <div style={{
           display: 'flex', gap: 8, padding: '12px 16px', borderRadius: 10, marginBottom: 20,
           background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-          fontSize: 13, color: '#FCA5A5',
+          fontSize: 13, color: '#DC2626',
         }}>
-          <AlertCircle size={16} color="#F87171" />
+          <AlertCircle size={16} color="#DC2626" />
           {error}
         </div>
       )}
@@ -486,7 +486,7 @@ export default function Empresas() {
       {/* Loading */}
       {loading && (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-          <Loader2 size={28} color="rgba(14,165,233,0.6)" style={{ animation: 'spin 1s linear infinite' }} />
+          <Loader2 size={28} color="rgba(79,70,229,0.6)" style={{ animation: 'spin 1s linear infinite' }} />
         </div>
       )}
 
@@ -495,7 +495,7 @@ export default function Empresas() {
         empresasFiltradas.length === 0 ? (
           <div style={{
             textAlign: 'center', padding: '80px 24px',
-            background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-primary)',
+            background: 'rgba(15,23,42,0.02)', border: '1px solid var(--border-primary)',
             borderRadius: 16,
           }}>
             <Building2 size={40} color="var(--text-muted)" style={{ marginBottom: 16, opacity: 0.4 }} />
@@ -562,7 +562,7 @@ export default function Empresas() {
                 <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
                   <button
                     onClick={() => setShowModal(false)}
-                    style={{ flex: 1, padding: '10px', borderRadius: 10, cursor: 'pointer', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-primary)', color: 'var(--text-muted)', fontSize: 13 }}
+                    style={{ flex: 1, padding: '10px', borderRadius: 10, cursor: 'pointer', background: 'rgba(15,23,42,0.04)', border: '1px solid var(--border-primary)', color: 'var(--text-muted)', fontSize: 13 }}
                   >
                     Cancelar
                   </button>
@@ -571,7 +571,7 @@ export default function Empresas() {
                     disabled={!form.empresa_nombre.trim() || creando}
                     style={{
                       flex: 1, padding: '10px', borderRadius: 10, cursor: 'pointer', fontSize: 13, fontWeight: 600,
-                      background: (!form.empresa_nombre.trim() || creando) ? 'rgba(255,255,255,0.05)' : 'var(--accent-primary)',
+                      background: (!form.empresa_nombre.trim() || creando) ? 'rgba(15,23,42,0.05)' : 'var(--accent-primary)',
                       color: (!form.empresa_nombre.trim() || creando) ? 'var(--text-muted)' : 'white',
                       border: 'none',
                     }}
@@ -590,7 +590,7 @@ export default function Empresas() {
                   Expira: {resultado.expires_label}
                 </p>
                 <div style={{
-                  background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-primary)',
+                  background: 'rgba(15,23,42,0.04)', border: '1px solid var(--border-primary)',
                   borderRadius: 10, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16,
                 }}>
                   <span style={{ flex: 1, fontSize: 11, color: 'var(--text-secondary)', wordBreak: 'break-all', textAlign: 'left' }}>
@@ -598,14 +598,14 @@ export default function Empresas() {
                   </span>
                   <button
                     onClick={() => copiarLink(resultado.link_registro)}
-                    style={{ flexShrink: 0, padding: '6px 10px', borderRadius: 8, cursor: 'pointer', background: copiado ? 'var(--success-soft)' : 'rgba(255,255,255,0.06)', border: '1px solid var(--border-primary)', color: copiado ? 'var(--success)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}
+                    style={{ flexShrink: 0, padding: '6px 10px', borderRadius: 8, cursor: 'pointer', background: copiado ? 'var(--success-soft)' : 'rgba(15,23,42,0.06)', border: '1px solid var(--border-primary)', color: copiado ? 'var(--success)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}
                   >
                     {copiado ? <><Check size={12} /> Copiado</> : <><Copy size={12} /> Copiar</>}
                   </button>
                 </div>
                 <button
                   onClick={() => setShowModal(false)}
-                  style={{ width: '100%', padding: '10px', borderRadius: 10, cursor: 'pointer', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-primary)', color: 'var(--text-muted)', fontSize: 13 }}
+                  style={{ width: '100%', padding: '10px', borderRadius: 10, cursor: 'pointer', background: 'rgba(15,23,42,0.04)', border: '1px solid var(--border-primary)', color: 'var(--text-muted)', fontSize: 13 }}
                 >
                   Cerrar
                 </button>
@@ -615,7 +615,7 @@ export default function Empresas() {
                 <p style={{ color: 'var(--error)', fontSize: 13, marginBottom: 16 }}>
                   Error: {resultado.detail || 'No se pudo crear la empresa'}
                 </p>
-                <button onClick={() => setResultado(null)} style={{ width: '100%', padding: '10px', borderRadius: 10, cursor: 'pointer', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-primary)', color: 'var(--text-muted)', fontSize: 13 }}>
+                <button onClick={() => setResultado(null)} style={{ width: '100%', padding: '10px', borderRadius: 10, cursor: 'pointer', background: 'rgba(15,23,42,0.04)', border: '1px solid var(--border-primary)', color: 'var(--text-muted)', fontSize: 13 }}>
                   Intentar de nuevo
                 </button>
               </div>

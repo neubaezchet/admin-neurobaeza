@@ -159,7 +159,7 @@ export default function SystemConsole() {
                         <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{label}</span>
                         <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{count} ({pct.toFixed(1)}%)</span>
                       </div>
-                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(15,23,42,0.06)' }}>
                         <div className={`h-full ${barColor} rounded-full transition-all duration-700`} style={{ width: `${Math.max(pct, 1)}%`, opacity: 0.85 }} />
                       </div>
                     </div>
@@ -182,7 +182,7 @@ export default function SystemConsole() {
               visibleEvents.map((ev, i) => (
                 <div key={ev.id || i} className="flex items-start gap-2.5 p-2.5 rounded-xl transition-colors"
                   style={{ cursor: 'default' }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(15,23,42,0.03)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                 >
                   <EventIcon tipo={ev.tipo} />
@@ -299,7 +299,7 @@ export default function SystemConsole() {
                     }}
                     className="flex-1 px-4 py-2 rounded-xl text-sm font-bold transition-all"
                     style={{
-                      background: (resetConfirm === 'RESET' && resetToken && !resetting) ? 'var(--error)' : 'rgba(255,255,255,0.05)',
+                      background: (resetConfirm === 'RESET' && resetToken && !resetting) ? 'var(--error)' : 'rgba(15,23,42,0.05)',
                       color: (resetConfirm === 'RESET' && resetToken && !resetting) ? 'white' : 'var(--text-muted)',
                       cursor: (resetConfirm === 'RESET' && resetToken && !resetting) ? 'pointer' : 'not-allowed',
                     }}
@@ -315,7 +315,7 @@ export default function SystemConsole() {
                     <div className="flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--success)' }}>
                       <CheckCircle2 className="w-4 h-4" /> Reset completado
                     </div>
-                    <div className="text-xs rounded-xl p-3 overflow-y-auto max-h-48" style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)' }}>
+                    <div className="text-xs rounded-xl p-3 overflow-y-auto max-h-48" style={{ background: 'rgba(15,23,42,0.04)', color: 'var(--text-secondary)' }}>
                       {Object.entries(resetResult.resumen).map(([tabla, count]) => (
                         <div key={tabla} className="flex justify-between py-0.5">
                           <span>{tabla}</span>

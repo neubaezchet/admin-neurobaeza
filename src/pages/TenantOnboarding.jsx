@@ -1,10 +1,10 @@
 /**
  * TenantOnboarding — Wizard de configuración de empresa
  * ======================================================
- * 7 pasos + pantalla de bienvenida inicial
- * Fondo: VANTA FOG (cargado dinámicamente desde CDN)
+ * 7 pasos + pantalla de bienvenida inicial (carrusel caligráfico multi-idioma)
+ * Tema: Indigo 2026 — blanco + índigo + violeta
+ * Fondo: CSS orbs (visible <1s) + VANTA FOG claro superpuesto (cargado desde CDN, opcional)
  * Transiciones: CSS puro (translateX + opacity, 320ms)
- * Sin Framer Motion (no disponible en este repo)
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react'
@@ -21,14 +21,14 @@ import {
   validarTokenRegistro, completarRegistro, saveSession,
 } from '../api'
 
-// ─── Paletas ──────────────────────────────────────────────
+// ─── Paletas (orden y valores canónicos del design handoff) ─
 const PALETAS = [
-  { id: 'ocean',     label: 'Océano',    primary: '#0EA5E9', secondary: '#38BDF8', accent: '#7C3AED' },
+  { id: 'indigo',    label: 'Índigo',    primary: '#4F46E5', secondary: '#818CF8', accent: '#7C3AED' },
+  { id: 'ocean',     label: 'Océano',    primary: '#0EA5E9', secondary: '#38BDF8', accent: '#0369A1' },
   { id: 'terracota', label: 'Terracota', primary: '#C2603C', secondary: '#E8956D', accent: '#7B4F35' },
   { id: 'bosque',    label: 'Bosque',    primary: '#16A34A', secondary: '#4ADE80', accent: '#854D0E' },
-  { id: 'lavanda',   label: 'Lavanda',   primary: '#7C3AED', secondary: '#A78BFA', accent: '#DB2777' },
-  { id: 'carbon',    label: 'Carbón',    primary: '#374151', secondary: '#6B7280', accent: '#F59E0B' },
   { id: 'aurora',    label: 'Aurora',    primary: '#BE185D', secondary: '#F472B6', accent: '#0891B2' },
+  { id: 'carbon',    label: 'Carbón',    primary: '#374151', secondary: '#6B7280', accent: '#F59E0B' },
 ]
 
 const ESTILOS_UI = [
@@ -64,6 +64,18 @@ const STEPS_CONFIG_PUBLIC = [
   { id: 8, Icon: CheckSquare, label: 'Activar',      shortLabel: 'Activar' },
 ]
 
+// Nombres en español para el carrusel caligráfico "hola"
+const ES_NAMES = {
+  en: 'Inglés', es: 'Español', fr: 'Francés', de: 'Alemán', it: 'Italiano',
+  pt: 'Portugués', pt_BR: 'Portugués (Brasil)', nl: 'Neerlandés', da: 'Danés',
+  sv: 'Sueco', nb: 'Noruego', fi: 'Finlandés', pl: 'Polaco', cs: 'Checo',
+  sk: 'Eslovaco', hu: 'Húngaro', ro: 'Rumano', hr: 'Croata', ca: 'Catalán',
+  el: 'Griego', bg: 'Búlgaro', ru: 'Ruso', uk: 'Ucraniano', tr: 'Turco',
+  kk: 'Kazajo', ar: 'Árabe', he: 'Hebreo', hi: 'Hindi', th: 'Tailandés',
+  vi: 'Vietnamita', id: 'Indonesio', ms: 'Malayo', ja: 'Japonés', ko: 'Coreano',
+  'zh-Hans': 'Chino (simplificado)', 'zh-Hant': 'Chino (tradicional)', zh_HK: 'Chino (Hong Kong)',
+}
+
 // ─── Helpers ──────────────────────────────────────────────
 
 function formatNIT(raw) {
@@ -76,9 +88,9 @@ function getPaleta(paletaId) {
   return PALETAS.find(p => p.id === paletaId) || PALETAS[0]
 }
 
-// Mapea un color hex al índice de paleta más cercano por luminancia
+// Mapea un color hex al índice de paleta más cercano por matiz (hue)
 function nearestPaleta(hex) {
-  if (!hex) return 'ocean'
+  if (!hex) return 'indigo'
   const r = parseInt(hex.slice(1, 3), 16)
   const g = parseInt(hex.slice(3, 5), 16)
   const b = parseInt(hex.slice(5, 7), 16)
@@ -86,42 +98,30 @@ function nearestPaleta(hex) {
   if (hue > 150 && hue <= 210) return 'ocean'
   if (hue > 0 && hue <= 30) return 'terracota'
   if (hue > 90 && hue <= 150) return 'bosque'
-  if (hue > 240 && hue <= 300) return 'lavanda'
+  if (hue > 240 && hue <= 300) return 'indigo'
   if (hue > 300) return 'aurora'
   return 'carbon'
 }
 
-// ─── Estilos base ─────────────────────────────────────────
+// ─── Loader de scripts externos (VANTA / hello-carousel) ──
 
-const inputStyle = {
-  width: '100%', boxSizing: 'border-box',
-  padding: '11px 14px',
-  background: 'rgba(255,255,255,0.04)',
-  border: '1px solid rgba(255,255,255,0.12)',
-  borderRadius: 10, fontSize: 14,
-  color: 'rgba(255,255,255,0.9)',
-  outline: 'none',
-  transition: 'border-color 0.2s',
-  fontFamily: 'inherit',
+function loadScriptOnce(src, cb) {
+  if (document.querySelector(`script[src="${src}"]`)) { setTimeout(cb, 50); return }
+  const s = document.createElement('script')
+  s.src = src; s.async = true
+  s.onload = cb
+  s.onerror = () => console.warn('Script no disponible (se continúa sin él):', src)
+  document.head.appendChild(s)
 }
 
-function Input({ error, ...props }) {
-  const [focused, setFocused] = useState(false)
+// ─── Átomos de formulario ─────────────────────────────────
+
+function Input({ error, className = '', ...props }) {
   return (
     <>
-      <input
-        {...props}
-        style={{
-          ...inputStyle,
-          borderColor: error
-            ? 'rgba(239,68,68,0.6)'
-            : focused ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.12)',
-        }}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-      />
+      <input className={`neo-input ${className}`} {...props} />
       {error && (
-        <p role="alert" style={{ margin: '4px 0 0', fontSize: 11, color: 'rgba(252,165,165,0.9)' }}>
+        <p role="alert" style={{ margin: '6px 0 0', fontSize: 12, color: 'var(--error)' }}>
           {error}
         </p>
       )}
@@ -129,42 +129,24 @@ function Input({ error, ...props }) {
   )
 }
 
-function Select({ children, ...props }) {
+function Select({ children, className = '', ...props }) {
   return (
-    <select
-      {...props}
-      style={{
-        ...inputStyle, cursor: 'pointer', appearance: 'none',
-        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='rgba(255,255,255,0.4)' d='M4 6l4 4 4-4'/%3E%3C/svg%3E")`,
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'right 12px center',
-        backgroundSize: '16px',
-        paddingRight: 36,
-      }}
-    >
+    <select className={`neo-input neo-select ${className}`} {...props}>
       {children}
     </select>
   )
 }
 
 function FieldLabel({ children }) {
-  return (
-    <label style={{
-      display: 'block', fontSize: 11, fontWeight: 700,
-      marginBottom: 6, color: 'rgba(255,255,255,0.45)',
-      letterSpacing: '0.07em', textTransform: 'uppercase',
-    }}>
-      {children}
-    </label>
-  )
+  return <label className="field-label">{children}</label>
 }
 
 function Field({ label, hint, children }) {
   return (
-    <div style={{ marginBottom: 20 }}>
+    <div className="field">
       <FieldLabel>{label}</FieldLabel>
       {children}
-      {hint && <p style={{ margin: '5px 0 0', fontSize: 11, color: 'rgba(255,255,255,0.3)', lineHeight: 1.5 }}>{hint}</p>}
+      {hint && <p className="field-hint">{hint}</p>}
     </div>
   )
 }
@@ -174,10 +156,7 @@ function Field({ label, hint, children }) {
 function StepIndicator({ current, paletaId, steps = STEPS_CONFIG }) {
   const paleta = getPaleta(paletaId)
   return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 0,
-      overflowX: 'auto', padding: '0 4px',
-    }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 0, overflowX: 'auto', padding: '0 4px' }}>
       {steps.map((s, i) => {
         const done = s.id < current
         const active = s.id === current
@@ -189,18 +168,18 @@ function StepIndicator({ current, paletaId, steps = STEPS_CONFIG }) {
                 width: 32, height: 32, borderRadius: '50%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 flexShrink: 0,
-                background: done ? paleta.primary : active ? `${paleta.primary}28` : 'rgba(255,255,255,0.06)',
-                border: (done || active) ? `2px solid ${paleta.primary}` : '2px solid rgba(255,255,255,0.12)',
+                background: done ? paleta.primary : active ? `${paleta.primary}1F` : 'rgba(15,23,42,0.04)',
+                border: (done || active) ? `2px solid ${paleta.primary}` : '2px solid rgba(15,23,42,0.10)',
                 transition: 'all 0.35s cubic-bezier(0.16,1,0.3,1)',
               }}>
                 {done
                   ? <Check size={14} color="#fff" strokeWidth={2.5} />
-                  : <Icon size={14} color={active ? paleta.primary : 'rgba(255,255,255,0.35)'} />
+                  : <Icon size={14} color={active ? paleta.primary : '#94A3B8'} />
                 }
               </div>
               <span style={{
                 fontSize: 9, fontWeight: active ? 700 : 400,
-                color: active ? paleta.primary : done ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.25)',
+                color: active ? paleta.primary : done ? '#334155' : '#94A3B8',
                 letterSpacing: '0.03em', whiteSpace: 'nowrap',
                 transition: 'color 0.3s',
               }}>
@@ -209,9 +188,8 @@ function StepIndicator({ current, paletaId, steps = STEPS_CONFIG }) {
             </div>
             {i < steps.length - 1 && (
               <div style={{
-                width: 28, height: 2,
-                marginBottom: 20, flexShrink: 0,
-                background: s.id < current ? paleta.primary : 'rgba(255,255,255,0.1)',
+                width: 28, height: 2, marginBottom: 20, flexShrink: 0,
+                background: s.id < current ? paleta.primary : 'rgba(15,23,42,0.10)',
                 transition: 'background 0.4s ease',
               }} />
             )}
@@ -224,49 +202,27 @@ function StepIndicator({ current, paletaId, steps = STEPS_CONFIG }) {
 
 // ─── Card shell ───────────────────────────────────────────
 
-function WizardCard({ children, title, desc, Icon, paletaId, style }) {
-  const paleta = getPaleta(paletaId)
+function WizardCard({ children, title, desc, Icon, wide }) {
   return (
-    <div style={{
-      background: 'rgba(14,20,30,0.88)',
-      backdropFilter: 'blur(32px)',
-      WebkitBackdropFilter: 'blur(32px)',
-      border: '1px solid rgba(255,255,255,0.08)',
-      borderRadius: 24,
-      padding: '36px 40px',
-      boxShadow: '0 32px 80px rgba(0,0,0,0.7)',
-      width: '100%',
-      maxWidth: 560,
-      ...style,
-    }}>
-      {/* Step header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 28 }}>
-        <div style={{
-          width: 44, height: 44, borderRadius: 12, flexShrink: 0,
-          background: `${paleta.primary}1A`,
-          border: `1px solid ${paleta.primary}40`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <Icon size={20} color={paleta.primary} />
+    <div className={`glass step-card${wide ? ' wide' : ''}`}>
+      <div className="top-strip" />
+      <div className="card-body">
+        <div className="card-header">
+          <div className="card-icon"><Icon size={20} color="#4F46E5" /></div>
+          <div>
+            <h2 className="card-title">{title}</h2>
+            <p className="card-desc">{desc}</p>
+          </div>
         </div>
-        <div>
-          <h2 style={{ margin: 0, fontSize: 19, fontWeight: 700, color: 'rgba(255,255,255,0.95)', lineHeight: 1.2 }}>
-            {title}
-          </h2>
-          <p style={{ margin: '4px 0 0', fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1.4 }}>
-            {desc}
-          </p>
-        </div>
+        {children}
       </div>
-      {children}
     </div>
   )
 }
 
 // ─── Step 1: Datos empresa ────────────────────────────────
 
-function Step1({ data, onChange, paletaId }) {
-  const paleta = getPaleta(paletaId)
+function Step1({ data, onChange }) {
   const [logoPreview, setLogoPreview] = useState(data.logo_url || null)
   const [extracting, setExtracting] = useState(false)
   const fileRef = useRef(null)
@@ -321,89 +277,63 @@ function Step1({ data, onChange, paletaId }) {
   }, [onChange])
 
   return (
-    <WizardCard
-      Icon={Building2} title="Datos de la empresa"
-      desc="Ingresa el NIT y el nombre con el que opera la empresa."
-      paletaId={paletaId}
-    >
+    <WizardCard Icon={Building2} title="Datos de la empresa" desc="Ingresa el NIT y el nombre con el que opera la empresa.">
       {/* Logo upload */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 24 }}>
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
           style={{
-            width: 88, height: 88, borderRadius: '50%', flexShrink: 0,
-            border: `2px dashed ${logoPreview ? paleta.primary : 'rgba(255,255,255,0.18)'}`,
-            background: logoPreview ? 'transparent' : 'rgba(255,255,255,0.04)',
+            width: 80, height: 80, borderRadius: '50%', flexShrink: 0,
+            border: `2px dashed ${logoPreview ? '#4F46E5' : 'rgba(15,23,42,0.18)'}`,
+            background: logoPreview ? 'transparent' : 'rgba(15,23,42,0.03)',
             cursor: 'pointer', overflow: 'hidden',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'border-color 0.2s',
-            position: 'relative',
+            transition: 'border-color 0.2s', position: 'relative',
           }}
           aria-label="Subir logo de la empresa"
         >
           {logoPreview
             ? <img src={logoPreview} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-            : <Upload size={22} color="rgba(255,255,255,0.3)" />
+            : <Upload size={20} color="#94A3B8" />
           }
           {extracting && (
             <div style={{
               position: 'absolute', inset: 0, borderRadius: '50%',
-              background: 'rgba(0,0,0,0.55)',
+              background: 'rgba(255,255,255,0.7)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <Loader2 size={18} color="#fff" style={{ animation: 'spin 1s linear infinite' }} />
+              <Loader2 size={18} color="#4F46E5" style={{ animation: 'spin 1s linear infinite' }} />
             </div>
           )}
         </button>
         <div>
-          <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.7)' }}>
-            Logo de la empresa
-          </p>
-          <p style={{ margin: '4px 0 8px', fontSize: 12, color: 'rgba(255,255,255,0.35)', lineHeight: 1.5 }}>
-            PNG, JPG o SVG. Al subir el logo,<br />la paleta se sugiere automáticamente.
+          <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#334155' }}>Logo de la empresa</p>
+          <p style={{ margin: '4px 0 8px', fontSize: 12, color: '#94A3B8', lineHeight: 1.5 }}>
+            PNG, JPG o SVG — opcional.<br />La paleta se sugiere automáticamente.
           </p>
           {logoPreview && (
             <button
               type="button"
               onClick={() => { setLogoPreview(null); onChange({ logo_url: null }) }}
-              style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                fontSize: 11, color: 'rgba(255,100,100,0.7)',
-                textDecoration: 'underline', padding: 0,
-              }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: 'var(--error)', textDecoration: 'underline', padding: 0 }}
             >
               Eliminar logo
             </button>
           )}
         </div>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/*"
-          style={{ display: 'none' }}
-          onChange={e => handleLogoFile(e.target.files?.[0])}
-        />
+        <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }}
+          onChange={e => handleLogoFile(e.target.files?.[0])} />
       </div>
 
-      <Field
-        label="NIT de la empresa"
-        hint="Formato colombiano: XXXXXXXXX-X (dígito de verificación)"
-      >
-        <Input
-          value={data.nit || ''}
-          onChange={e => onChange({ nit: formatNIT(e.target.value) })}
-          placeholder="900123456-7"
-          inputMode="numeric"
-        />
+      <Field label="NIT de la empresa" hint="Formato colombiano: XXXXXXXXX-X (dígito de verificación)">
+        <Input value={data.nit || ''} onChange={e => onChange({ nit: formatNIT(e.target.value) })}
+          placeholder="900123456-7" inputMode="numeric" />
       </Field>
 
       <Field label="Nombre de la empresa">
-        <Input
-          value={data.nombre || ''}
-          onChange={e => onChange({ nombre: e.target.value })}
-          placeholder="Empresa S.A.S."
-        />
+        <Input value={data.nombre || ''} onChange={e => onChange({ nombre: e.target.value })}
+          placeholder="Empresa S.A.S." />
       </Field>
     </WizardCard>
   )
@@ -411,8 +341,7 @@ function Step1({ data, onChange, paletaId }) {
 
 // ─── Step 2: Estructura empresarial ──────────────────────
 
-function Step2({ data, onChange, paletaId }) {
-  const paleta = getPaleta(paletaId)
+function Step2({ data, onChange }) {
   const tipo = data.tipo_estructura || 'unica'
   const [subInput, setSubInput] = useState('')
   const subs = data.sub_empresas || []
@@ -425,63 +354,36 @@ function Step2({ data, onChange, paletaId }) {
     }
   }
 
-  const removeSub = (name) =>
-    onChange({ sub_empresas: subs.filter(s => s !== name) })
+  const removeSub = (name) => onChange({ sub_empresas: subs.filter(s => s !== name) })
 
-  const CardOption = ({ id, icon, title, desc }) => (
+  const OptCard = ({ id, icon, title, desc }) => (
     <button
       type="button"
       onClick={() => onChange({ tipo_estructura: id })}
-      style={{
-        padding: '18px 20px', borderRadius: 14, cursor: 'pointer',
-        textAlign: 'left', display: 'flex', alignItems: 'flex-start', gap: 14,
-        border: tipo === id
-          ? `2px solid ${paleta.primary}`
-          : '2px solid rgba(255,255,255,0.1)',
-        background: tipo === id ? `${paleta.primary}12` : 'rgba(255,255,255,0.03)',
-        transition: 'all 0.2s ease',
-        flex: 1,
-      }}
+      className={`opt-card${tipo === id ? ' active' : ''}`}
       aria-pressed={tipo === id}
     >
-      <div style={{
-        width: 40, height: 40, borderRadius: 10, flexShrink: 0,
-        background: tipo === id ? `${paleta.primary}20` : 'rgba(255,255,255,0.06)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
-        {icon}
-      </div>
+      <div className="opt-icon">{icon}</div>
       <div>
-        <p style={{
-          margin: 0, fontSize: 14, fontWeight: 700,
-          color: tipo === id ? paleta.primary : 'rgba(255,255,255,0.8)',
-        }}>
-          {title}
-        </p>
-        <p style={{ margin: '4px 0 0', fontSize: 12, color: 'rgba(255,255,255,0.4)', lineHeight: 1.4 }}>
-          {desc}
-        </p>
+        <p className="opt-title">{title}</p>
+        <p className="opt-desc">{desc}</p>
       </div>
     </button>
   )
 
   return (
-    <WizardCard
-      Icon={Network} title="Estructura empresarial"
-      desc="Selecciona cómo están organizadas las empresas del tenant."
-      paletaId={paletaId}
-    >
-      <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
-        <CardOption
+    <WizardCard Icon={Network} title="Estructura empresarial" desc="Selecciona cómo están organizadas las empresas del tenant.">
+      <div style={{ display: 'flex', gap: 12, marginBottom: 4 }}>
+        <OptCard
           id="unica"
-          icon={<Building2 size={18} color={tipo === 'unica' ? paleta.primary : 'rgba(255,255,255,0.4)'} />}
+          icon={<Building2 size={18} color={tipo === 'unica' ? '#4F46E5' : '#94A3B8'} />}
           title="Empresa única"
           desc="Una sola empresa con todos sus empleados"
         />
-        <CardOption
+        <OptCard
           id="holding"
           icon={
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={tipo === 'holding' ? paleta.primary : 'rgba(255,255,255,0.4)'} strokeWidth="2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={tipo === 'holding' ? '#4F46E5' : '#94A3B8'} strokeWidth="2">
               <circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/>
               <line x1="12" y1="8" x2="5" y2="16"/><line x1="12" y1="8" x2="19" y2="16"/>
             </svg>
@@ -492,28 +394,21 @@ function Step2({ data, onChange, paletaId }) {
       </div>
 
       {tipo === 'holding' && (
-        <div style={{
-          padding: '16px 18px', borderRadius: 12,
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(255,255,255,0.08)',
-        }}>
+        <div className="sub-box">
           <FieldLabel>Empresas del grupo</FieldLabel>
           <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
             <input
+              className="neo-input"
+              style={{ flex: 1 }}
               value={subInput}
               onChange={e => setSubInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addSub())}
               placeholder="Nombre de la empresa…"
-              style={{ ...inputStyle, flex: 1 }}
             />
             <button
               type="button"
               onClick={addSub}
-              style={{
-                padding: '0 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                background: paleta.primary, color: '#fff', fontWeight: 600, fontSize: 13,
-                flexShrink: 0,
-              }}
+              style={{ padding: '0 14px', borderRadius: 10, border: 'none', cursor: 'pointer', background: '#4F46E5', color: '#fff', fontWeight: 600, fontSize: 13, flexShrink: 0 }}
               title="Agregar empresa"
             >
               <Plus size={16} />
@@ -522,21 +417,10 @@ function Step2({ data, onChange, paletaId }) {
           {subs.length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {subs.map(s => (
-                <div key={s} style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  padding: '4px 10px 4px 12px', borderRadius: 20,
-                  background: `${paleta.primary}18`,
-                  border: `1px solid ${paleta.primary}35`,
-                  fontSize: 12, color: 'rgba(255,255,255,0.8)',
-                }}>
+                <div key={s} className="tag">
                   {s}
-                  <button
-                    type="button"
-                    onClick={() => removeSub(s)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, lineHeight: 1 }}
-                    aria-label={`Eliminar ${s}`}
-                  >
-                    <X size={12} color="rgba(255,255,255,0.5)" />
+                  <button type="button" onClick={() => removeSub(s)} className="tag-x" aria-label={`Eliminar ${s}`}>
+                    <X size={12} />
                   </button>
                 </div>
               ))}
@@ -550,68 +434,36 @@ function Step2({ data, onChange, paletaId }) {
 
 // ─── Step 3: Ciclo de reporte ─────────────────────────────
 
-function Step3({ data, onChange, paletaId }) {
-  const paleta = getPaleta(paletaId)
+function Step3({ data, onChange }) {
   const ciclo = data.ciclo_reporte || 'mensual'
 
   const CicloCard = ({ id, icon, title, desc }) => (
     <button
       type="button"
       onClick={() => onChange({ ciclo_reporte: id })}
-      style={{
-        padding: '20px', borderRadius: 14, cursor: 'pointer',
-        textAlign: 'center', flex: 1,
-        border: ciclo === id ? `2px solid ${paleta.primary}` : '2px solid rgba(255,255,255,0.1)',
-        background: ciclo === id ? `${paleta.primary}12` : 'rgba(255,255,255,0.03)',
-        transition: 'all 0.2s ease', display: 'flex',
-        flexDirection: 'column', alignItems: 'center', gap: 10,
-      }}
+      className={`ciclo-card${ciclo === id ? ' active' : ''}`}
       aria-pressed={ciclo === id}
     >
-      <div style={{
-        width: 48, height: 48, borderRadius: 14,
-        background: ciclo === id ? `${paleta.primary}20` : 'rgba(255,255,255,0.06)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
-        {icon}
-      </div>
+      <div className="ciclo-icon">{icon}</div>
       <div>
-        <p style={{
-          margin: 0, fontSize: 15, fontWeight: 700,
-          color: ciclo === id ? paleta.primary : 'rgba(255,255,255,0.8)',
-        }}>{title}</p>
-        <p style={{ margin: '4px 0 0', fontSize: 12, color: 'rgba(255,255,255,0.4)', lineHeight: 1.4 }}>
-          {desc}
-        </p>
+        <p className="ciclo-title">{title}</p>
+        <p className="ciclo-desc">{desc}</p>
       </div>
-      {ciclo === id && (
-        <div style={{
-          width: 20, height: 20, borderRadius: '50%',
-          background: paleta.primary,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <Check size={12} color="#fff" strokeWidth={3} />
-        </div>
-      )}
     </button>
   )
 
   return (
-    <WizardCard
-      Icon={Clock} title="Ciclo de reporte"
-      desc="Define con qué frecuencia se generan los reportes de incapacidades."
-      paletaId={paletaId}
-    >
-      <div style={{ display: 'flex', gap: 14 }}>
+    <WizardCard Icon={Clock} title="Ciclo de reporte" desc="Define con qué frecuencia se generan los reportes de incapacidades.">
+      <div className="ciclo-row">
         <CicloCard
           id="quincenal"
-          icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={ciclo === 'quincenal' ? paleta.primary : 'rgba(255,255,255,0.45)'} strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="10" x2="12" y2="22"/></svg>}
+          icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={ciclo === 'quincenal' ? '#4F46E5' : '#94A3B8'} strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="10" x2="12" y2="22"/></svg>}
           title="Quincenal"
           desc="Reportes del 1–15 y del 16–fin de mes"
         />
         <CicloCard
           id="mensual"
-          icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={ciclo === 'mensual' ? paleta.primary : 'rgba(255,255,255,0.45)'} strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>}
+          icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={ciclo === 'mensual' ? '#4F46E5' : '#94A3B8'} strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>}
           title="Mensual"
           desc="Reporte completo al cierre de cada mes"
         />
@@ -622,34 +474,17 @@ function Step3({ data, onChange, paletaId }) {
 
 // ─── Step 4: Contacto ─────────────────────────────────────
 
-function Step4({ data, onChange, paletaId }) {
+function Step4({ data, onChange }) {
   return (
-    <WizardCard
-      Icon={Mail} title="Información de contacto"
-      desc="Correos con los que el sistema se comunicará para esta empresa."
-      paletaId={paletaId}
-    >
+    <WizardCard Icon={Mail} title="Información de contacto" desc="Correos con los que el sistema se comunicará para esta empresa.">
       <Field label="Correo del administrador de la empresa">
-        <Input
-          type="email"
-          value={data.contacto_email || ''}
-          onChange={e => onChange({ contacto_email: e.target.value })}
-          placeholder="admin@empresa.com"
-        />
+        <Input type="email" value={data.contacto_email || ''} onChange={e => onChange({ contacto_email: e.target.value })} placeholder="admin@empresa.com" />
       </Field>
       <Field label="Correo para carpeta de Google Drive">
-        <Input
-          type="email"
-          value={data.correo_drive || ''}
-          onChange={e => onChange({ correo_drive: e.target.value })}
-          placeholder="drive@empresa.com"
-        />
+        <Input type="email" value={data.correo_drive || ''} onChange={e => onChange({ correo_drive: e.target.value })} placeholder="drive@empresa.com" />
       </Field>
       <Field label="Zona horaria">
-        <Select
-          value={data.zona_horaria || 'America/Bogota'}
-          onChange={e => onChange({ zona_horaria: e.target.value })}
-        >
+        <Select value={data.zona_horaria || 'America/Bogota'} onChange={e => onChange({ zona_horaria: e.target.value })}>
           {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
         </Select>
       </Field>
@@ -657,7 +492,7 @@ function Step4({ data, onChange, paletaId }) {
   )
 }
 
-// ─── Step 5: Preview Box ──────────────────────────────────
+// ─── Step 5: Preview Box (mockup del portal del tenant) ───
 
 function PreviewBox({ paleta, estilo, nombre, logoUrl }) {
   const p = paleta.primary
@@ -677,71 +512,44 @@ function PreviewBox({ paleta, estilo, nombre, logoUrl }) {
   return (
     <div style={{
       borderRadius: 12, overflow: 'hidden',
-      border: '1px solid rgba(255,255,255,0.08)',
-      boxShadow: `0 8px 32px rgba(0,0,0,0.5)`,
+      border: '1px solid rgba(15,23,42,0.08)',
+      boxShadow: '0 8px 32px rgba(15,23,42,0.12)',
       fontSize: 11, fontFamily,
       aspectRatio: '3/2', display: 'flex', flexDirection: 'column',
     }}>
       {/* Header */}
-      <div style={{
-        height: 32, background: p,
-        display: 'flex', alignItems: 'center',
-        padding: '0 10px', gap: 8, flexShrink: 0,
-      }}>
-        <div style={{
-          width: 20, height: 20, borderRadius: '50%',
-          background: 'rgba(255,255,255,0.2)',
-          overflow: 'hidden', flexShrink: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
+      <div style={{ height: 32, background: p, display: 'flex', alignItems: 'center', padding: '0 10px', gap: 8, flexShrink: 0 }}>
+        <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {logoUrl
             ? <img src={logoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-            : <span style={{ fontSize: 8, color: '#fff', fontWeight: 700 }}>
-                {(nombre || 'E')[0].toUpperCase()}
-              </span>
+            : <span style={{ fontSize: 8, color: '#fff', fontWeight: 700 }}>{(nombre || 'E')[0].toUpperCase()}</span>
           }
         </div>
-        <span style={{ color: '#fff', fontWeight: 700, fontSize: 10, flex: 1, truncate: 'ellipsis' }}>
-          {nombre || 'Mi Empresa'}
-        </span>
+        <span style={{ color: '#fff', fontWeight: 700, fontSize: 10, flex: 1 }}>{nombre || 'Mi Empresa'}</span>
         <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(255,255,255,0.6)' }} />
       </div>
 
       {/* Body */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {/* Sidebar */}
         <div style={{
           width: isUxFocus ? 28 : 36, background: sidebarBg,
           borderRight: isFuturista ? `1px solid ${p}` : '1px solid rgba(255,255,255,0.06)',
-          display: 'flex', flexDirection: 'column', alignItems: 'center',
-          padding: '8px 0', gap: 8, flexShrink: 0,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '8px 0', gap: 8, flexShrink: 0,
         }}>
           {['⬡','◈','▣','◉','⊕'].map((ico, i) => (
             <div key={i} style={{
-              width: isUxFocus ? 18 : 22, height: isUxFocus ? 18 : 22,
-              borderRadius: 5,
+              width: isUxFocus ? 18 : 22, height: isUxFocus ? 18 : 22, borderRadius: 5,
               background: i === 0 ? `${a}35` : 'transparent',
               border: i === 0 ? `1px solid ${a}60` : 'none',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 9, color: i === 0 ? a : textSub,
-              cursor: 'default',
-            }}>
-              {ico}
-            </div>
+              fontSize: 9, color: i === 0 ? a : textSub, cursor: 'default',
+            }}>{ico}</div>
           ))}
         </div>
 
-        {/* Content */}
-        <div style={{
-          flex: 1, background: bgContent, padding: '8px 10px',
-          display: 'flex', flexDirection: 'column', gap: 6, overflowY: 'hidden',
-        }}>
-          {/* Stats */}
+        <div style={{ flex: 1, background: bgContent, padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 6, overflowY: 'hidden' }}>
           <div style={{ display: 'flex', gap: 6 }}>
-            {[
-              { label: 'Activos', val: '12' },
-              { label: 'Pendientes', val: '3' },
-            ].map(({ label, val }) => (
+            {[{ label: 'Activos', val: '12' }, { label: 'Pendientes', val: '3' }].map(({ label, val }) => (
               <div key={label} style={{
                 flex: 1, padding: '5px 7px', borderRadius: 6,
                 background: isMinimalista ? '#f1f5f9' : 'rgba(255,255,255,0.05)',
@@ -753,18 +561,11 @@ function PreviewBox({ paleta, estilo, nombre, logoUrl }) {
             ))}
           </div>
 
-          {/* Mini table */}
-          <div style={{
-            borderRadius: 6, overflow: 'hidden',
-            border: isFuturista ? `1px solid ${p}30` : '1px solid rgba(255,255,255,0.06)',
-          }}>
+          <div style={{ borderRadius: 6, overflow: 'hidden', border: isFuturista ? `1px solid ${p}30` : '1px solid rgba(255,255,255,0.06)' }}>
             {['García, L.', 'Martínez, R.', 'López, M.'].map((name, i) => (
               <div key={i} style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '4px 7px',
-                background: i % 2 === 0
-                  ? (isMinimalista ? '#f8fafc' : 'rgba(255,255,255,0.03)')
-                  : 'transparent',
+                display: 'flex', alignItems: 'center', gap: 6, padding: '4px 7px',
+                background: i % 2 === 0 ? (isMinimalista ? '#f8fafc' : 'rgba(255,255,255,0.03)') : 'transparent',
                 borderBottom: i < 2 ? '1px solid rgba(255,255,255,0.04)' : 'none',
               }}>
                 <span style={{ flex: 1, fontSize: 9, color: textColor }}>{name}</span>
@@ -772,19 +573,12 @@ function PreviewBox({ paleta, estilo, nombre, logoUrl }) {
                   padding: '1px 5px', borderRadius: 4, fontSize: 8, fontWeight: 600,
                   background: i === 0 ? `${p}25` : i === 1 ? `${a}25` : `${s}25`,
                   color: i === 0 ? p : i === 1 ? a : s,
-                }}>
-                  {i === 0 ? 'VERDE' : i === 1 ? 'AMBAR' : 'NUEVO'}
-                </span>
+                }}>{i === 0 ? 'VERDE' : i === 1 ? 'AMBAR' : 'NUEVO'}</span>
               </div>
             ))}
           </div>
 
-          {/* Button */}
-          <button style={{
-            padding: '4px 10px', borderRadius: 5, border: 'none', cursor: 'default',
-            background: p, color: '#fff', fontSize: 9, fontWeight: 700,
-            alignSelf: 'flex-start',
-          }}>
+          <button style={{ padding: '4px 10px', borderRadius: 5, border: 'none', cursor: 'default', background: p, color: '#fff', fontSize: 9, fontWeight: 700, alignSelf: 'flex-start' }}>
             + Nueva incapacidad
           </button>
         </div>
@@ -796,102 +590,59 @@ function PreviewBox({ paleta, estilo, nombre, logoUrl }) {
 // ─── Step 5: Personalización visual ──────────────────────
 
 function Step5({ data, onChange, nombre, logoUrl }) {
-  const paletaId = data.paleta_id || 'ocean'
+  const paletaId = data.paleta_id || 'indigo'
   const estilo = data.estilo_ui || 'default'
   const paleta = getPaleta(paletaId)
 
   return (
-    <WizardCard
-      Icon={Palette} title="Identidad visual"
-      desc="Elige los colores y el estilo del portal de incapacidades."
-      paletaId={paletaId}
-      style={{ maxWidth: 760 }}
-    >
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-        {/* Columna izquierda */}
+    <WizardCard Icon={Palette} title="Identidad visual" desc="Elige los colores y el estilo del portal de incapacidades." wide>
+      <div style={{ display: 'grid', gridTemplateColumns: '264px 1fr', gap: 28 }}>
         <div>
-          {/* Paletas */}
           <FieldLabel>Paleta de colores</FieldLabel>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, marginBottom: 20 }}>
+          <div className="paleta-grid">
             {PALETAS.map(p => (
               <button
                 key={p.id}
                 type="button"
-                onClick={() => onChange({
-                  paleta_id: p.id,
-                  paleta_colores: { primary: p.primary, secondary: p.secondary, accent: p.accent },
-                })}
-                style={{
-                  padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
-                  border: paletaId === p.id ? `2px solid ${p.primary}` : '2px solid transparent',
-                  background: paletaId === p.id ? `${p.primary}15` : 'rgba(255,255,255,0.04)',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
-                  transition: 'all 0.15s ease',
-                }}
+                onClick={() => onChange({ paleta_id: p.id, paleta_colores: { primary: p.primary, secondary: p.secondary, accent: p.accent } })}
+                className={`pal-btn${paletaId === p.id ? ' active' : ''}`}
                 aria-label={p.label}
                 aria-pressed={paletaId === p.id}
               >
-                <div style={{ display: 'flex', gap: 3 }}>
+                <div className="pal-dots">
                   {[p.primary, p.secondary, p.accent].map((c, i) => (
-                    <div key={i} style={{ width: 14, height: 14, borderRadius: '50%', background: c }} />
+                    <div key={i} className="pal-dot" style={{ background: c }} />
                   ))}
                 </div>
-                <span style={{
-                  fontSize: 10, fontWeight: paletaId === p.id ? 700 : 400,
-                  color: paletaId === p.id ? p.primary : 'rgba(255,255,255,0.5)',
-                }}>
-                  {p.label}
-                </span>
+                <span className="pal-name">{p.label}</span>
               </button>
             ))}
           </div>
 
-          {/* Estilos UI */}
           <FieldLabel>Estilo de interfaz</FieldLabel>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div>
             {ESTILOS_UI.map(e => (
               <button
                 key={e.id}
                 type="button"
                 onClick={() => onChange({ estilo_ui: e.id })}
-                style={{
-                  padding: '9px 12px', borderRadius: 9, cursor: 'pointer',
-                  textAlign: 'left', display: 'flex', alignItems: 'center', gap: 10,
-                  border: estilo === e.id ? `1px solid ${paleta.primary}` : '1px solid rgba(255,255,255,0.08)',
-                  background: estilo === e.id ? `${paleta.primary}10` : 'rgba(255,255,255,0.03)',
-                  transition: 'all 0.15s ease',
-                }}
+                className={`est-btn${estilo === e.id ? ' active' : ''}`}
                 aria-pressed={estilo === e.id}
               >
-                <div style={{
-                  width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
-                  background: estilo === e.id ? paleta.primary : 'rgba(255,255,255,0.2)',
-                  transition: 'background 0.2s',
-                }} />
+                <div className="est-radio" />
                 <div>
-                  <p style={{
-                    margin: 0, fontSize: 13, fontWeight: estilo === e.id ? 700 : 500,
-                    color: estilo === e.id ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.65)',
-                  }}>
-                    {e.label}
-                  </p>
-                  <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{e.desc}</p>
+                  <p className="est-label">{e.label}</p>
+                  <p className="est-desc">{e.desc}</p>
                 </div>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Columna derecha: Preview vivo */}
-        <div>
-          <FieldLabel>Vista previa en tiempo real</FieldLabel>
-          <PreviewBox
-            paleta={paleta}
-            estilo={estilo}
-            nombre={nombre}
-            logoUrl={logoUrl}
-          />
-          <p style={{ marginTop: 10, fontSize: 11, color: 'rgba(255,255,255,0.3)', textAlign: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <FieldLabel>Vista previa del portal</FieldLabel>
+          <PreviewBox paleta={paleta} estilo={estilo} nombre={nombre} logoUrl={logoUrl} />
+          <p style={{ margin: 0, fontSize: 11, color: '#94A3B8', textAlign: 'center' }}>
             Los cambios se reflejan al instante
           </p>
         </div>
@@ -902,14 +653,12 @@ function Step5({ data, onChange, nombre, logoUrl }) {
 
 // ─── Step 6: Google Drive ─────────────────────────────────
 
-function Step6({ data, onChange, companyId, paletaId, serviceAccountEmail }) {
-  const paleta = getPaleta(paletaId)
+function Step6({ data, onChange, companyId, serviceAccountEmail }) {
   const [verifying, setVerifying] = useState(false)
   const [result, setResult]       = useState(null)
   const [err, setErr]             = useState('')
   const [copied, setCopied]       = useState(false)
 
-  // Extrae el ID de carpeta desde un link de Drive pegado
   const handleDriveUrl = (raw) => {
     const match = raw.match(/\/folders\/([a-zA-Z0-9_-]{10,})/)
     const id = match ? match[1] : raw.trim()
@@ -945,77 +694,37 @@ function Step6({ data, onChange, companyId, paletaId, serviceAccountEmail }) {
   }
 
   return (
-    <WizardCard
-      Icon={HardDrive} title="Carpeta de Google Drive"
-      desc="Conecta la carpeta donde se guardan las incapacidades. Este paso es opcional."
-      paletaId={paletaId}
-    >
-      {/* Correo de la cuenta de servicio */}
-      <div style={{
-        padding: '14px 16px', borderRadius: 10, marginBottom: 18,
-        background: `${paleta.primary}10`, border: `1px solid ${paleta.primary}30`,
-      }}>
-        <p style={{ margin: '0 0 6px', fontSize: 11, fontWeight: 700,
-          color: paleta.primary, textTransform: 'uppercase', letterSpacing: '0.07em' }}>
-          Paso 1 — Comparte tu carpeta con este correo
-        </p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <code style={{
-            flex: 1, fontSize: 12, color: 'rgba(255,255,255,0.85)',
-            background: 'rgba(0,0,0,0.3)', padding: '7px 10px',
-            borderRadius: 7, wordBreak: 'break-all',
-          }}>
-            {serviceAccountEmail || 'Cargando...'}
-          </code>
-          <button type="button" onClick={copyEmail}
-            title="Copiar correo"
-            style={{
-              background: copied ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.07)',
-              border: `1px solid ${copied ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.12)'}`,
-              borderRadius: 7, padding: '7px 10px', cursor: 'pointer',
-              color: copied ? '#6ee7b7' : 'rgba(255,255,255,0.6)', fontSize: 12,
-              transition: 'all 0.2s', whiteSpace: 'nowrap',
-            }}>
+    <WizardCard Icon={HardDrive} title="Carpeta de Google Drive" desc="Conecta la carpeta donde se guardan las incapacidades. Este paso es opcional.">
+      <div className="sa-box">
+        <span className="sa-label">Paso 1 — Comparte tu carpeta con este correo</span>
+        <div className="sa-row">
+          <code className="sa-code">{serviceAccountEmail || 'Cargando...'}</code>
+          <button type="button" onClick={copyEmail} className="copy-btn">
             {copied ? '✓ Copiado' : 'Copiar'}
           </button>
         </div>
-        <p style={{ margin: '8px 0 0', fontSize: 11, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5 }}>
-          En Google Drive → tu carpeta → Clic derecho → Compartir → pega este correo → rol <strong style={{ color: 'rgba(255,255,255,0.6)' }}>Editor</strong> → Enviar
+        <p style={{ margin: '8px 0 0', fontSize: 11, color: '#94A3B8', lineHeight: 1.55 }}>
+          Carpeta de Drive → Compartir → pega este correo → rol <strong style={{ color: '#334155' }}>Editor</strong> → Enviar
         </p>
       </div>
 
-      {/* Input de URL o ID */}
-      <Field
-        label="Paso 2 — Pega el link de tu carpeta de Drive"
-        hint="Ej: drive.google.com/drive/folders/1aBcDeFgH... — el ID se extrae automáticamente"
-      >
-        <Input
-          value={data.google_workspace_drive_id || ''}
-          onChange={e => handleDriveUrl(e.target.value)}
-          placeholder="https://drive.google.com/drive/folders/ABC123..."
-        />
+      <Field label="Paso 2 — Pega el link de tu carpeta de Drive" hint="El ID se extrae automáticamente del link">
+        <Input value={data.google_workspace_drive_id || ''} onChange={e => handleDriveUrl(e.target.value)} placeholder="https://drive.google.com/drive/folders/ABC123..." />
       </Field>
 
-      {/* ID detectado */}
       {data.google_workspace_drive_id && (
-        <p style={{ margin: '-8px 0 14px', fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
-          ID detectado: <code style={{ color: 'rgba(255,255,255,0.55)' }}>{data.google_workspace_drive_id}</code>
+        <p style={{ margin: '-8px 0 14px', fontSize: 11, color: '#94A3B8' }}>
+          ID detectado: <code style={{ color: '#64748B' }}>{data.google_workspace_drive_id}</code>
         </p>
       )}
 
-      {/* Botón verificar — solo disponible con sesión activa */}
       {companyId ? (
         <button
           type="button"
           onClick={verify}
           disabled={verifying || !data.google_workspace_drive_id}
-          style={{
-            width: '100%', padding: '12px', borderRadius: 10, cursor: 'pointer',
-            background: verifying ? 'rgba(255,255,255,0.06)' : paleta.primary,
-            border: 'none', color: '#fff', fontWeight: 600, fontSize: 14,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            transition: 'all 0.2s', opacity: (verifying || !data.google_workspace_drive_id) ? 0.5 : 1,
-          }}
+          className="btn-next"
+          style={{ width: '100%' }}
         >
           {verifying
             ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Verificando acceso...</>
@@ -1023,41 +732,32 @@ function Step6({ data, onChange, companyId, paletaId, serviceAccountEmail }) {
           }
         </button>
       ) : (
-        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', textAlign: 'center', margin: 0 }}>
+        <p style={{ fontSize: 12, color: '#94A3B8', textAlign: 'center', margin: 0 }}>
           La verificación de acceso estará disponible después de activar tu empresa.
         </p>
       )}
 
-      {/* Error */}
       {err && (
         <div role="alert" style={{
-          marginTop: 12, padding: '10px 14px', borderRadius: 8,
-          background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
+          marginTop: 12, padding: '10px 14px', borderRadius: 10,
+          background: 'var(--error-soft)', border: '1px solid rgba(239,68,68,0.25)',
           display: 'flex', gap: 8, alignItems: 'flex-start',
         }}>
-          <AlertCircle size={14} color="#f87171" style={{ flexShrink: 0, marginTop: 1 }} />
-          <span style={{ fontSize: 12, color: '#fca5a5' }}>{err}</span>
+          <AlertCircle size={14} color="var(--error)" style={{ flexShrink: 0, marginTop: 1 }} />
+          <span style={{ fontSize: 12, color: '#B91C1C' }}>{err}</span>
         </div>
       )}
 
-      {/* Éxito */}
       {result?.acceso && (
-        <div style={{
-          marginTop: 12, padding: '14px 16px', borderRadius: 10,
-          background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.25)',
-        }}>
-          <p style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 600, color: '#6ee7b7' }}>
+        <div style={{ marginTop: 12, padding: '14px 16px', borderRadius: 12, background: 'var(--success-soft)', border: '1px solid rgba(16,185,129,0.25)' }}>
+          <p style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 600, color: '#047857' }}>
             ✅ Acceso confirmado: "{result.carpeta_nombre}"
           </p>
           {result.estructura?.length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {result.estructura.map(f => (
-                <div key={f.name} style={{
-                  display: 'flex', alignItems: 'center', gap: 5,
-                  padding: '3px 9px', borderRadius: 5,
-                  background: 'rgba(255,255,255,0.05)', fontSize: 11, color: 'rgba(255,255,255,0.6)',
-                }}>
-                  <FolderOpen size={11} color="#f59e0b" />
+                <div key={f.name} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '3px 9px', borderRadius: 5, background: 'rgba(15,23,42,0.04)', fontSize: 11, color: '#334155' }}>
+                  <FolderOpen size={11} color="#F59E0B" />
                   {f.name}
                 </div>
               ))}
@@ -1066,13 +766,8 @@ function Step6({ data, onChange, companyId, paletaId, serviceAccountEmail }) {
         </div>
       )}
 
-      {/* No acceso */}
       {result && !result.acceso && (
-        <div role="alert" style={{
-          marginTop: 12, padding: '10px 14px', borderRadius: 8,
-          background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-          fontSize: 12, color: '#fca5a5',
-        }}>
+        <div role="alert" style={{ marginTop: 12, padding: '10px 14px', borderRadius: 10, background: 'var(--error-soft)', border: '1px solid rgba(239,68,68,0.25)', fontSize: 12, color: '#B91C1C' }}>
           ⚠️ Sin acceso aún. Asegúrate de haber compartido la carpeta con el correo de arriba y vuelve a verificar.
         </div>
       )}
@@ -1080,12 +775,10 @@ function Step6({ data, onChange, companyId, paletaId, serviceAccountEmail }) {
   )
 }
 
-
 // ─── Step 7: Resumen ──────────────────────────────────────
 
-function Step7({ data, paletaId }) {
-  const paleta = getPaleta(paletaId)
-  const PALETA_LABEL = PALETAS.find(p => p.id === (data.paleta_id || 'ocean'))?.label || 'Océano'
+function Step7({ data }) {
+  const PALETA_LABEL = PALETAS.find(p => p.id === (data.paleta_id || 'indigo'))?.label || 'Índigo'
   const ESTILO_LABEL = ESTILOS_UI.find(e => e.id === (data.estilo_ui || 'default'))?.label || 'Default'
 
   const items = [
@@ -1101,140 +794,79 @@ function Step7({ data, paletaId }) {
   ].filter(i => i.value)
 
   return (
-    <WizardCard
-      Icon={CheckSquare} title="Resumen de configuración"
-      desc="Revisa los datos antes de activar la empresa en el sistema."
-      paletaId={paletaId}
-    >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 20 }}>
+    <WizardCard Icon={CheckSquare} title="Resumen de configuración" desc="Revisa los datos antes de activar la empresa en el sistema.">
+      <div style={{ marginBottom: 20 }}>
         {items.map(({ Icon, label, value }) => (
-          <div key={label} style={{
-            display: 'flex', alignItems: 'center', gap: 12,
-            padding: '10px 14px', borderRadius: 10,
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.07)',
-          }}>
-            <Icon size={14} color={paleta.primary} style={{ flexShrink: 0 }} />
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', width: 90, flexShrink: 0 }}>{label}</span>
-            <span style={{
-              fontSize: 13, color: 'rgba(255,255,255,0.85)', fontWeight: 500,
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            }}>
-              {value}
-            </span>
+          <div key={label} className="summary-item">
+            <Icon size={14} color="#4F46E5" style={{ flexShrink: 0 }} />
+            <span className="summary-label">{label}</span>
+            <span className="summary-val">{value}</span>
           </div>
         ))}
       </div>
-      <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', lineHeight: 1.6, margin: 0 }}>
+      <p style={{ fontSize: 12, color: '#94A3B8', lineHeight: 1.7, margin: 0 }}>
         Al activar la empresa se creará automáticamente un usuario administrador para el tenant. Las credenciales se mostrarán en el siguiente paso.
       </p>
     </WizardCard>
   )
 }
 
-// ─── Pantalla de bienvenida (paso 0) ─────────────────────
+// ─── Pantalla de bienvenida (paso 0) — carrusel caligráfico ─
 
 function WelcomeScreen({ onStart }) {
-  const [phase, setPhase] = useState(0)
+  const stageRef = useRef(null)
+  const engineRef = useRef(null)
+  const [langLabel, setLangLabel] = useState('Español')
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase(1), 100)
-    const t2 = setTimeout(() => setPhase(2), 600)
-    const t3 = setTimeout(() => setPhase(3), 1300)
-    return () => [t1, t2, t3].forEach(clearTimeout)
+    let cancelled = false
+    const start = () => {
+      if (cancelled) return
+      if (stageRef.current && window.NeurobaezaHelloCarousel && !engineRef.current) {
+        engineRef.current = window.NeurobaezaHelloCarousel(stageRef.current, {
+          color: '#5B21B6',
+          onWord: (entry) => setLangLabel(ES_NAMES[entry.code] || entry.label),
+        })
+      } else if (!window.NeurobaezaHelloCarousel) {
+        setTimeout(start, 100)
+      }
+    }
+    loadScriptOnce('/hello-carousel.js', start)
+    return () => {
+      cancelled = true
+      if (engineRef.current) { engineRef.current.stop(); engineRef.current = null }
+    }
   }, [])
 
   return (
-    <div style={{
-      position: 'relative', zIndex: 1,
-      display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center',
-      minHeight: '100vh', textAlign: 'center',
-      padding: '0 24px',
-    }}>
-      <div style={{
-        opacity: phase >= 1 ? 1 : 0,
-        transform: phase >= 1 ? 'translateY(0)' : 'translateY(28px)',
-        transition: 'opacity 0.7s ease, transform 0.7s cubic-bezier(0.16,1,0.3,1)',
-      }}>
-        <p style={{
-          fontSize: 'clamp(52px, 8vw, 80px)', margin: '0 0 8px',
-          fontWeight: 800, color: 'rgba(255,255,255,0.96)',
-          letterSpacing: '-0.03em', lineHeight: 1,
-        }}>
-          Hola
-        </p>
+    <div className="welcome">
+      <div className="welcome-badge">
+        <div className="welcome-badge-dot" />
+        Bienvenido a Neurobaeza
       </div>
-
-      <div style={{
-        opacity: phase >= 2 ? 1 : 0,
-        transform: phase >= 2 ? 'translateY(0)' : 'translateY(20px)',
-        transition: 'opacity 0.6s 0.1s ease, transform 0.6s 0.1s cubic-bezier(0.16,1,0.3,1)',
-      }}>
-        <p style={{
-          fontSize: 'clamp(16px, 2.5vw, 20px)', margin: '0 0 48px',
-          color: 'rgba(255,255,255,0.45)', fontWeight: 400,
-          maxWidth: 380,
-        }}>
-          Configura tu empresa en minutos
-        </p>
+      <div className="hello-wrap">
+        <div id="hello-svg-stage" ref={stageRef} style={{ position: 'relative', width: 'min(70vw,460px)', height: 'min(32vw,180px)' }} />
       </div>
-
-      <div style={{
-        opacity: phase >= 3 ? 1 : 0,
-        transform: phase >= 3 ? 'translateY(0) scale(1)' : 'translateY(16px) scale(0.97)',
-        transition: 'opacity 0.5s ease, transform 0.5s cubic-bezier(0.34,1.56,0.64,1)',
-      }}>
-        <button
-          onClick={onStart}
-          style={{
-            padding: '15px 40px', borderRadius: 14, border: 'none', cursor: 'pointer',
-            background: 'rgba(255,255,255,0.1)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            color: '#fff', fontSize: 16, fontWeight: 600,
-            display: 'flex', alignItems: 'center', gap: 10,
-            transition: 'all 0.15s ease',
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.18)'
-            e.currentTarget.style.transform = 'translateY(-2px)'
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.10)'
-            e.currentTarget.style.transform = 'translateY(0)'
-          }}
-        >
-          Comenzar
-          <ChevronRight size={18} />
-        </button>
-      </div>
+      <div className="lang-chip">{langLabel}</div>
+      <p className="welcome-sub">Configura tu empresa y comienza a gestionar incapacidades médicas en minutos.</p>
+      <button className="btn-start" onClick={onStart}>
+        Comenzar <ChevronRight size={18} />
+      </button>
     </div>
   )
 }
 
 // ─── Step 7 público: Acceso ───────────────────────────────
 
-function StepAcceso({ data, onChange, paletaId }) {
-  const paleta = getPaleta(paletaId)
+function StepAcceso({ data, onChange }) {
   const [showPass, setShowPass]       = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
 
-  const passwordMismatch =
-    data.admin_password_confirm && data.admin_password !== data.admin_password_confirm
+  const passwordMismatch = data.admin_password_confirm && data.admin_password !== data.admin_password_confirm
 
   return (
-    <WizardCard
-      Icon={Lock}
-      title="Acceso al sistema"
-      desc="Crea la contraseña que usarás para entrar al portal de administración."
-      paletaId={paletaId}
-    >
-      <div style={{
-        padding: '12px 14px', borderRadius: 10, marginBottom: 22,
-        background: `${paleta.primary}10`, border: `1px solid ${paleta.primary}25`,
-        fontSize: 12, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6,
-      }}>
+    <WizardCard Icon={Lock} title="Acceso al sistema" desc="Crea la contraseña que usarás para entrar al portal de administración.">
+      <div className="sa-box" style={{ fontSize: 12, color: '#64748B', lineHeight: 1.6 }}>
         Tu nombre de usuario se genera automáticamente a partir de tu correo electrónico.
         La contraseña que elijas aquí es la que usarás para ingresar al sistema.
       </div>
@@ -1247,16 +879,8 @@ function StepAcceso({ data, onChange, paletaId }) {
             onChange={e => onChange({ admin_password: e.target.value })}
             placeholder="Tu contraseña"
           />
-          <button
-            type="button"
-            onClick={() => setShowPass(v => !v)}
-            style={{
-              position: 'absolute', right: 10, top: '50%',
-              transform: 'translateY(-50%)',
-              background: 'none', border: 'none', cursor: 'pointer', padding: 4,
-              color: 'rgba(255,255,255,0.4)',
-            }}
-          >
+          <button type="button" onClick={() => setShowPass(v => !v)}
+            style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: '#94A3B8' }}>
             {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
         </div>
@@ -1271,16 +895,8 @@ function StepAcceso({ data, onChange, paletaId }) {
             placeholder="Repite tu contraseña"
             error={passwordMismatch ? 'Las contraseñas no coinciden' : undefined}
           />
-          <button
-            type="button"
-            onClick={() => setShowConfirm(v => !v)}
-            style={{
-              position: 'absolute', right: 10, top: passwordMismatch ? '35%' : '50%',
-              transform: 'translateY(-50%)',
-              background: 'none', border: 'none', cursor: 'pointer', padding: 4,
-              color: 'rgba(255,255,255,0.4)',
-            }}
-          >
+          <button type="button" onClick={() => setShowConfirm(v => !v)}
+            style={{ position: 'absolute', right: 10, top: passwordMismatch ? '35%' : '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: '#94A3B8' }}>
             {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
         </div>
@@ -1303,9 +919,7 @@ export default function TenantOnboarding() {
 
   const MAX_STEP = isPublicMode ? 8 : 7
   const steps    = isPublicMode ? STEPS_CONFIG_PUBLIC : STEPS_CONFIG
-  const companyId = isPublicMode ? null : companyIdParam
 
-  // Estados
   const [showWelcome, setShowWelcome] = useState(true)
   const [step, setStep] = useState(1)
   const [data, setData] = useState({})
@@ -1315,12 +929,11 @@ export default function TenantOnboarding() {
   const [tenant, setTenant] = useState(null)
   const [serviceAccountEmail, setServiceAccountEmail] = useState('')
 
-  // Cargar email de cuenta de servicio para el paso Drive
   useEffect(() => {
     getServiceAccountEmail().then(r => { if (r?.email) setServiceAccountEmail(r.email) }).catch(() => {})
   }, [])
 
-  // ── Cargar VANTA FOG ──────────────────────────────────
+  // ── VANTA FOG claro — capa de movimiento sobre el fondo CSS ──
   useEffect(() => {
     const initVanta = () => {
       if (vantaEffect.current || !vantaRef.current) return
@@ -1328,12 +941,12 @@ export default function TenantOnboarding() {
       vantaEffect.current = window.VANTA.FOG({
         el: vantaRef.current,
         THREE: window.THREE,
-        highlightColor: 0x0ea5e9,
-        midtoneColor: 0x050507,
-        lowlightColor: 0x0b0b10,
-        baseColor: 0x000000,
-        blurFactor: 0.90,
-        speed: 2.50,
+        highlightColor: 0xA5B4FC,
+        midtoneColor: 0xC7D2FE,
+        lowlightColor: 0xEEF2FF,
+        baseColor: 0xFFFFFF,
+        blurFactor: 0.72,
+        speed: 3.50,
       })
     }
 
@@ -1342,21 +955,9 @@ export default function TenantOnboarding() {
       return
     }
 
-    const loadScript = (src, cb) => {
-      if (document.querySelector(`script[src="${src}"]`)) { setTimeout(cb, 50); return }
-      const s = document.createElement('script')
-      s.src = src; s.async = true
-      s.onload = cb
-      s.onerror = () => console.warn('VANTA script failed to load:', src)
-      document.head.appendChild(s)
-    }
-
-    loadScript(
+    loadScriptOnce(
       'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js',
-      () => loadScript(
-        'https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.fog.min.js',
-        initVanta,
-      )
+      () => loadScriptOnce('https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.fog.min.js', initVanta),
     )
 
     return () => {
@@ -1425,7 +1026,6 @@ export default function TenantOnboarding() {
   const handleBack = () => { if (step > 1) setStep(step - 1) }
   const handleSkipDrive = () => saveStep(step + 1)
 
-  // Modo admin: guarda pasos y llama completeTenantOnboarding
   const handleComplete = async () => {
     setSaving(true); setError('')
     try {
@@ -1446,7 +1046,6 @@ export default function TenantOnboarding() {
     }
   }
 
-  // Modo público: llama completarRegistro con todo el wizard de una sola vez
   const handleCompletePublico = async () => {
     if (!data.admin_password || data.admin_password.length < 8) {
       setError('La contraseña debe tener al menos 8 caracteres.')
@@ -1469,7 +1068,7 @@ export default function TenantOnboarding() {
         contacto_email:             data.contacto_email,
         correo_drive:               data.correo_drive,
         admin_password:             data.admin_password,
-        paleta_id:                  data.paleta_id                  || 'ocean',
+        paleta_id:                  data.paleta_id                  || 'indigo',
         paleta_colores:             data.paleta_colores             || {},
         estilo_ui:                  data.estilo_ui                  || 'default',
         logo_url:                   data.logo_url                   || null,
@@ -1492,196 +1091,103 @@ export default function TenantOnboarding() {
 
   if (loading) {
     return (
-      <div style={{
-        minHeight: '100vh', display: 'flex', alignItems: 'center',
-        justifyContent: 'center', background: '#000',
-      }}>
-        <Loader2 size={32} color="rgba(14,165,233,0.8)"
-          style={{ animation: 'spin 1s linear infinite' }} />
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FAFBFF' }}>
+        <Loader2 size={32} color="#4F46E5" style={{ animation: 'spin 1s linear infinite' }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
       </div>
     )
   }
 
-  const paletaId = data.paleta_id || 'ocean'
+  const paletaId = data.paleta_id || 'indigo'
   const paleta = getPaleta(paletaId)
 
   return (
-    <div style={{ minHeight: '100vh', position: 'relative', fontFamily: '"Inter", "DM Sans", system-ui, sans-serif' }}>
-      {/* VANTA FOG fondo — z-index 0 */}
-      <div
-        ref={vantaRef}
-        style={{
-          position: 'fixed', inset: 0, zIndex: 0,
-          background: '#000010',  // Fallback mientras carga VANTA
-        }}
-      />
+    <div style={{ minHeight: '100vh', position: 'relative', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
+      {/* Fondo: CSS orbs (visible de inmediato) + VANTA FOG claro superpuesto */}
+      <div ref={vantaRef} className="vanta-bg">
+        <div className="orb orb-1" />
+        <div className="orb orb-2" />
+        <div className="orb orb-3" />
+      </div>
 
-      {/* Pantalla de bienvenida */}
-      {showWelcome && !loading && (
-        <div style={{ position: 'relative', zIndex: 1 }}>
+      <div className="onb-page">
+        {showWelcome && (
           <WelcomeScreen onStart={() => setShowWelcome(false)} />
-        </div>
-      )}
+        )}
 
-      {/* Wizard content */}
-      {!showWelcome && (
-        <div style={{
-          position: 'relative', zIndex: 1,
-          minHeight: '100vh',
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center',
-          padding: '40px 24px 60px',
-        }}>
-          {/* Header */}
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              background: `${paleta.primary}14`,
-              border: `1px solid ${paleta.primary}30`,
-              borderRadius: 999, padding: '5px 16px', marginBottom: 14,
-            }}>
-              <div style={{
-                width: 6, height: 6, borderRadius: '50%',
-                background: paleta.primary, animation: 'pulse 2s infinite',
-              }} />
-              <span style={{
-                fontSize: 11, color: paleta.primary, fontWeight: 700,
-                letterSpacing: '0.06em', textTransform: 'uppercase',
-              }}>
-                Configuración de empresa
-              </span>
+        {!showWelcome && (
+          <div className="wizard">
+            <div className="wizard-header">
+              <div className="config-pill">
+                <div className="pill-dot" />
+                <span className="pill-label">Configuración de empresa</span>
+              </div>
+              <h1 className="company-name">{data.nombre || tenant?.nombre || 'Tu empresa'}</h1>
             </div>
-            <h1 style={{
-              margin: 0, fontSize: 'clamp(20px,4vw,28px)', fontWeight: 800,
-              color: 'rgba(255,255,255,0.95)', letterSpacing: '-0.02em',
-            }}>
-              {data.nombre || tenant?.nombre || 'Tu empresa'}
-            </h1>
-          </div>
 
-          {/* Step indicator */}
-          <div style={{ marginBottom: 32 }}>
-            <StepIndicator current={step} paletaId={paletaId} steps={steps} />
-          </div>
+            <div style={{ marginBottom: 26 }}>
+              <StepIndicator current={step} paletaId={paletaId} steps={steps} />
+            </div>
 
-          {/* Step cards con transición */}
-          <div style={{
-            width: '100%', maxWidth: step === 5 ? 780 : 560,
-            transition: 'max-width 0.32s cubic-bezier(0.16,1,0.3,1)',
-          }}>
-            {step === 1 && <Step1 data={data} onChange={mergeData} paletaId={paletaId} />}
-            {step === 2 && <Step2 data={data} onChange={mergeData} paletaId={paletaId} />}
-            {step === 3 && <Step3 data={data} onChange={mergeData} paletaId={paletaId} />}
-            {step === 4 && <Step4 data={data} onChange={mergeData} paletaId={paletaId} />}
+            {step === 1 && <Step1 data={data} onChange={mergeData} />}
+            {step === 2 && <Step2 data={data} onChange={mergeData} />}
+            {step === 3 && <Step3 data={data} onChange={mergeData} />}
+            {step === 4 && <Step4 data={data} onChange={mergeData} />}
             {step === 5 && (
-              <Step5
-                data={data} onChange={mergeData}
-                nombre={data.nombre || tenant?.nombre}
-                logoUrl={data.logo_url}
-              />
+              <Step5 data={data} onChange={mergeData} nombre={data.nombre || tenant?.nombre} logoUrl={data.logo_url} />
             )}
             {step === 6 && (
               <Step6
                 data={data} onChange={mergeData}
                 companyId={isPublicMode ? null : companyIdParam}
-                paletaId={paletaId}
                 serviceAccountEmail={serviceAccountEmail}
               />
             )}
             {step === 7 && isPublicMode && (
-              <StepAcceso data={data} onChange={mergeData} paletaId={paletaId} />
+              <StepAcceso data={data} onChange={mergeData} />
             )}
-            {step === (isPublicMode ? 8 : 7) && <Step7 data={data} paletaId={paletaId} />}
-          </div>
+            {step === (isPublicMode ? 8 : 7) && <Step7 data={data} />}
 
-          {/* Error */}
-          {error && (
-            <div role="alert" style={{
-              marginTop: 14, maxWidth: 560, width: '100%',
-              padding: '10px 16px', borderRadius: 10,
-              background: 'rgba(239,68,68,0.12)',
-              border: '1px solid rgba(239,68,68,0.3)',
-              display: 'flex', gap: 8, alignItems: 'center',
-            }}>
-              <AlertCircle size={14} color="#f87171" />
-              <span style={{ fontSize: 13, color: '#fca5a5' }}>{error}</span>
-            </div>
-          )}
+            {error && (
+              <div role="alert" className="error-row">
+                <AlertCircle size={14} />
+                <span>{error}</span>
+              </div>
+            )}
 
-          {/* Nav */}
-          <div style={{
-            marginTop: 24, display: 'flex', gap: 10,
-            width: '100%', maxWidth: 560, alignItems: 'center',
-          }}>
-            {step > 1 && (
+            <div className="wizard-nav">
+              {step > 1 && (
+                <button type="button" onClick={handleBack} disabled={saving} className="btn-back">
+                  <ChevronLeft size={16} /> Anterior
+                </button>
+              )}
+
               <button
                 type="button"
-                onClick={handleBack}
+                onClick={step === MAX_STEP ? (isPublicMode ? handleCompletePublico : handleComplete) : handleNext}
                 disabled={saving}
-                style={{
-                  padding: '13px 20px', borderRadius: 12, cursor: 'pointer',
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: 14,
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  transition: 'all 0.15s ease',
-                }}
+                className="btn-next"
               >
-                <ChevronLeft size={16} /> Anterior
+                {saving ? (
+                  <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> {isPublicMode ? 'Activando...' : 'Guardando...'}</>
+                ) : step === MAX_STEP ? (
+                  <><Lock size={16} /> Activar empresa</>
+                ) : (
+                  <>Continuar <ChevronRight size={16} /></>
+                )}
+              </button>
+            </div>
+
+            {step === 6 && !saving && (
+              <button type="button" onClick={handleSkipDrive} className="skip-link">
+                Configurar carpeta de Drive después →
               </button>
             )}
-
-            <button
-              type="button"
-              onClick={
-                step === MAX_STEP
-                  ? (isPublicMode ? handleCompletePublico : handleComplete)
-                  : handleNext
-              }
-              disabled={saving}
-              style={{
-                flex: 1, padding: '13px', borderRadius: 12, cursor: saving ? 'not-allowed' : 'pointer',
-                background: saving ? 'rgba(255,255,255,0.06)' : paleta.primary,
-                border: 'none', color: '#fff', fontWeight: 700, fontSize: 14,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                transition: 'all 0.2s ease',
-                boxShadow: saving ? 'none' : `0 4px 20px ${paleta.primary}45`,
-                opacity: saving ? 0.7 : 1,
-              }}
-            >
-              {saving ? (
-                <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> {isPublicMode ? 'Activando...' : 'Guardando...'}</>
-              ) : step === MAX_STEP ? (
-                <><Lock size={16} /> Activar empresa</>
-              ) : (
-                <>Continuar <ChevronRight size={16} /></>
-              )}
-            </button>
           </div>
+        )}
+      </div>
 
-          {/* Skip Drive — solo en paso 6 */}
-          {step === 6 && !saving && (
-            <button
-              type="button"
-              onClick={handleSkipDrive}
-              style={{
-                marginTop: 10, background: 'none', border: 'none', cursor: 'pointer',
-                fontSize: 12, color: 'rgba(255,255,255,0.3)',
-                textDecoration: 'underline', textDecorationStyle: 'dotted',
-              }}
-            >
-              Configurar carpeta de Drive después
-            </button>
-          )}
-
-        </div>
-      )}
-
-      <style>{`
-        @keyframes spin  { to { transform: rotate(360deg) } }
-        @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.4 } }
-      `}</style>
+      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
     </div>
   )
 }

@@ -207,11 +207,11 @@ const CATALOGO = {
 }
 
 const ESTADOS = {
-  activo:          { label: 'Activo',           dot: '#10B981', bg: 'rgba(16,185,129,0.10)',  color: '#34D399' },
-  configuracion:   { label: 'En configuración', dot: '#F59E0B', bg: 'rgba(245,158,11,0.10)',  color: '#FBBF24' },
-  inactivo:        { label: 'Inactivo',         dot: '#4A5568', bg: 'rgba(255,255,255,0.06)', color: 'var(--text-tertiary)' },
-  suspendido:      { label: 'Suspendido',       dot: '#EF4444', bg: 'rgba(239,68,68,0.10)',   color: '#F87171' },
-  sin_configurar:  { label: 'Sin configurar',   dot: '#374151', bg: 'rgba(255,255,255,0.04)', color: 'var(--text-muted)' },
+  activo:          { label: 'Activo',           dot: '#10B981', bg: 'rgba(16,185,129,0.10)',  color: '#059669' },
+  configuracion:   { label: 'En configuración', dot: '#F59E0B', bg: 'rgba(245,158,11,0.10)',  color: '#B45309' },
+  inactivo:        { label: 'Inactivo',         dot: '#94A3B8', bg: 'rgba(15,23,42,0.05)',    color: 'var(--text-tertiary)' },
+  suspendido:      { label: 'Suspendido',       dot: '#EF4444', bg: 'rgba(239,68,68,0.10)',   color: '#DC2626' },
+  sin_configurar:  { label: 'Sin configurar',   dot: '#94A3B8', bg: 'rgba(15,23,42,0.04)',    color: 'var(--text-muted)' },
 }
 
 const EMPRESA_COLORS = ['#0EA5E9','#10B981','#F59E0B','#8B5CF6','#06B6D4','#E11D48','#22C55E','#F97316']
@@ -232,8 +232,8 @@ function EpsLogo({ cat, dot }) {
         <div style={{
           width: 40, height: 40, borderRadius: '50%', background: '#fff',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          overflow: 'hidden', boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
-          border: '1px solid rgba(255,255,255,0.1)',
+          overflow: 'hidden', boxShadow: '0 2px 6px rgba(15,23,42,0.12)',
+          border: '1px solid rgba(15,23,42,0.08)',
         }}>
           <img src={cat.logo} alt={cat.nombre} onError={() => setErr(true)} loading="lazy"
             style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 3 }} />
@@ -251,7 +251,7 @@ function EpsLogo({ cat, dot }) {
       <span style={{
         position: 'absolute', bottom: -1, right: -1,
         width: 13, height: 13, borderRadius: '50%',
-        background: dot, border: '2.5px solid #12121A',
+        background: dot, border: '2.5px solid var(--bg-card-solid)',
       }} />
     </div>
   )
@@ -330,12 +330,12 @@ function SesionNavegador({ apiBot, onRefresh }) {
         </div>
         <div style={{ display: 'flex', gap: 7, flexShrink: 0 }}>
           <button disabled={trabajando} onClick={abrirLogin}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 9, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid rgba(129,140,248,0.3)', background: 'rgba(99,102,241,0.10)', color: '#818CF8', opacity: trabajando ? 0.5 : 1 }}>
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 9, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid rgba(79,70,229,0.3)', background: 'rgba(79,70,229,0.1)', color: '#4F46E5', opacity: trabajando ? 0.5 : 1 }}>
             <Globe size={12} /> {tieneSesion ? 'Renovar login' : 'Iniciar sesión en portal'}
           </button>
           {tieneSesion && (
             <button disabled={trabajando} onClick={eliminar}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 9, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)', color: '#F87171', opacity: trabajando ? 0.5 : 1 }}>
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 9, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)', color: '#DC2626', opacity: trabajando ? 0.5 : 1 }}>
               {trabajando ? <Loader size={12} className="animate-spin" /> : <Trash2 size={12} />} Eliminar
             </button>
           )}
@@ -350,17 +350,17 @@ function SesionNavegador({ apiBot, onRefresh }) {
       {/* Modal de login en vivo */}
       {loginModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-          <div style={{ background: 'var(--bg-card-solid, #111827)', border: '1px solid var(--border-primary)', borderRadius: 18, width: 'min(1100px, 96vw)', maxHeight: '92vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div style={{ background: 'var(--bg-card-solid)', border: '1px solid var(--border-primary)', borderRadius: 18, width: 'min(1100px, 96vw)', maxHeight: '92vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 32px 80px rgba(15,23,42,0.24)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 18px', borderBottom: '1px solid var(--border-primary)' }}>
               <h4 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <KeyRound size={15} style={{ color: '#818CF8' }} /> Inicia sesión en el portal — el navegador es tuyo, usa el mouse y teclado
+                <KeyRound size={15} style={{ color: '#4F46E5' }} /> Inicia sesión en el portal — el navegador es tuyo, usa el mouse y teclado
               </h4>
               <button onClick={() => setLoginModal(null)} style={{ color: 'var(--text-muted)', cursor: 'pointer', background: 'none', border: 'none' }}><X size={18} /></button>
             </div>
 
             {loginModal.cargando ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: 70 }}>
-                <Loader size={30} className="animate-spin" style={{ color: '#818CF8' }} />
+                <Loader size={30} className="animate-spin" style={{ color: '#4F46E5' }} />
                 <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Abriendo navegador seguro en la nube…</span>
               </div>
             ) : (
@@ -450,14 +450,14 @@ function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave, onSo
   return (
     <div style={{
       borderRadius: 13, background: 'var(--bg-card-solid)',
-      border: `1px solid ${open ? 'rgba(14,165,233,0.35)' : 'var(--border-primary)'}`,
-      boxShadow: open ? '0 8px 28px rgba(0,0,0,0.4)' : 'none',
+      border: `1px solid ${open ? 'rgba(79,70,229,0.35)' : 'var(--border-primary)'}`,
+      boxShadow: open ? '0 8px 28px rgba(15,23,42,0.14)' : 'none',
       transition: 'all .2s', overflow: 'hidden',
     }}>
       <div
         onClick={onToggle}
         style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '10px 16px', cursor: 'pointer' }}
-        onMouseEnter={e => { if (!open) e.currentTarget.style.background = 'rgba(255,255,255,0.02)' }}
+        onMouseEnter={e => { if (!open) e.currentTarget.style.background = 'var(--bg-hover)' }}
         onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
       >
         <EpsLogo cat={cat} dot={est.dot} />
@@ -465,7 +465,7 @@ function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave, onSo
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13.5, fontWeight: 700, color: 'var(--text-primary)' }}>
             {cat.nombre}
-            <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 6px', borderRadius: 5, background: 'rgba(255,255,255,0.06)', color: 'var(--text-secondary)', letterSpacing: '0.06em', flexShrink: 0 }}>
+            <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 6px', borderRadius: 5, background: 'rgba(15,23,42,0.05)', color: 'var(--text-secondary)', letterSpacing: '0.06em', flexShrink: 0 }}>
               {cat.categoria}
             </span>
           </div>
@@ -479,7 +479,7 @@ function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave, onSo
           display: 'inline-flex', alignItems: 'center', gap: 5,
           fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 999, flexShrink: 0,
           background: medio === 'email' ? 'rgba(16,185,129,0.10)' : 'rgba(99,102,241,0.10)',
-          color: medio === 'email' ? '#34D399' : '#818CF8',
+          color: medio === 'email' ? '#059669' : '#4F46E5',
         }}>
           {medio === 'email' ? <Mail size={12} /> : <Globe size={12} />}
           {medio === 'email' ? 'Email' : 'Portal'}
@@ -496,7 +496,7 @@ function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave, onSo
         </span>
 
         <ChevronDown size={17} style={{
-          color: open ? '#38BDF8' : 'var(--text-muted)',
+          color: open ? '#4F46E5' : 'var(--text-muted)',
           transform: open ? 'rotate(180deg)' : 'none',
           transition: 'transform .25s', flexShrink: 0,
         }} />
@@ -514,9 +514,9 @@ function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave, onSo
                 <button key={m} onClick={() => setMedio(m)} style={{
                   flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                   padding: 11, borderRadius: 12, fontSize: 13, fontWeight: 600, transition: 'all .2s', cursor: 'pointer',
-                  color: medio === m ? '#38BDF8' : 'var(--text-tertiary)',
-                  background: medio === m ? 'rgba(14,165,233,0.12)' : 'var(--bg-input)',
-                  border: `1px solid ${medio === m ? 'rgba(14,165,233,0.3)' : 'var(--border-input)'}`,
+                  color: medio === m ? '#4F46E5' : 'var(--text-tertiary)',
+                  background: medio === m ? 'rgba(79,70,229,0.12)' : 'var(--bg-input)',
+                  border: `1px solid ${medio === m ? 'rgba(79,70,229,0.3)' : 'var(--border-input)'}`,
                 }}>
                   {m === 'portal' ? <Globe size={15} /> : <Mail size={15} />}
                   {m === 'portal' ? 'Portal web' : 'Correo'}
@@ -534,7 +534,7 @@ function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave, onSo
             {campos.map(c => (
               <div key={c.key}>
                 <label style={{ display: 'block', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: 7 }}>
-                  {c.label}{c.requerido && <span style={{ color: '#F87171', marginLeft: 2 }}>*</span>}
+                  {c.label}{c.requerido && <span style={{ color: '#DC2626', marginLeft: 2 }}>*</span>}
                 </label>
                 {c.tipo === 'select' ? (
                   <select
@@ -576,7 +576,7 @@ function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave, onSo
 
           {/* Soporte adjunto */}
           {apiBot && (
-            <div style={{ marginTop: 20, padding: '14px 16px', borderRadius: 13, background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-primary)' }}>
+            <div style={{ marginTop: 20, padding: '14px 16px', borderRadius: 13, background: 'rgba(15,23,42,0.03)', border: '1px solid var(--border-primary)' }}>
               <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
                 <Paperclip size={12} /> Soporte adjunto · se envía automáticamente con cada radicación
               </div>
@@ -594,7 +594,7 @@ function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave, onSo
                     )}
                     {apiBot.soporte_drive_url && (
                       <a href={apiBot.soporte_drive_url} target="_blank" rel="noopener noreferrer"
-                        style={{ fontSize: 11, color: '#38BDF8', textDecoration: 'none', flexShrink: 0 }}
+                        style={{ fontSize: 11, color: '#4F46E5', textDecoration: 'none', flexShrink: 0 }}
                         onClick={e => e.stopPropagation()}>
                         Ver
                       </a>
@@ -604,12 +604,12 @@ function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave, onSo
                     <input type="file" accept=".pdf,.jpg,.jpeg,.png" ref={fileInputRef} style={{ display: 'none' }}
                       onChange={e => { const f = e.target.files?.[0]; if (f) handleSubirSoporte(f) }} />
                     <button disabled={subiendoSoporte} onClick={() => fileInputRef.current?.click()}
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 9, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid rgba(56,189,248,0.3)', background: 'rgba(14,165,233,0.08)', color: '#38BDF8', opacity: subiendoSoporte ? 0.5 : 1 }}>
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 9, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid rgba(79,70,229,0.3)', background: 'rgba(79,70,229,0.08)', color: '#4F46E5', opacity: subiendoSoporte ? 0.5 : 1 }}>
                       {subiendoSoporte ? <Loader size={12} className="animate-spin" /> : <Upload size={12} />}
                       Reemplazar
                     </button>
                     <button disabled={subiendoSoporte} onClick={handleQuitarSoporte}
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 9, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)', color: '#F87171', opacity: subiendoSoporte ? 0.5 : 1 }}>
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 9, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)', color: '#DC2626', opacity: subiendoSoporte ? 0.5 : 1 }}>
                       <Trash2 size={12} /> Quitar
                     </button>
                   </div>
@@ -623,7 +623,7 @@ function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave, onSo
                   <input type="file" accept=".pdf,.jpg,.jpeg,.png" ref={fileInputRef} style={{ display: 'none' }}
                     onChange={e => { const f = e.target.files?.[0]; if (f) handleSubirSoporte(f) }} />
                   <button disabled={subiendoSoporte} onClick={() => fileInputRef.current?.click()}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 9, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid rgba(56,189,248,0.3)', background: 'rgba(14,165,233,0.08)', color: '#38BDF8', opacity: subiendoSoporte ? 0.5 : 1, flexShrink: 0 }}>
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 9, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid rgba(79,70,229,0.3)', background: 'rgba(79,70,229,0.08)', color: '#4F46E5', opacity: subiendoSoporte ? 0.5 : 1, flexShrink: 0 }}>
                     {subiendoSoporte ? <Loader size={12} className="animate-spin" /> : <Upload size={12} />}
                     Adjuntar soporte
                   </button>
@@ -644,7 +644,7 @@ function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave, onSo
                 <Lock size={13} /> Credenciales cifradas — solo visibles para administradores
               </span>
               {camposDesdeSkill ? (
-                <span style={{ fontSize: 10.5, display: 'flex', alignItems: 'center', gap: 5, color: '#34D399' }}>
+                <span style={{ fontSize: 10.5, display: 'flex', alignItems: 'center', gap: 5, color: '#059669' }}>
                   <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#34D399', display: 'inline-block' }} />
                   Campos detectados automáticamente por el bot
                 </span>
@@ -657,7 +657,7 @@ function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave, onSo
             <button
               onClick={handleSave}
               disabled={guardando}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 17px', borderRadius: 11, fontSize: 13, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #0EA5E9, #0284C7)', boxShadow: '0 2px 12px rgba(14,165,233,0.35)', border: 'none', cursor: 'pointer', transition: 'all .2s', opacity: guardando ? 0.6 : 1 }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 17px', borderRadius: 11, fontSize: 13, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #4F46E5, #4338CA)', boxShadow: '0 2px 12px rgba(79,70,229,0.35)', border: 'none', cursor: 'pointer', transition: 'all .2s', opacity: guardando ? 0.6 : 1 }}
             >
               {guardando ? <Loader size={15} className="animate-spin" /> : <Save size={15} />}
               Guardar credenciales
@@ -755,7 +755,7 @@ export default function BotConfiguration() {
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 4 }}>
-        <div style={{ width: 44, height: 44, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(14,165,233,0.12)', border: '1px solid rgba(14,165,233,0.25)', color: '#38BDF8' }}>
+        <div style={{ width: 44, height: 44, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(79,70,229,0.1)', border: '1px solid rgba(79,70,229,0.25)', color: '#4F46E5' }}>
           <Bot size={24} />
         </div>
         <h2 style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
@@ -783,8 +783,8 @@ export default function BotConfiguration() {
               >
                 <div style={{
                   width: 68, height: 68, borderRadius: '50%', padding: 3, transition: 'all .25s cubic-bezier(.16,1,.3,1)',
-                  background: isSel ? 'linear-gradient(135deg, #38BDF8, #0EA5E9, #7DD3FC)' : 'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))',
-                  boxShadow: isSel ? '0 4px 20px rgba(14,165,233,0.45)' : 'none',
+                  background: isSel ? 'linear-gradient(135deg, #6366F1, #4F46E5, #A5B4FC)' : 'linear-gradient(135deg, rgba(15,23,42,0.06), rgba(15,23,42,0.02))',
+                  boxShadow: isSel ? '0 4px 20px rgba(79,70,229,0.35)' : 'none',
                   transform: isSel ? 'translateY(-2px)' : 'none',
                 }}>
                   <div style={{ width: '100%', height: '100%', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 20, color: '#fff', background: `linear-gradient(135deg, ${color}, ${shade(color)})`, border: '3px solid var(--bg-primary)' }}>
@@ -807,7 +807,7 @@ export default function BotConfiguration() {
         <div className="animate-fade-in" key={selId} style={{
           display: 'flex', alignItems: 'center', gap: 22, padding: '24px 26px', borderRadius: 20,
           background: 'var(--bg-card-solid)', border: '1px solid var(--border-primary)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.4)', marginBottom: 22, position: 'relative', overflow: 'hidden',
+          boxShadow: '0 8px 32px rgba(15,23,42,0.12)', marginBottom: 22, position: 'relative', overflow: 'hidden',
         }}>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, var(--accent-primary), transparent)', opacity: 0.6 }} />
           {(() => {
@@ -815,7 +815,7 @@ export default function BotConfiguration() {
             const color = empActual.color || EMPRESA_COLORS[i % EMPRESA_COLORS.length]
             const sigla = (empActual.sigla || empActual.nombre.split(' ').map(w => w[0]).join('').slice(0, 2)).toUpperCase()
             return (
-              <div style={{ width: 84, height: 84, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 30, color: '#fff', background: `linear-gradient(135deg, ${color}, ${shade(color)})`, boxShadow: '0 8px 28px rgba(0,0,0,0.5)' }}>
+              <div style={{ width: 84, height: 84, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 30, color: '#fff', background: `linear-gradient(135deg, ${color}, ${shade(color)})`, boxShadow: '0 8px 28px rgba(15,23,42,0.2)' }}>
                 {sigla}
               </div>
             )
@@ -843,7 +843,7 @@ export default function BotConfiguration() {
               <div style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', marginTop: 6 }}>Bots</div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 28, fontWeight: 800, lineHeight: 1, color: '#34D399' }}>{activos}</div>
+              <div style={{ fontSize: 28, fontWeight: 800, lineHeight: 1, color: '#059669' }}>{activos}</div>
               <div style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', marginTop: 6 }}>Activos</div>
             </div>
           </div>
@@ -863,7 +863,7 @@ export default function BotConfiguration() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 9, margin: '26px 2px 14px', color: 'var(--text-primary)' }}>
                 <Layers size={16} />
                 <h4 style={{ fontSize: 15, fontWeight: 700 }}>EPS</h4>
-                <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 9px', borderRadius: 999, background: 'rgba(14,165,233,0.15)', color: '#38BDF8' }}>
+                <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 9px', borderRadius: 999, background: 'rgba(79,70,229,0.12)', color: '#4F46E5' }}>
                   {epsEntries.length}
                 </span>
               </div>
@@ -887,7 +887,7 @@ export default function BotConfiguration() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 9, margin: '32px 2px 14px', color: 'var(--text-primary)' }}>
                 <Layers size={16} />
                 <h4 style={{ fontSize: 15, fontWeight: 700 }}>ARL</h4>
-                <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 9px', borderRadius: 999, background: 'rgba(14,165,233,0.15)', color: '#38BDF8' }}>
+                <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 9px', borderRadius: 999, background: 'rgba(79,70,229,0.12)', color: '#4F46E5' }}>
                   {arlEntries.length}
                 </span>
               </div>
@@ -917,8 +917,8 @@ export default function BotConfiguration() {
           position: 'fixed', bottom: 26, left: '50%', transform: 'translateX(-50%)', zIndex: 100,
           display: 'flex', alignItems: 'center', gap: 10, padding: '13px 20px', borderRadius: 14,
           fontSize: 13.5, fontWeight: 600,
-          background: 'var(--bg-card-elevated)', border: '1px solid var(--border-primary)', boxShadow: '0 20px 60px rgba(0,0,0,0.7)',
-          color: toast.tipo === 'error' ? '#F87171' : '#34D399',
+          background: 'var(--bg-card-elevated)', border: '1px solid var(--border-primary)', boxShadow: '0 20px 60px rgba(15,23,42,0.2)',
+          color: toast.tipo === 'error' ? '#DC2626' : '#059669',
         }}>
           {toast.tipo === 'error' ? <AlertCircle size={17} /> : <Check size={17} />}
           {toast.msg}

@@ -18,10 +18,10 @@ function fmtFecha(iso) {
 
 function EstadoChip({ estado }) {
   const map = {
-    pendiente: { label: 'Pendiente', bg: 'rgba(251,191,36,0.12)', color: '#FCD34D', border: 'rgba(251,191,36,0.25)' },
-    aprobado:  { label: 'Aprobado',  bg: 'rgba(16,185,129,0.12)', color: '#34D399', border: 'rgba(16,185,129,0.25)' },
-    rechazado: { label: 'Rechazado', bg: 'rgba(239,68,68,0.12)',  color: '#F87171', border: 'rgba(239,68,68,0.25)' },
-    expirado:  { label: 'Demo expirado', bg: 'rgba(148,163,184,0.12)', color: '#94A3B8', border: 'rgba(148,163,184,0.25)' },
+    pendiente: { label: 'Pendiente', bg: 'rgba(251,191,36,0.12)', color: '#B45309', border: 'rgba(251,191,36,0.25)' },
+    aprobado:  { label: 'Aprobado',  bg: 'rgba(16,185,129,0.12)', color: '#059669', border: 'rgba(16,185,129,0.25)' },
+    rechazado: { label: 'Rechazado', bg: 'rgba(239,68,68,0.12)',  color: '#DC2626', border: 'rgba(239,68,68,0.25)' },
+    expirado:  { label: 'Demo expirado', bg: 'rgba(148,163,184,0.12)', color: '#475569', border: 'rgba(148,163,184,0.25)' },
   }
   const s = map[estado] || map.pendiente
   return (
@@ -73,7 +73,7 @@ function ModalAprobar({ lead, onClose, onSuccess }) {
       <div style={{
         background: 'var(--bg-sidebar)', border: '1px solid var(--border-primary)',
         borderRadius: 20, padding: 32, maxWidth: 500, width: '100%',
-        boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+        boxShadow: '0 24px 80px rgba(15,23,42,0.2)',
       }}>
         {!resultado ? (
           <>
@@ -111,7 +111,7 @@ function ModalAprobar({ lead, onClose, onSuccess }) {
                 placeholder="Notas sobre esta aprobación..."
                 style={{
                   width: '100%', boxSizing: 'border-box', padding: '10px 12px',
-                  background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-primary)',
+                  background: 'rgba(15,23,42,0.04)', border: '1px solid var(--border-primary)',
                   borderRadius: 10, fontSize: 13, color: 'var(--text-primary)',
                   resize: 'vertical', outline: 'none', fontFamily: 'inherit',
                 }}
@@ -122,9 +122,9 @@ function ModalAprobar({ lead, onClose, onSuccess }) {
               <div style={{
                 display: 'flex', gap: 8, alignItems: 'center', padding: '10px 12px',
                 background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-                borderRadius: 8, marginBottom: 16, fontSize: 12, color: '#FCA5A5',
+                borderRadius: 8, marginBottom: 16, fontSize: 12, color: '#DC2626',
               }}>
-                <AlertCircle size={14} color="#F87171" />
+                <AlertCircle size={14} color="#DC2626" />
                 {error}
               </div>
             )}
@@ -134,7 +134,7 @@ function ModalAprobar({ lead, onClose, onSuccess }) {
                 onClick={onClose}
                 style={{
                   flex: 1, padding: '11px', borderRadius: 10, cursor: 'pointer',
-                  background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-primary)',
+                  background: 'rgba(15,23,42,0.05)', border: '1px solid var(--border-primary)',
                   color: 'var(--text-muted)', fontWeight: 600, fontSize: 14,
                 }}
               >
@@ -174,9 +174,9 @@ function ModalAprobar({ lead, onClose, onSuccess }) {
 
             <div style={{
               padding: '14px 16px', borderRadius: 12, marginBottom: 20,
-              background: 'rgba(14,165,233,0.08)', border: '1px solid rgba(14,165,233,0.2)',
+              background: 'rgba(79,70,229,0.08)', border: '1px solid rgba(79,70,229,0.2)',
             }}>
-              <p style={{ margin: '0 0 6px', fontSize: 11, fontWeight: 700, color: '#38BDF8', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+              <p style={{ margin: '0 0 6px', fontSize: 11, fontWeight: 700, color: '#4F46E5', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                 Link de registro generado
               </p>
               <p style={{
@@ -188,9 +188,9 @@ function ModalAprobar({ lead, onClose, onSuccess }) {
               <button
                 onClick={copyLink}
                 style={{
-                  padding: '7px 14px', borderRadius: 8, border: '1px solid rgba(14,165,233,0.3)',
-                  background: copied ? 'rgba(16,185,129,0.15)' : 'rgba(14,165,233,0.12)',
-                  color: copied ? '#34D399' : '#38BDF8',
+                  padding: '7px 14px', borderRadius: 8, border: '1px solid rgba(79,70,229,0.3)',
+                  background: copied ? 'rgba(16,185,129,0.15)' : 'rgba(79,70,229,0.12)',
+                  color: copied ? '#059669' : '#4F46E5',
                   cursor: 'pointer', fontSize: 12, fontWeight: 600,
                   display: 'flex', alignItems: 'center', gap: 6,
                 }}
@@ -207,7 +207,7 @@ function ModalAprobar({ lead, onClose, onSuccess }) {
               onClick={onClose}
               style={{
                 width: '100%', padding: '11px', borderRadius: 10, cursor: 'pointer',
-                background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-primary)',
+                background: 'rgba(15,23,42,0.06)', border: '1px solid var(--border-primary)',
                 color: 'var(--text-primary)', fontWeight: 600, fontSize: 14,
               }}
             >
@@ -249,7 +249,7 @@ function ModalRechazar({ lead, onClose, onSuccess }) {
       <div style={{
         background: 'var(--bg-sidebar)', border: '1px solid var(--border-primary)',
         borderRadius: 20, padding: 32, maxWidth: 440, width: '100%',
-        boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+        boxShadow: '0 24px 80px rgba(15,23,42,0.2)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
           <div style={{
@@ -280,7 +280,7 @@ function ModalRechazar({ lead, onClose, onSuccess }) {
             placeholder="Ej: Información incompleta, empresa no aplica..."
             style={{
               width: '100%', boxSizing: 'border-box', padding: '10px 12px',
-              background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-primary)',
+              background: 'rgba(15,23,42,0.04)', border: '1px solid var(--border-primary)',
               borderRadius: 10, fontSize: 13, color: 'var(--text-primary)',
               resize: 'vertical', outline: 'none', fontFamily: 'inherit',
             }}
@@ -291,9 +291,9 @@ function ModalRechazar({ lead, onClose, onSuccess }) {
           <div style={{
             display: 'flex', gap: 8, padding: '10px 12px', borderRadius: 8, marginBottom: 16,
             background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-            fontSize: 12, color: '#FCA5A5',
+            fontSize: 12, color: '#DC2626',
           }}>
-            <AlertCircle size={14} color="#F87171" />
+            <AlertCircle size={14} color="#DC2626" />
             {error}
           </div>
         )}
@@ -301,7 +301,7 @@ function ModalRechazar({ lead, onClose, onSuccess }) {
         <div style={{ display: 'flex', gap: 10 }}>
           <button onClick={onClose} style={{
             flex: 1, padding: '11px', borderRadius: 10, cursor: 'pointer',
-            background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-primary)',
+            background: 'rgba(15,23,42,0.05)', border: '1px solid var(--border-primary)',
             color: 'var(--text-muted)', fontWeight: 600, fontSize: 14,
           }}>Cancelar</button>
           <button onClick={handleRechazar} disabled={loading} style={{
@@ -362,17 +362,17 @@ function ModalAprobarDemo({ lead, onClose, onSuccess }) {
       <div style={{
         background: 'var(--bg-sidebar)', border: '1px solid var(--border-primary)',
         borderRadius: 20, padding: 32, maxWidth: 500, width: '100%',
-        boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+        boxShadow: '0 24px 80px rgba(15,23,42,0.2)',
       }}>
         {!resultado ? (
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
               <div style={{
                 width: 44, height: 44, borderRadius: 12,
-                background: 'rgba(14,165,233,0.12)', border: '1px solid rgba(14,165,233,0.25)',
+                background: 'rgba(79,70,229,0.12)', border: '1px solid rgba(79,70,229,0.25)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
               }}>
-                <Timer size={20} color="#38BDF8" />
+                <Timer size={20} color="#4F46E5" />
               </div>
               <div>
                 <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: 'var(--text-primary)' }}>
@@ -386,7 +386,7 @@ function ModalAprobarDemo({ lead, onClose, onSuccess }) {
 
             <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 18, lineHeight: 1.6 }}>
               La empresa tendrá acceso temporal al sistema. Al vencer el tiempo,
-              todos los datos del demo se <strong style={{ color: '#F87171' }}>eliminarán automáticamente</strong>.
+              todos los datos del demo se <strong style={{ color: '#DC2626' }}>eliminarán automáticamente</strong>.
             </p>
 
             {/* Selector de horas */}
@@ -401,9 +401,9 @@ function ModalAprobarDemo({ lead, onClose, onSuccess }) {
                     onClick={() => setHoras(opt.value)}
                     style={{
                       flex: 1, padding: '12px 8px', borderRadius: 10, cursor: 'pointer', textAlign: 'center',
-                      border: horas === opt.value ? '2px solid #38BDF8' : '1px solid var(--border-primary)',
-                      background: horas === opt.value ? 'rgba(14,165,233,0.12)' : 'rgba(255,255,255,0.03)',
-                      color: horas === opt.value ? '#38BDF8' : 'var(--text-muted)',
+                      border: horas === opt.value ? '2px solid #4F46E5' : '1px solid var(--border-primary)',
+                      background: horas === opt.value ? 'rgba(79,70,229,0.12)' : 'rgba(15,23,42,0.03)',
+                      color: horas === opt.value ? '#4F46E5' : 'var(--text-muted)',
                       transition: 'all 0.15s',
                     }}
                   >
@@ -425,7 +425,7 @@ function ModalAprobarDemo({ lead, onClose, onSuccess }) {
                 placeholder="Ej: Cliente grande, darle seguimiento posterior..."
                 style={{
                   width: '100%', boxSizing: 'border-box', padding: '10px 12px',
-                  background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-primary)',
+                  background: 'rgba(15,23,42,0.04)', border: '1px solid var(--border-primary)',
                   borderRadius: 10, fontSize: 13, color: 'var(--text-primary)',
                   resize: 'none', outline: 'none', fontFamily: 'inherit',
                 }}
@@ -436,21 +436,21 @@ function ModalAprobarDemo({ lead, onClose, onSuccess }) {
               <div style={{
                 display: 'flex', gap: 8, padding: '10px 12px', borderRadius: 8, marginBottom: 16,
                 background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-                fontSize: 12, color: '#FCA5A5', alignItems: 'center',
+                fontSize: 12, color: '#DC2626', alignItems: 'center',
               }}>
-                <AlertCircle size={14} color="#F87171" />{error}
+                <AlertCircle size={14} color="#DC2626" />{error}
               </div>
             )}
 
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={onClose} style={{
                 flex: 1, padding: '11px', borderRadius: 10, cursor: 'pointer',
-                background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-primary)',
+                background: 'rgba(15,23,42,0.05)', border: '1px solid var(--border-primary)',
                 color: 'var(--text-muted)', fontWeight: 600, fontSize: 14,
               }}>Cancelar</button>
               <button onClick={handleAprobar} disabled={loading} style={{
                 flex: 2, padding: '11px', borderRadius: 10, cursor: loading ? 'not-allowed' : 'pointer',
-                background: loading ? 'rgba(14,165,233,0.3)' : 'linear-gradient(135deg,#0EA5E9,#0284C7)',
+                background: loading ? 'rgba(79,70,229,0.3)' : 'linear-gradient(135deg,#4F46E5,#4338CA)',
                 border: 'none', color: '#fff', fontWeight: 700, fontSize: 14,
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               }}>
@@ -466,10 +466,10 @@ function ModalAprobarDemo({ lead, onClose, onSuccess }) {
             <div style={{ textAlign: 'center', marginBottom: 24 }}>
               <div style={{
                 width: 64, height: 64, borderRadius: '50%', margin: '0 auto 16px',
-                background: 'rgba(14,165,233,0.15)', border: '2px solid #38BDF8',
+                background: 'rgba(79,70,229,0.15)', border: '2px solid #4F46E5',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <Zap size={32} color="#38BDF8" />
+                <Zap size={32} color="#4F46E5" />
               </div>
               <h3 style={{ margin: '0 0 6px', fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>
                 ¡Demo activado!
@@ -481,9 +481,9 @@ function ModalAprobarDemo({ lead, onClose, onSuccess }) {
 
             <div style={{
               padding: '14px 16px', borderRadius: 12, marginBottom: 16,
-              background: 'rgba(14,165,233,0.08)', border: '1px solid rgba(14,165,233,0.2)',
+              background: 'rgba(79,70,229,0.08)', border: '1px solid rgba(79,70,229,0.2)',
             }}>
-              <p style={{ margin: '0 0 6px', fontSize: 11, fontWeight: 700, color: '#38BDF8', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+              <p style={{ margin: '0 0 6px', fontSize: 11, fontWeight: 700, color: '#4F46E5', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                 Link de acceso al demo
               </p>
               <p style={{
@@ -493,9 +493,9 @@ function ModalAprobarDemo({ lead, onClose, onSuccess }) {
                 {resultado.link_registro}
               </p>
               <button onClick={copyLink} style={{
-                padding: '7px 14px', borderRadius: 8, border: '1px solid rgba(14,165,233,0.3)',
-                background: copied ? 'rgba(16,185,129,0.15)' : 'rgba(14,165,233,0.12)',
-                color: copied ? '#34D399' : '#38BDF8',
+                padding: '7px 14px', borderRadius: 8, border: '1px solid rgba(79,70,229,0.3)',
+                background: copied ? 'rgba(16,185,129,0.15)' : 'rgba(79,70,229,0.12)',
+                color: copied ? '#059669' : '#4F46E5',
                 cursor: 'pointer', fontSize: 12, fontWeight: 600,
                 display: 'flex', alignItems: 'center', gap: 6,
               }}>
@@ -509,7 +509,7 @@ function ModalAprobarDemo({ lead, onClose, onSuccess }) {
 
             <button onClick={onClose} style={{
               width: '100%', padding: '11px', borderRadius: 10, cursor: 'pointer',
-              background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-primary)',
+              background: 'rgba(15,23,42,0.06)', border: '1px solid var(--border-primary)',
               color: 'var(--text-primary)', fontWeight: 600, fontSize: 14,
             }}>
               Cerrar
@@ -552,7 +552,7 @@ function ModalActivarEmpresa({ lead, onClose, onSuccess }) {
       <div style={{
         background: 'var(--bg-sidebar)', border: '1px solid var(--border-primary)',
         borderRadius: 20, padding: 32, maxWidth: 480, width: '100%',
-        boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+        boxShadow: '0 24px 80px rgba(15,23,42,0.2)',
       }}>
         {activada ? (
           <div style={{ textAlign: 'center' }}>
@@ -579,19 +579,19 @@ function ModalActivarEmpresa({ lead, onClose, onSuccess }) {
                 {[['admin', '🔵 Admin'], ['portal', '🟢 Validación'], ['repogemin', '🟡 Recepción']].map(([key, label]) => resultado.links[key] && (
                   <a key={key} href={resultado.links[key]} target="_blank" rel="noopener noreferrer" style={{
                     fontSize: 12, fontWeight: 600, padding: '6px 12px', borderRadius: 8, textDecoration: 'none',
-                    background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-primary)', color: 'var(--text-primary)',
+                    background: 'rgba(15,23,42,0.05)', border: '1px solid var(--border-primary)', color: 'var(--text-primary)',
                   }}>{label}</a>
                 ))}
               </div>
             )}
             {resultado?.recreada && resultado?.link_registro && (
-              <p style={{ margin: '0 0 20px', fontSize: 12, color: '#FCD34D', lineHeight: 1.6 }}>
+              <p style={{ margin: '0 0 20px', fontSize: 12, color: '#B45309', lineHeight: 1.6 }}>
                 📧 Se envió una nueva invitación de registro al contacto (el demo anterior ya había sido eliminado).
               </p>
             )}
             <button onClick={onClose} style={{
               width: '100%', padding: '11px', borderRadius: 10, cursor: 'pointer',
-              background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-primary)',
+              background: 'rgba(15,23,42,0.06)', border: '1px solid var(--border-primary)',
               color: 'var(--text-primary)', fontWeight: 600, fontSize: 14,
             }}>Cerrar</button>
           </div>
@@ -618,9 +618,9 @@ function ModalActivarEmpresa({ lead, onClose, onSuccess }) {
             <div style={{
               padding: '14px 16px', borderRadius: 12, marginBottom: 20,
               background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(16,185,129,0.2)',
-              fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6,
+              fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6,
             }}>
-              <p style={{ margin: '0 0 8px', fontWeight: 700, color: '#34D399' }}>¿Qué ocurre al activar?</p>
+              <p style={{ margin: '0 0 8px', fontWeight: 700, color: '#059669' }}>¿Qué ocurre al activar?</p>
               <p style={{ margin: 0 }}>
                 ✅ La empresa queda como <strong style={{ color: 'var(--text-primary)' }}>cliente activo permanente</strong>.<br />
                 ✅ Toda la configuración del demo <strong style={{ color: 'var(--text-primary)' }}>se conserva</strong> — portal, estructura, usuarios.<br />
@@ -633,16 +633,16 @@ function ModalActivarEmpresa({ lead, onClose, onSuccess }) {
               <div style={{
                 display: 'flex', gap: 8, padding: '10px 12px', borderRadius: 8, marginBottom: 16,
                 background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-                fontSize: 12, color: '#FCA5A5', alignItems: 'center',
+                fontSize: 12, color: '#DC2626', alignItems: 'center',
               }}>
-                <AlertCircle size={14} color="#F87171" />{error}
+                <AlertCircle size={14} color="#DC2626" />{error}
               </div>
             )}
 
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={onClose} style={{
                 flex: 1, padding: '11px', borderRadius: 10, cursor: 'pointer',
-                background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-primary)',
+                background: 'rgba(15,23,42,0.05)', border: '1px solid var(--border-primary)',
                 color: 'var(--text-muted)', fontWeight: 600, fontSize: 14,
               }}>Cancelar</button>
               <button onClick={handleActivar} disabled={loading} style={{
@@ -728,7 +728,7 @@ export default function Leads() {
             title="Actualizar"
             style={{
               padding: '8px 14px', borderRadius: 10, cursor: 'pointer',
-              background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-primary)',
+              background: 'rgba(15,23,42,0.05)', border: '1px solid var(--border-primary)',
               color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13,
             }}
           >
@@ -740,9 +740,9 @@ export default function Leads() {
         {/* Stats chips */}
         <div style={{ display: 'flex', gap: 10, marginTop: 18, flexWrap: 'wrap' }}>
           {[
-            { label: 'Pendientes', value: stats.pendientes, color: '#FCD34D', bg: 'rgba(251,191,36,0.1)', border: 'rgba(251,191,36,0.2)' },
-            { label: 'Aprobadas',  value: stats.aprobados,  color: '#34D399', bg: 'rgba(16,185,129,0.1)', border: 'rgba(16,185,129,0.2)' },
-            { label: 'Rechazadas', value: stats.rechazados, color: '#F87171', bg: 'rgba(239,68,68,0.1)',  border: 'rgba(239,68,68,0.2)' },
+            { label: 'Pendientes', value: stats.pendientes, color: '#B45309', bg: 'rgba(251,191,36,0.1)', border: 'rgba(251,191,36,0.2)' },
+            { label: 'Aprobadas',  value: stats.aprobados,  color: '#059669', bg: 'rgba(16,185,129,0.1)', border: 'rgba(16,185,129,0.2)' },
+            { label: 'Rechazadas', value: stats.rechazados, color: '#DC2626', bg: 'rgba(239,68,68,0.1)',  border: 'rgba(239,68,68,0.2)' },
           ].map(s => (
             <div key={s.label} style={{
               display: 'flex', alignItems: 'center', gap: 8, padding: '6px 14px',
@@ -764,9 +764,9 @@ export default function Leads() {
             onClick={() => setFiltroEstado(f.value)}
             style={{
               padding: '6px 14px', borderRadius: 8, cursor: 'pointer', fontSize: 12, fontWeight: 600,
-              border: filtroEstado === f.value ? '1px solid rgba(14,165,233,0.4)' : '1px solid var(--border-primary)',
-              background: filtroEstado === f.value ? 'rgba(14,165,233,0.12)' : 'rgba(255,255,255,0.03)',
-              color: filtroEstado === f.value ? '#38BDF8' : 'var(--text-muted)',
+              border: filtroEstado === f.value ? '1px solid rgba(79,70,229,0.4)' : '1px solid var(--border-primary)',
+              background: filtroEstado === f.value ? 'rgba(79,70,229,0.12)' : 'rgba(15,23,42,0.03)',
+              color: filtroEstado === f.value ? '#4F46E5' : 'var(--text-muted)',
               transition: 'all 0.15s ease',
             }}
           >
@@ -780,9 +780,9 @@ export default function Leads() {
         <div style={{
           display: 'flex', gap: 8, padding: '12px 16px', borderRadius: 10, marginBottom: 20,
           background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-          fontSize: 13, color: '#FCA5A5',
+          fontSize: 13, color: '#DC2626',
         }}>
-          <AlertCircle size={16} color="#F87171" style={{ flexShrink: 0, marginTop: 1 }} />
+          <AlertCircle size={16} color="#DC2626" style={{ flexShrink: 0, marginTop: 1 }} />
           {error}
         </div>
       )}
@@ -790,7 +790,7 @@ export default function Leads() {
       {/* Loading */}
       {loading && (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-          <Loader2 size={28} color="rgba(14,165,233,0.6)" style={{ animation: 'spin 1s linear infinite' }} />
+          <Loader2 size={28} color="rgba(79,70,229,0.6)" style={{ animation: 'spin 1s linear infinite' }} />
         </div>
       )}
 
@@ -799,7 +799,7 @@ export default function Leads() {
         leads.length === 0 ? (
           <div style={{
             textAlign: 'center', padding: '80px 24px',
-            background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-primary)',
+            background: 'rgba(15,23,42,0.02)', border: '1px solid var(--border-primary)',
             borderRadius: 16,
           }}>
             <Building2 size={40} color="var(--text-muted)" style={{ marginBottom: 16, opacity: 0.4 }} />
@@ -812,7 +812,7 @@ export default function Leads() {
           </div>
         ) : (
           <div style={{
-            background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-primary)',
+            background: 'rgba(15,23,42,0.02)', border: '1px solid var(--border-primary)',
             borderRadius: 16, overflow: 'hidden',
           }}>
             {/* Cabecera tabla */}
@@ -820,7 +820,7 @@ export default function Leads() {
               display: 'grid',
               gridTemplateColumns: '1.5fr 1fr 1.2fr 1.5fr 0.8fr 0.7fr 0.7fr 0.9fr 1.2fr',
               padding: '10px 20px', gap: 12,
-              background: 'rgba(255,255,255,0.02)',
+              background: 'rgba(15,23,42,0.02)',
               borderBottom: '1px solid var(--border-primary)',
             }}>
               {['Empresa', 'NIT', 'Contacto', 'Correo', 'Teléfono', 'N° empleados', 'Cómo nos conoció', 'Fecha', 'Acciones'].map(h => (
@@ -841,7 +841,7 @@ export default function Leads() {
                   borderBottom: i < leads.length - 1 ? '1px solid var(--border-primary)' : 'none',
                   transition: 'background 0.15s',
                 }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.025)'}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(15,23,42,0.025)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
               >
                 <div>
@@ -852,7 +852,7 @@ export default function Leads() {
                 </div>
                 <span style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'monospace' }}>{lead.nit || '—'}</span>
                 <span style={{ fontSize: 12, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.contacto_nombre}</span>
-                <span style={{ fontSize: 12, color: '#38BDF8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.contacto_email}</span>
+                <span style={{ fontSize: 12, color: '#4F46E5', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.contacto_email}</span>
                 <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{lead.contacto_telefono || '—'}</span>
                 <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: lead.mensaje ? 600 : 400 }}>
                   {lead.mensaje ? <><Users size={11} style={{ marginRight: 3, verticalAlign: 'middle' }} />{lead.mensaje}</> : '—'}
@@ -869,7 +869,7 @@ export default function Leads() {
                         style={{
                           padding: '5px 10px', borderRadius: 7, cursor: 'pointer', fontSize: 11, fontWeight: 700,
                           background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)',
-                          color: '#34D399', display: 'flex', alignItems: 'center', gap: 4,
+                          color: '#059669', display: 'flex', alignItems: 'center', gap: 4,
                         }}
                       >
                         <Check size={11} /> Aprobar
@@ -878,8 +878,8 @@ export default function Leads() {
                         onClick={() => setModalDemo(lead)}
                         style={{
                           padding: '5px 10px', borderRadius: 7, cursor: 'pointer', fontSize: 11, fontWeight: 700,
-                          background: 'rgba(14,165,233,0.1)', border: '1px solid rgba(14,165,233,0.25)',
-                          color: '#38BDF8', display: 'flex', alignItems: 'center', gap: 4,
+                          background: 'rgba(79,70,229,0.1)', border: '1px solid rgba(79,70,229,0.25)',
+                          color: '#4F46E5', display: 'flex', alignItems: 'center', gap: 4,
                         }}
                       >
                         <Timer size={11} /> Demo
@@ -889,7 +889,7 @@ export default function Leads() {
                         style={{
                           padding: '5px 10px', borderRadius: 7, cursor: 'pointer', fontSize: 11, fontWeight: 700,
                           background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)',
-                          color: '#F87171', display: 'flex', alignItems: 'center', gap: 4,
+                          color: '#DC2626', display: 'flex', alignItems: 'center', gap: 4,
                         }}
                       >
                         <X size={11} /> Rechazar
@@ -899,11 +899,11 @@ export default function Leads() {
                   {(lead.estado === 'aprobado' || lead.estado === 'expirado') && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
                       {lead.estado === 'aprobado' ? (
-                        <span style={{ fontSize: 11, color: '#34D399', display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <span style={{ fontSize: 11, color: '#059669', display: 'flex', alignItems: 'center', gap: 4 }}>
                           <CheckCircle2 size={12} /> Aprobado por {lead.aprobado_por}
                         </span>
                       ) : (
-                        <span style={{ fontSize: 11, color: '#94A3B8', display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <span style={{ fontSize: 11, color: '#475569', display: 'flex', alignItems: 'center', gap: 4 }}>
                           <Timer size={12} /> {lead.demo_estado === 'eliminada' ? 'Datos eliminados — activar la recrea' : 'Expirado — aún puedes activarla'}
                         </span>
                       )}
@@ -912,7 +912,7 @@ export default function Leads() {
                         style={{
                           padding: '5px 10px', borderRadius: 7, cursor: 'pointer', fontSize: 11, fontWeight: 700,
                           background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)',
-                          color: '#34D399', display: 'flex', alignItems: 'center', gap: 4,
+                          color: '#059669', display: 'flex', alignItems: 'center', gap: 4,
                         }}
                       >
                         <Zap size={11} /> Activar empresa
@@ -924,7 +924,7 @@ export default function Leads() {
                               key={key}
                               href={lead.links[key]} target="_blank" rel="noopener noreferrer"
                               title={`Portal ${key} de ${lead.empresa_nombre}`}
-                              style={{ fontSize: 12, textDecoration: 'none', padding: '2px 4px', borderRadius: 5, background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-primary)' }}
+                              style={{ fontSize: 12, textDecoration: 'none', padding: '2px 4px', borderRadius: 5, background: 'rgba(15,23,42,0.04)', border: '1px solid var(--border-primary)' }}
                             >
                               {icon}
                             </a>
@@ -934,7 +934,7 @@ export default function Leads() {
                     </div>
                   )}
                   {lead.estado === 'rechazado' && (
-                    <span style={{ fontSize: 11, color: '#F87171', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ fontSize: 11, color: '#DC2626', display: 'flex', alignItems: 'center', gap: 4 }}>
                       <X size={12} /> Rechazado
                     </span>
                   )}

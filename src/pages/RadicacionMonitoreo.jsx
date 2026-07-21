@@ -36,11 +36,11 @@ const STATUS_MAP = {
 }
 
 const ESTADO_COLORS = {
-  exitosa:  { bg: 'rgba(16,185,129,0.06)',  border: '#1D9E75', badge: { bg: 'rgba(16,185,129,0.12)',  color: '#34D399'  } },
-  en_curso: { bg: 'rgba(245,158,11,0.06)',  border: '#EF9F27', badge: { bg: 'rgba(245,158,11,0.12)',  color: '#FBBF24'  } },
-  fallida:  { bg: 'rgba(226,75,74,0.06)',   border: '#E24B4A', badge: { bg: 'rgba(239,68,68,0.12)',   color: '#F87171'  } },
-  esperando:{ bg: 'rgba(255,255,255,0.02)', border: '#374151', badge: { bg: 'rgba(255,255,255,0.06)', color: 'var(--text-muted)' } },
-  error:    { bg: 'rgba(226,75,74,0.06)',   border: '#E24B4A', badge: { bg: 'rgba(239,68,68,0.12)',   color: '#F87171'  } },
+  exitosa:  { bg: 'rgba(16,185,129,0.06)',  border: '#1D9E75', badge: { bg: 'rgba(16,185,129,0.12)',  color: '#059669'  } },
+  en_curso: { bg: 'rgba(245,158,11,0.06)',  border: '#EF9F27', badge: { bg: 'rgba(245,158,11,0.12)',  color: '#B45309'  } },
+  fallida:  { bg: 'rgba(226,75,74,0.06)',   border: '#E24B4A', badge: { bg: 'rgba(239,68,68,0.12)',   color: '#DC2626'  } },
+  esperando:{ bg: 'rgba(15,23,42,0.02)', border: '#374151', badge: { bg: 'rgba(15,23,42,0.06)', color: 'var(--text-muted)' } },
+  error:    { bg: 'rgba(226,75,74,0.06)',   border: '#E24B4A', badge: { bg: 'rgba(239,68,68,0.12)',   color: '#DC2626'  } },
 }
 
 function Spinner() {
@@ -85,9 +85,9 @@ function RunCard({ run, onVerVivo, onVerPasos, onDetener, deteniendo }) {
           {ses && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, flexWrap: 'wrap' }}>
               <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--text-primary)' }}>{ses.eps?.replace(/_/g, ' ').toUpperCase()}</span>
-              <span style={{ fontSize: 10, padding: '1px 7px', borderRadius: 999, background: 'rgba(14,165,233,0.10)', color: '#38BDF8' }}>{ses.empresa}</span>
+              <span style={{ fontSize: 10, padding: '1px 7px', borderRadius: 999, background: 'rgba(79,70,229,0.10)', color: '#4F46E5' }}>{ses.empresa}</span>
               {ses.documento && <span style={{ fontSize: 10.5, color: 'var(--text-muted)' }}>CC {ses.documento}</span>}
-              {ses.cached && <span style={{ fontSize: 9.5, padding: '1px 6px', borderRadius: 999, background: 'rgba(16,185,129,0.10)', color: '#34D399' }}>🔑 sesión guardada</span>}
+              {ses.cached && <span style={{ fontSize: 9.5, padding: '1px 6px', borderRadius: 999, background: 'rgba(16,185,129,0.10)', color: '#059669' }}>🔑 sesión guardada</span>}
             </div>
           )}
           <div style={{ fontSize: ses ? 11 : 13, fontWeight: ses ? 400 : 600, color: ses ? 'var(--text-muted)' : 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
@@ -113,7 +113,7 @@ function RunCard({ run, onVerVivo, onVerPasos, onDetener, deteniendo }) {
 
       {/* Resultado si completó */}
       {run.status === 'COMPLETED' && run.result && (
-        <div style={{ fontSize: 11, color: '#34D399', marginBottom: 6 }}>
+        <div style={{ fontSize: 11, color: '#059669', marginBottom: 6 }}>
           <CheckCircle size={11} style={{ display: 'inline', marginRight: 4 }} />
           {run.result.summary || JSON.stringify(run.result).slice(0, 140)}
         </div>
@@ -121,7 +121,7 @@ function RunCard({ run, onVerVivo, onVerPasos, onDetener, deteniendo }) {
 
       {/* Causa exacta si falló */}
       {(run.status === 'FAILED' || run.status === 'TIMED_OUT' || run.status === 'STOPPED') && run.cause && (
-        <div style={{ fontSize: 11, color: '#F87171', marginBottom: 6 }}>
+        <div style={{ fontSize: 11, color: '#DC2626', marginBottom: 6 }}>
           <AlertCircle size={11} style={{ display: 'inline', marginRight: 4 }} />
           <b>{run.cause.code}</b>{run.cause.message ? ` — ${run.cause.message}` : ''}
         </div>
@@ -131,15 +131,15 @@ function RunCard({ run, onVerVivo, onVerPasos, onDetener, deteniendo }) {
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
         {activo && (
           <>
-            <button onClick={() => onVerVivo(run)} style={btnStyle('#38BDF8', 'rgba(14,165,233,0.10)', 'rgba(14,165,233,0.2)')}>
+            <button onClick={() => onVerVivo(run)} style={btnStyle('#4F46E5', 'rgba(79,70,229,0.10)', 'rgba(79,70,229,0.2)')}>
               <Eye size={11} /> Ver en vivo
             </button>
-            <button onClick={() => onDetener(run)} disabled={deteniendo === run.runId} style={btnStyle('#F87171', 'rgba(239,68,68,0.08)', 'rgba(239,68,68,0.2)')}>
+            <button onClick={() => onDetener(run)} disabled={deteniendo === run.runId} style={btnStyle('#DC2626', 'rgba(239,68,68,0.08)', 'rgba(239,68,68,0.2)')}>
               <StopCircle size={11} /> {deteniendo === run.runId ? 'Deteniendo…' : 'Detener'}
             </button>
           </>
         )}
-        <button onClick={() => onVerPasos(run)} style={btnStyle('var(--text-secondary)', 'rgba(255,255,255,0.04)', 'var(--border-primary)')}>
+        <button onClick={() => onVerPasos(run)} style={btnStyle('var(--text-secondary)', 'rgba(15,23,42,0.04)', 'var(--border-primary)')}>
           <ListOrdered size={11} /> Paso a paso
         </button>
         {run.sessionId && (
@@ -179,7 +179,7 @@ function Modal({ title, onClose, children, wide }) {
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
       onClick={onClose}>
-      <div style={{ background: 'var(--bg-card-solid, #111827)', border: '1px solid var(--border-primary)', borderRadius: 18, width: wide ? 'min(1100px, 96vw)' : 'min(640px, 96vw)', maxHeight: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+      <div style={{ background: 'var(--bg-card-solid, #ffffff)', border: '1px solid var(--border-primary)', borderRadius: 18, width: wide ? 'min(1100px, 96vw)' : 'min(640px, 96vw)', maxHeight: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
         onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderBottom: '1px solid var(--border-primary)' }}>
           <h4 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>{title}</h4>
@@ -313,13 +313,13 @@ export default function RadicacionMonitoreo() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4, flexWrap: 'wrap', gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(14,165,233,0.12)', border: '1px solid rgba(14,165,233,0.25)', color: '#38BDF8' }}>
+          <div style={{ width: 44, height: 44, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(79,70,229,0.12)', border: '1px solid rgba(79,70,229,0.25)', color: '#4F46E5' }}>
             <Cloud size={24} />
           </div>
           <h2 style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
             Estado de Radicación
           </h2>
-          <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 999, background: 'rgba(99,102,241,0.12)', color: '#818CF8', border: '1px solid rgba(99,102,241,0.25)' }}>
+          <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 999, background: 'rgba(124,58,237,0.12)', color: '#7C3AED', border: '1px solid rgba(124,58,237,0.25)' }}>
             ☁️ Browserbase
           </span>
         </div>
@@ -330,10 +330,10 @@ export default function RadicacionMonitoreo() {
             </span>
           )}
           <a href="https://browserbase.com/overview" target="_blank" rel="noreferrer"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 13px', borderRadius: 10, fontSize: 12, fontWeight: 600, color: '#818CF8', background: 'rgba(99,102,241,0.10)', border: '1px solid rgba(99,102,241,0.2)', textDecoration: 'none' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 13px', borderRadius: 10, fontSize: 12, fontWeight: 600, color: '#7C3AED', background: 'rgba(124,58,237,0.10)', border: '1px solid rgba(124,58,237,0.2)', textDecoration: 'none' }}>
             <ExternalLink size={13} /> Dashboard Browserbase
           </a>
-          <button onClick={cargar} disabled={cargando} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 13px', borderRadius: 10, fontSize: 12, fontWeight: 600, color: '#38BDF8', background: 'rgba(14,165,233,0.10)', border: '1px solid rgba(14,165,233,0.2)', cursor: 'pointer' }}>
+          <button onClick={cargar} disabled={cargando} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 13px', borderRadius: 10, fontSize: 12, fontWeight: 600, color: '#4F46E5', background: 'rgba(79,70,229,0.10)', border: '1px solid rgba(79,70,229,0.2)', cursor: 'pointer' }}>
             <RefreshCw size={13} style={{ animation: cargando ? 'spin .8s linear infinite' : 'none' }} /> Actualizar
           </button>
         </div>
@@ -344,7 +344,7 @@ export default function RadicacionMonitoreo() {
 
       {/* Alerta si hay fallas */}
       {hayFallas && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 12, background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)', color: '#FBBF24', fontSize: 12, fontWeight: 600, marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 12, background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)', color: '#B45309', fontSize: 12, fontWeight: 600, marginBottom: 20 }}>
           <AlertCircle size={15} />
           Hay bots fallidos — revisa la causa exacta en cada tarjeta o el paso a paso para ver dónde se detuvo.
         </div>
@@ -352,8 +352,8 @@ export default function RadicacionMonitoreo() {
 
       {/* Sin conexión */}
       {sinConexion && !cargando && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-primary)', color: 'var(--text-muted)', fontSize: 12, marginBottom: 20 }}>
-          <WifiOff size={14} /> No se pudo conectar con Browserbase. Verifica que <code style={{ fontSize: 11, background: 'rgba(255,255,255,0.06)', padding: '1px 5px', borderRadius: 4 }}>BROWSERBASE_API_KEY</code> esté configurada en el backend (Railway).
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 12, background: 'rgba(15,23,42,0.03)', border: '1px solid var(--border-primary)', color: 'var(--text-muted)', fontSize: 12, marginBottom: 20 }}>
+          <WifiOff size={14} /> No se pudo conectar con Browserbase. Verifica que <code style={{ fontSize: 11, background: 'rgba(15,23,42,0.06)', padding: '1px 5px', borderRadius: 4 }}>BROWSERBASE_API_KEY</code> esté configurada en el backend (Railway).
         </div>
       )}
 
@@ -372,7 +372,7 @@ export default function RadicacionMonitoreo() {
         </select>
         {(filtroEmpresa !== 'todas' || filtroEps !== 'todas') && (
           <button onClick={() => { setFiltroEmpresa('todas'); setFiltroEps('todas') }}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 11px', borderRadius: 9, fontSize: 11.5, fontWeight: 600, color: 'var(--text-muted)', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-primary)', cursor: 'pointer' }}>
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 11px', borderRadius: 9, fontSize: 11.5, fontWeight: 600, color: 'var(--text-muted)', background: 'rgba(15,23,42,0.04)', border: '1px solid var(--border-primary)', cursor: 'pointer' }}>
             <X size={11} /> Limpiar
           </button>
         )}
@@ -381,9 +381,9 @@ export default function RadicacionMonitoreo() {
       {/* Métricas */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
         <MetricCard label="Runs recientes" value={stats.total} />
-        <MetricCard label="Completados" value={stats.exitosas} color="#34D399" />
-        <MetricCard label="En curso" value={stats.en_curso} color="#FBBF24" />
-        <MetricCard label="Fallidos" value={stats.fallidas} color="#F87171" />
+        <MetricCard label="Completados" value={stats.exitosas} color="#059669" />
+        <MetricCard label="En curso" value={stats.en_curso} color="#B45309" />
+        <MetricCard label="Fallidos" value={stats.fallidas} color="#DC2626" />
       </div>
 
       {/* Grid principal */}
@@ -394,7 +394,7 @@ export default function RadicacionMonitoreo() {
           <h4 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 7, marginBottom: 14 }}>
             <Activity size={13} /> Bots activos
             {activos.length > 0 && (
-              <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: 'rgba(245,158,11,0.15)', color: '#FBBF24' }}>
+              <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: 'rgba(245,158,11,0.15)', color: '#B45309' }}>
                 {activos.length} en curso
               </span>
             )}
@@ -434,7 +434,7 @@ export default function RadicacionMonitoreo() {
             <h4 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 7, marginBottom: 12 }}>
               <Layers size={13} /> Cola pendiente
               {cola.length > 0 && (
-                <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: 'rgba(14,165,233,0.15)', color: '#38BDF8' }}>
+                <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: 'rgba(79,70,229,0.15)', color: '#4F46E5' }}>
                   {cola.length}
                 </span>
               )}
@@ -443,12 +443,12 @@ export default function RadicacionMonitoreo() {
               <p style={{ fontSize: 12, color: 'var(--text-muted)', padding: '12px 0' }}>Cola vacía — sin pendientes.</p>
             ) : (
               cola.map((item, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < cola.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', fontSize: 12 }}>
+                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < cola.length - 1 ? '1px solid rgba(15,23,42,0.04)' : 'none', fontSize: 12 }}>
                   <div>
                     <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{item.eps}</span>
                     <span style={{ color: 'var(--text-muted)', fontSize: 11 }}> · {item.documento}</span>
                   </div>
-                  <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)' }}>
+                  <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(15,23,42,0.05)', color: 'var(--text-muted)' }}>
                     En espera
                   </span>
                 </div>
@@ -463,10 +463,10 @@ export default function RadicacionMonitoreo() {
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {[
-                { icon: <Eye size={13} style={{ color: '#38BDF8' }} />, txt: 'Ver en vivo: mira el navegador del bot en tiempo real (y toma control si se atasca).' },
-                { icon: <ListOrdered size={13} style={{ color: '#818CF8' }} />, txt: 'Paso a paso: transcript de cada acción del bot — si falla, ves exactamente dónde.' },
-                { icon: <ExternalLink size={13} style={{ color: '#34D399' }} />, txt: 'Browserbase: grabación completa (replay) de cada sesión terminada.' },
-                { icon: <AlertCircle size={13} style={{ color: '#FBBF24' }} />, txt: 'CAPTCHAs y proxies se resuelven automáticamente en la nube.' },
+                { icon: <Eye size={13} style={{ color: '#4F46E5' }} />, txt: 'Ver en vivo: mira el navegador del bot en tiempo real (y toma control si se atasca).' },
+                { icon: <ListOrdered size={13} style={{ color: '#7C3AED' }} />, txt: 'Paso a paso: transcript de cada acción del bot — si falla, ves exactamente dónde.' },
+                { icon: <ExternalLink size={13} style={{ color: '#059669' }} />, txt: 'Browserbase: grabación completa (replay) de cada sesión terminada.' },
+                { icon: <AlertCircle size={13} style={{ color: '#B45309' }} />, txt: 'CAPTCHAs y proxies se resuelven automáticamente en la nube.' },
               ].map((f, i) => (
                 <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 11.5, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
                   <span style={{ marginTop: 2, flexShrink: 0 }}>{f.icon}</span>
@@ -480,10 +480,10 @@ export default function RadicacionMonitoreo() {
 
       {/* ── Modal: Vista en vivo ── */}
       {liveRun && (
-        <Modal wide title={<><Eye size={15} style={{ color: '#38BDF8' }} /> Vista en vivo — {liveRun.run.task?.slice(0, 60)}…</>} onClose={() => setLiveRun(null)}>
+        <Modal wide title={<><Eye size={15} style={{ color: '#4F46E5' }} /> Vista en vivo — {liveRun.run.task?.slice(0, 60)}…</>} onClose={() => setLiveRun(null)}>
           {liveRun.cargando ? (
             <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
-              <Loader size={30} className="animate-spin" style={{ color: '#38BDF8' }} />
+              <Loader size={30} className="animate-spin" style={{ color: '#4F46E5' }} />
             </div>
           ) : liveRun.url ? (
             <iframe
@@ -504,15 +504,15 @@ export default function RadicacionMonitoreo() {
 
       {/* ── Modal: Paso a paso ── */}
       {pasosRun && (
-        <Modal title={<><ListOrdered size={15} style={{ color: '#818CF8' }} /> Paso a paso del bot</>} onClose={() => setPasosRun(null)}>
+        <Modal title={<><ListOrdered size={15} style={{ color: '#7C3AED' }} /> Paso a paso del bot</>} onClose={() => setPasosRun(null)}>
           <div style={{ padding: '14px 18px' }}>
             <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 12, lineHeight: 1.5 }}>{pasosRun.run.task}</p>
             {pasosRun.cargando ? (
               <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}>
-                <Loader size={26} className="animate-spin" style={{ color: '#818CF8' }} />
+                <Loader size={26} className="animate-spin" style={{ color: '#7C3AED' }} />
               </div>
             ) : pasosRun.error ? (
-              <p style={{ fontSize: 12, color: '#F87171' }}>{pasosRun.error}</p>
+              <p style={{ fontSize: 12, color: '#DC2626' }}>{pasosRun.error}</p>
             ) : pasosRun.mensajes.length === 0 ? (
               <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Sin mensajes todavía.</p>
             ) : (
@@ -522,7 +522,7 @@ export default function RadicacionMonitoreo() {
                 const esBot = (m.message?.role || m.role) === 'assistant'
                 return (
                   <div key={m.id || i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 8, fontSize: 12 }}>
-                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: esBot ? '#818CF8' : '#38BDF8', marginTop: 5, flexShrink: 0 }} />
+                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: esBot ? '#7C3AED' : '#4F46E5', marginTop: 5, flexShrink: 0 }} />
                     <span style={{ color: 'var(--text-secondary)', lineHeight: 1.5, wordBreak: 'break-word' }}>{texto}</span>
                   </div>
                 )
