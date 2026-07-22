@@ -223,6 +223,12 @@ export function quitarSoporteEps(nombreEmpresa, botNombre) {
 export function getRadicacionSkills() {
   return apiFetch('/admin/radicacion/skills');
 }
+export function guardarAgenteSkill(epsKey, payload) {
+  return apiFetch(`/admin/radicacion/skills/${encodeURIComponent(epsKey)}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
 
 // ─── Browserbase — Bots cloud (navegador en la nube) ─────
 export function getBrowserbaseRuns(params = {}) {

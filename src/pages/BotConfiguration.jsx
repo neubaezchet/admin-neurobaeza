@@ -5,7 +5,7 @@ import {
   Paperclip, Trash2, Upload, KeyRound, X, CheckCircle,
 } from 'lucide-react'
 import {
-  getEmpresas, getBotsEmpresa, createBotEmpresa, updateBotEmpresa, getRadicacionSkills,
+  getEmpresas, getBotsEmpresa, createBotEmpresa, updateBotEmpresa, getRadicacionSkills, guardarAgenteSkill,
   subirSoporteEps, quitarSoporteEps,
   iniciarLoginBot, finalizarLoginBot, eliminarSesionBot,
 } from '../api'
@@ -393,7 +393,7 @@ function SesionNavegador({ apiBot, onRefresh }) {
   )
 }
 
-function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave, onSoporteChange }) {
+function EpsRow({ catKey, cat, apiBot, skillCampos, tieneAgente, agenteInfo, onGuardarAgente, open, onToggle, onSave, onSoporteChange }) {
   const estadoKey = apiBot?.estado || 'sin_configurar'
   const est = ESTADOS[estadoKey] || ESTADOS.sin_configurar
   const [medio, setMedio] = useState(apiBot?.bot_tipo_medio || cat.medio || 'portal')
@@ -401,6 +401,9 @@ function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave, onSo
   const [show, setShow] = useState({})
   const [guardando, setGuardando] = useState(false)
   const [subiendoSoporte, setSubiendoSoporte] = useState(false)
+  const [agenteId, setAgenteId] = useState(agenteInfo?.agent_id || '')
+  const [agenteIdReportes, setAgenteIdReportes] = useState(agenteInfo?.agent_id_reportes || '')
+  const [guardandoAgente, setGuardandoAgente] = useState(null) // 'radicacion' | 'reportes' | null
   const fileInputRef = useRef(null)
 
   // Sync when apiBot changes (company switch)
@@ -409,6 +412,23 @@ function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave, onSo
     setCred({ ...(apiBot?.credenciales || {}) })
     setShow({})
   }, [apiBot, catKey])
+
+  // Sync cuando cargarSkills trae el estado más reciente de los agentes (independiente de la empresa)
+  useEffect(() => {
+    setAgenteId(agenteInfo?.agent_id || '')
+    setAgenteIdReportes(agenteInfo?.agent_id_reportes || '')
+  }, [agenteInfo?.agent_id, agenteInfo?.agent_id_reportes])
+
+  const handleGuardarAgente = async (campo) => {
+    setGuardandoAgente(campo)
+    try {
+      await onGuardarAgente(catKey, campo === 'radicacion' ? { agent_id: agenteId } : { agent_id_reportes: agenteIdReportes })
+    } catch (e) {
+      alert('Error al guardar agente: ' + e.message)
+    } finally {
+      setGuardandoAgente(null)
+    }
+  }
 
   const handleSubirSoporte = async (file) => {
     if (!apiBot) return
@@ -484,6 +504,20 @@ function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave, onSo
           {medio === 'email' ? <Mail size={12} /> : <Globe size={12} />}
           {medio === 'email' ? 'Email' : 'Portal'}
         </span>
+
+        {/* Agente Browserbase — solo aplica a bots de portal, el medio email no usa Browserbase */}
+        {medio === 'portal' && (
+          <span title={tieneAgente ? 'Agente de Browserbase registrado — radica automático' : 'Sin agente registrado — la cola espera sin fallar hasta que se registre'}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 5,
+              fontSize: 10.5, fontWeight: 700, padding: '4px 10px', borderRadius: 999, flexShrink: 0,
+              background: tieneAgente ? 'rgba(16,185,129,0.10)' : 'rgba(148,163,184,0.12)',
+              color: tieneAgente ? '#059669' : 'var(--text-muted)',
+            }}>
+            <Bot size={12} />
+            {tieneAgente ? 'Agente listo' : 'Sin agente'}
+          </span>
+        )}
 
         {/* Status chip */}
         <span style={{
@@ -637,6 +671,65 @@ function EpsRow({ catKey, cat, apiBot, skillCampos, open, onToggle, onSave, onSo
             <SesionNavegador apiBot={apiBot} onRefresh={onSoporteChange} />
           )}
 
+          {/* Agentes de Browserbase — un agente por EPS (no por empresa), mismas credenciales de arriba */}
+          {medio === 'portal' && (
+            <div style={{ marginTop: 20, padding: '14px 16px', borderRadius: 13, background: 'rgba(79,70,229,0.04)', border: '1px solid var(--border-primary)' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Bot size={12} /> Agentes de Browserbase · mismas credenciales de arriba
+              </div>
+
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 7 }}>
+                  ID del agente — Radicación
+                </label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input
+                    type="text" placeholder="agent-id de Browserbase"
+                    value={agenteId} onChange={e => setAgenteId(e.target.value)}
+                    style={{ flex: 1, padding: '10px 13px', borderRadius: 11, fontSize: 13, color: 'var(--text-primary)', background: 'var(--bg-input)', border: '1px solid var(--border-input)', outline: 'none' }}
+                  />
+                  <button
+                    disabled={guardandoAgente === 'radicacion' || !agenteId.trim() || agenteId === (agenteInfo?.agent_id || '')}
+                    onClick={() => handleGuardarAgente('radicacion')}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 15px', borderRadius: 11,
+                      fontSize: 12.5, fontWeight: 700, cursor: 'pointer', border: '1px solid rgba(79,70,229,0.3)',
+                      background: 'rgba(79,70,229,0.08)', color: '#4F46E5', flexShrink: 0,
+                      opacity: (guardandoAgente === 'radicacion' || !agenteId.trim() || agenteId === (agenteInfo?.agent_id || '')) ? 0.5 : 1,
+                    }}>
+                    {guardandoAgente === 'radicacion' ? <Loader size={13} className="animate-spin" /> : <Save size={13} />}
+                    Guardar
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 7 }}>
+                  ID del agente — Reportes (consulta estado)
+                </label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input
+                    type="text" placeholder="agent-id de Browserbase"
+                    value={agenteIdReportes} onChange={e => setAgenteIdReportes(e.target.value)}
+                    style={{ flex: 1, padding: '10px 13px', borderRadius: 11, fontSize: 13, color: 'var(--text-primary)', background: 'var(--bg-input)', border: '1px solid var(--border-input)', outline: 'none' }}
+                  />
+                  <button
+                    disabled={guardandoAgente === 'reportes' || !agenteIdReportes.trim() || agenteIdReportes === (agenteInfo?.agent_id_reportes || '')}
+                    onClick={() => handleGuardarAgente('reportes')}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 15px', borderRadius: 11,
+                      fontSize: 12.5, fontWeight: 700, cursor: 'pointer', border: '1px solid rgba(79,70,229,0.3)',
+                      background: 'rgba(79,70,229,0.08)', color: '#4F46E5', flexShrink: 0,
+                      opacity: (guardandoAgente === 'reportes' || !agenteIdReportes.trim() || agenteIdReportes === (agenteInfo?.agent_id_reportes || '')) ? 0.5 : 1,
+                    }}>
+                    {guardandoAgente === 'reportes' ? <Loader size={13} className="animate-spin" /> : <Save size={13} />}
+                    Guardar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Footer */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 18 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
@@ -674,6 +767,7 @@ export default function BotConfiguration() {
   const [selId, setSelId] = useState(null)
   const [apiBotsMap, setApiBotsMap] = useState({})
   const [skillsMap, setSkillsMap] = useState({})   // eps_key → campos_credenciales del backend
+  const [agentesMap, setAgentesMap] = useState({}) // eps_key → tiene_agente registrado en Browserbase
   const [cargando, setCargando] = useState(false)
   const [openBot, setOpenBot] = useState(null)
   const [toast, setToast] = useState(null)
@@ -691,12 +785,20 @@ export default function BotConfiguration() {
   const cargarSkills = async () => {
     try {
       const data = await getRadicacionSkills()
-      const map = {}
+      const campos = {}
+      const agentes = {}
       for (const s of (data.skills || [])) {
-        if (s.campos_credenciales) map[s.key] = s.campos_credenciales
+        if (s.campos_credenciales) campos[s.key] = s.campos_credenciales
+        agentes[s.key] = { agent_id: s.agent_id || null, agent_id_reportes: s.agent_id_reportes || null }
       }
-      setSkillsMap(map)
+      setSkillsMap(campos)
+      setAgentesMap(agentes)
     } catch { /* skills son opcionales — no bloquear UI */ }
+  }
+
+  const handleGuardarAgente = async (epsKey, payload) => {
+    await guardarAgenteSkill(epsKey, payload)
+    await cargarSkills()
   }
 
   const cargarEmpresas = async () => {
@@ -875,6 +977,9 @@ export default function BotConfiguration() {
                     cat={cat}
                     apiBot={apiBotsMap[key] || null}
                     skillCampos={skillsMap[key] || null}
+                    tieneAgente={!!agentesMap[key]?.agent_id}
+                    agenteInfo={agentesMap[key]}
+                    onGuardarAgente={handleGuardarAgente}
                     open={openBot === key}
                     onToggle={() => setOpenBot(openBot === key ? null : key)}
                     onSave={handleSave}
@@ -899,6 +1004,9 @@ export default function BotConfiguration() {
                     cat={cat}
                     apiBot={apiBotsMap[key] || null}
                     skillCampos={skillsMap[key] || null}
+                    tieneAgente={!!agentesMap[key]?.agent_id}
+                    agenteInfo={agentesMap[key]}
+                    onGuardarAgente={handleGuardarAgente}
                     open={openBot === key}
                     onToggle={() => setOpenBot(openBot === key ? null : key)}
                     onSave={handleSave}
